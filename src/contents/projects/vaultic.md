@@ -1,12 +1,12 @@
 ---
-title: Vaultic
+title: Vaultic Web
 description: Cloud storage that uses Telegram as the backend. Upload, preview, and share files through a web interface. Telegram stores everything.
 poster: /projects/vaultic.png
 techstack:
   - SvelteKit
 ---
 
-[Vaultic](https://github.com/wiscaksono/vaultic) is cloud storage that uses Telegram as the backend. You upload files through a web app, they get sent to a private Telegram channel. Download, preview, share, all from the same interface.
+[Vaultic](https://github.com/wiscaksono/vaultic-web) is cloud storage that uses Telegram as the backend. You upload files through a web app, they get sent to a private Telegram channel. Download, preview, share, all from the same interface.
 
 ## Why
 
@@ -67,4 +67,4 @@ Everything is configurable through environment variables. Chunk sizes, cache lim
 - [Sharp](https://sharp.pixelplumbing.com) for thumbnail generation
 - [Pino](https://getpino.io) for structured logging
 
-[Source code](https://github.com/wiscaksono/vaultic)
+[Source code](https://github.com/wiscaksono/vaultic-web)
