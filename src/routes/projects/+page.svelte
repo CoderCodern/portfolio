@@ -21,8 +21,8 @@
 </script>
 
 <Metadata
-	title="Projects | Wiscaksono"
-	description="Discover the interactive brilliance of my projects, peruse my polished portfolio, and delve into a sneak peek of my formidable technical prowess. Uncover a world where innovation meets functionality, showcased through a meticulously crafted Next.js application. Elevate your digital experience with a seamless blend of creativity and technical finesse."
+	title="Projects | Viet Hoang"
+	description="A collection of enterprise and product projects I've worked on — spanning .NET backends, React frontends, microservices, and clean architecture."
 />
 
 <h1 class="sr-only">Wisnu Wicaksono's Projects</h1>

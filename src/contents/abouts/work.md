@@ -1,34 +1,50 @@
 ---
 title: 'work.ts'
-description: "I'm Wisnu Wicaksono, a Full-Stack Developer currently working fulltime at MSIG Life. Based in Jakarta, Indonesia, I specialize in building engaging user interfaces using React, Next.js, and TypeScript. With a strong foundation in frontend technologies and a passion for clean, efficient code, I combine Tailwind CSS with modern JavaScript frameworks to create exceptional web experiences. When I'm not crafting responsive websites, you can find me exploring Linux (Arch btw), playing video games, or enjoying a good movie!"
+description: 'Viet Hoang — Software Engineer. .NET & React, Clean Architecture, enterprise systems.'
 ---
 
 ```ts
-const PROFESSION = 'Full-Stack Developer';
-const LOCATION = 'Jakarta, Indonesia';
+const PROFESSION = 'Software Engineer';
+const LOCATION = 'Hanoi, Vietnam';
 
 // Employers
 const employers = [
-	{ name: 'MSIG Life', role: 'Frontend Developer', type: 'Full-time' },
-	{ name: 'Selego', role: 'Frontend Developer', type: 'Part-time' },
-	{ name: 'Upwork', role: 'Frontend Developer', type: 'Freelance' },
-	{ name: 'Falah Inovasi Teknologi', role: 'Frontend Developer', type: 'Previous' }
+	{ name: 'NashTech Vietnam', role: 'Software Engineer', type: 'Full-time' },
+	{ name: 'Windsoft Vietnam', role: 'Junior Developer', type: 'Previous' },
+	{ name: 'NCCPLUS Vietnam', role: 'Fresher Developer', type: 'Previous' }
 ];
 
 // Top Skills
 const skills = {
-	languages: ['TypeScript', 'Go', 'Java'],
+	languages: ['C#', 'Java', 'JavaScript', 'TypeScript'],
 	frameworks: [
-		'React',
-		'Next.js',
-		'Tailwind CSS',
-		'Node.js',
-		'Laravel' // still learning this...
+		'ASP.NET Core',
+		'ReactJS',
+		'Entity Framework',
+		'Minimal API',
+		'Spring Boot'
 	],
-	databases: ['PostgreSQL', 'MongoDB'],
-	tools: ['Figma', 'Version Control', 'GraphQL', 'Rest API', 'TRPC']
+	databases: ['SQL Server', 'MySQL', 'Azure SQL'],
+	tools: ['Azure DevOps', 'Docker', 'Git', 'AWS', 'CI/CD']
 };
 
-// Fun Facts
-const interests = ['Programming', 'Memes', 'Video Games', 'Music', 'Movies'];
+// Education
+const education = [
+	{
+		degree: 'Bachelor of Computer Science',
+		school: 'Hanoi University of Industry',
+		year: '2019 – 2023'
+	},
+	{
+		degree: 'Diploma in Information Systems Management',
+		school: 'FPT – APTECH',
+		year: '2020 – 2023'
+	}
+];
+
+// Certifications
+const certifications = [
+	{ name: 'Diploma in Information Systems Management', issuer: 'FPT Aptech', year: 2023 },
+	{ name: 'AWS Certified Developer – Associate', issuer: 'Amazon Web Services', year: 2026 }
+];
 ```

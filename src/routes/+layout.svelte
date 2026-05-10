@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { MediaQuery } from 'svelte/reactivity';
-	import { PUBLIC_UMAMI_TRACKING_ID } from '$env/static/public';
 
 	import '../app.css';
-	import { dev } from '$app/environment';
 	import Header from '$lib/components/layout/header/header.svelte';
 	import Navbar from '$lib/components/layout/navbar/navbar.svelte';
 
@@ -60,9 +58,6 @@
 </script>
 
 <svelte:head>
-	{#if !dev}
-		<script defer src="https://umami.wiscaksono.com/script.js" data-website-id={PUBLIC_UMAMI_TRACKING_ID}></script>
-	{/if}
 </svelte:head>
 
 <main

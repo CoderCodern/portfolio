@@ -1,18 +1,25 @@
 ---
 title: personal.ts
-description: Hello, I'm Wisnu Wicaksono, based in Jakarta, Indonesia. I enjoy programming, gaming, eating, and playing basketball. Explore my world of interests!.
+description: Viet Hoang — Software Engineer based in Hanoi, Vietnam.
 ---
 
 ```ts
-const NAME = 'Wisnu Wicaksono';
+const NAME = 'Nguyen Viet Hoang';
 
-let location = 'Jakarta, Indonesia';
+let location = 'Hanoi, Vietnam';
+
+const contact = {
+	phone: '0868248696',
+	email: 'codercodern2001@gmail.com',
+	github: 'https://github.com/CoderCodern',
+	linkedin: 'https://www.linkedin.com/in/viet-hoang-745627361/'
+};
 
 let hobbies = [
 	'Programming',
 	'Gaming',
-	'Eating',
-	'Basketball'
-	// 'Sleeping'
+	'Reading',
+	'Music',
+	'Badminton'
 ];
 ```

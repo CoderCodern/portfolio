@@ -7,75 +7,74 @@ description: 'Explore my hardware and software setup. From a powerful computer w
 const hardware = {
 	computers: [
 		{
-			name: 'Macbook Pro M3',
-			desc: 'The sidekick I take on adventures (aka coffee shops). Sleek, powerful, and always ready to roll.',
+			name: 'MacBook Pro M3',
+			desc: 'My primary machine for software development, cloud architecture, and engineering work. Lightweight, silent, and highly reliable for long coding sessions.',
 			tags: ['Laptop']
-		},
-		{
-			name: 'Logitech MX Keys Mini',
-			desc: 'My classy compact 65% keyboard – perfect for keeping things stylish and minimal.',
-			tags: ['Keyboard']
-		},
-		{
-			name: 'Noir Z1',
-			desc: 'My compact 65% layout keyboard',
-			tags: ['Keyboard']
-		},
-		{
-			name: 'Logitech MX Master 3S',
-			desc: 'The all-rounder mouse I use for everything... except pwning noobs in games. 😅',
-			tags: ['Mouse']
-		}
-	],
-	monitors: [
-		{
-			name: 'Xiaomi Mi Curved Gaming Monitor 34',
-			desc: 'The big boss on my desk! A 34" 1440p 144Hz curved beauty that makes everything look amazing.',
-			tags: ['Monitor']
-		}
-	],
-	audio: [
-		{
-			name: 'Steelseries Arctis 7',
-			desc: 'A comfy wireless headset with awesome sound. No more cable tangles, and the chat mix feature is a total game-changer!',
-			tags: ['Headphone']
-		},
-		{
-			name: 'Redmi Buds 3 Pro',
-			desc: 'The multitasker of my audio gear – noise canceling, dual Bluetooth connections, and perfect for on-the-go jams.',
-			tags: ['Earbuds']
 		}
 	]
 };
 
 const software = [
 	{
-		name: 'Neovim',
-		desc: 'My Swiss Army knife for everything text-related – from coding to taking notes. Neovim is life!',
+		name: 'Visual Studio 2022',
+		desc: 'My main IDE for complex .NET Core development, microservices, and implementing Clean Architecture patterns.',
+		tags: ['IDE']
+	},
+	{
+		name: 'Visual Studio Code',
+		desc: 'Essential for ReactJS frontend work, TypeScript, and quick cloud-integrated development.',
 		tags: ['Editor']
 	},
 	{
-		name: 'Tmux',
-		desc: 'Terminal multitasking wizardry – because tabs are too mainstream.',
+		name: 'Claude Code & AI Agents',
+		desc: 'Utilizing AI coding assistants and the Model Context Protocol (MCP) to accelerate refactoring and business logic orchestration.',
+		tags: ['AI Tool']
+	},
+	{
+		name: 'Ghostty & Oh My Zsh',
+		desc: 'A high-performance terminal setup focused on productivity and a clean, minimal aesthetic.',
 		tags: ['Terminal']
 	},
 	{
-		name: 'Ghostty',
-		desc: 'A lightning-fast terminal emulator that’s as cool as it sounds, with GPU acceleration and all the bells and whistles.',
-		tags: ['Terminal']
+		name: 'Docker',
+		desc: 'Used for containerizing .NET and SQL Server environments to ensure development consistency.',
+		tags: ['DevOps']
 	},
 	{
-		name: 'Oh my zsh',
-		desc: 'My shell of choice, spiced up with the awesome powerlevel10k theme.',
-		tags: ['Terminal']
+		name: 'Postman / Swagger',
+		desc: 'Core tools for designing, documenting, and testing robust Web APIs.',
+		tags: ['Backend']
 	}
 ];
 
-const hosting = [
+const infrastructure = [
 	{
-		name: 'Vercel',
-		desc: "Deploys so fast, it's practically magic! Git push, and voilà – my website is live.",
+		name: 'AWS',
+		desc: 'Experienced in deploying scalable serverless solutions using Lambda, API Gateway, and DynamoDB.',
+		tags: ['Cloud']
+	},
+	{
+		name: 'Azure Services',
+		desc: 'Utilizing Azure App Services and Azure SQL for enterprise-grade hosting and CI/CD pipelines.',
+		tags: ['Cloud']
+	},
+	{
+		name: 'Vercel & Render',
+		desc: 'Platforms of choice for hosting frontend experiments and rapid full-stack prototyping.',
 		tags: ['Hosting']
+	}
+];
+
+const learning = [
+	{
+		name: 'AI Orchestration',
+		desc: 'Building "AI-First" systems focusing on autonomous agents and intelligent business automation.',
+		tags: ['AI/ML']
+	},
+	{
+		name: 'Distributed Systems',
+		desc: 'Exploring event-driven design and high-availability architecture patterns.',
+		tags: ['Architecture']
 	}
 ];
 ```

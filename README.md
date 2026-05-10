@@ -1,29 +1,24 @@
-# Wisnu's Homepage
+# Viet Hoang — Personal Site
 
-## Preview
-
-![Preview 1](./static/preview-1.png)
+Personal portfolio site built with SvelteKit.
 
 ## Stack
 
-- [Svelte Kit](https://svelte.dev/) - The fastest way to build Svelte apps.
-- [Lucia Auth](https://lucia-auth.com/) - Authentication from scratch.
-- [mdsvex](https://mdsvex.pngwn.io/) - Markdown preprocessor.
-- [Drizzle ORM](https://orm.drizzle.team/) - Drizzle ORM is a headless TypeScript ORM with a head. 🐲
-- [Tailwind CSS](https://tailwindcss.com) - A utility-first CSS framework packed with classes that can be composed to build any design, directly in your markup.
+- [SvelteKit](https://svelte.dev/) — App framework
+- [mdsvex](https://mdsvex.pngwn.io/) — Markdown preprocessor
+- [Tailwind CSS](https://tailwindcss.com) — Utility-first CSS framework
+- [Drizzle ORM](https://orm.drizzle.team/) — TypeScript ORM
 
 ## Running Locally
 
 ```bash
-git clone https://github.com/wiscaksono/wiscaksono-sv
-cd wiscaksono-sv
+git clone https://github.com/CoderCodern/site
+cd site
 cp .env.example .env
 pnpm install
 pnpm dev
 ```
 
-## License
+## Deployment
 
-1. You are free to use this code as inspiration.
-2. Please do not copy it directly.
-3. Crediting the author is appreciated.
+Deployed on [Vercel](https://vercel.com). Pushing to `master` triggers an automatic deploy.

@@ -3,24 +3,22 @@
 </script>
 
 <Metadata
-	title="Wiscaksono"
-	description="Get to know me, Wisnu Wicaksono, through this website! I'm a passionate frontend developer and electrical engineering student, and I've poured my skills and creativity into building this site with Next.js and Tailwind CSS. Explore my interactive projects, clean portfolio, and a glimpse into my technical expertise. If you're seeking a talented developer for your next project or simply looking for inspiration, feel free to get in touch!"
+	title="Viet Hoang"
+	description="Hi, I'm Viet Hoang — a Software Engineer based in Hanoi, Vietnam. Passionate about clean code, system design, and continuously improving engineering craftsmanship."
 />
 
 <section class="flex grow flex-col items-center justify-center space-y-2.5 md:space-y-5">
 	<code class="block text-[2dvw] leading-[0.9] -tracking-widest whitespace-pre-wrap lg:text-[1.4dvh]">
-		{`___ __ _______________________________________________________________
-7  V  V  77  77     77     77  _  77  7  77     77     77     77     7
-|  |  |  ||  ||  ___!|  ___!|  _  ||   __!|  ___!|  7  ||  _  ||  7  |
-|  !  !  ||  |!__   7|  7___|  7  ||     |!__   7|  |  ||  7  ||  |  |
-|        ||  |7     ||     7|  |  ||  7  |7     ||  !  ||  |  ||  !  |
-!________!!__!!_____!!_____!!__!__!!__!__!!_____!!_____!!__!__!!_____!`}
+		{`__   _____ ___ _____   _  _  ___   _   _  _  ___
+\\ \\ / /_ _| __|_   _| | || |/ _ \\ /_\\ | \\| |/ __|
+ \\ V / | || _|  | |   | __ | (_) / _ \\| .\` | (_ |
+  \\_/ |___|___| |_|   |_||_|\\___/_/ \\_\\_|\\_|\\___| `}
 	</code>
 
-	<p class="sr-only">Wisnu Wicaksono</p>
+	<p class="sr-only">Viet Hoang</p>
 
 	<div class="text-center">
-		<p>Self taught web developer</p>
-		<p>love to learn new things and I&apos;m always looking for new challenges to solve :)</p>
+		<p>Passionate about clean code, system design,</p>
+		<p>and continuously improving engineering craftsmanship.</p>
 	</div>
 </section>

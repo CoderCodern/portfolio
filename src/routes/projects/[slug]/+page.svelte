@@ -6,7 +6,7 @@
 	let { data }: PageProps = $props();
 </script>
 
-<Metadata title={data.meta.title + ' | Wiscaksono'} description={data.meta.description} image={data.meta.poster} />
+<Metadata title={data.meta.title + ' | Viet Hoang'} description={data.meta.description} image={data.meta.poster} />
 
 <header class="group border-ash-700 bg-ash-700 relative mb-5 aspect-3/1 overflow-hidden border">
 	<img src={data.meta.poster} alt={data.meta.title} class="size-full object-cover object-center" />
