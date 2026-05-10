@@ -48,7 +48,7 @@ const config = {
 			rehypePlugins: [rehypeSlug]
 		})
 	],
-	kit: { adapter: adapter(), experimental: { remoteFunctions: true } },
+	kit: { adapter: adapter({ runtime: 'nodejs22.x' }), experimental: { remoteFunctions: true } },
 	compilerOptions: { experimental: { async: true } },
 	vitePlugin: {
 		inspector: {
