@@ -41,7 +41,7 @@
 	<div class="hidden items-center justify-between gap-2 px-2 lg:flex lg:px-0">
 		<div class="flex items-center gap-2">
 			<div class="bg-ash-200 h-4 w-1.5"></div>
-			<a class="flex items-center" href="https://github.com/CoderCodern/site" target="_blank" rel="norreferrer" data-umami-event="github-repo-link">
+			<a class="flex items-center" href="https://github.com/CoderCodern/portfolio" target="_blank" rel="norreferrer" data-umami-event="github-repo-link">
 				<svg
 					class="mr-1 h-3 w-3"
 					xmlns="http://www.w3.org/2000/svg"

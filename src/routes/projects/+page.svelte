@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { onDestroy } from 'svelte';
-	import { browser } from '$app/environment';
 	import { createWebHaptics } from 'web-haptics/svelte';
 
 	import Metadata from '$lib/components/metadata.svelte';
@@ -9,7 +8,7 @@
 
 	let { data }: PageProps = $props();
 
-	let activeTechstack = $derived(browser ? (page.url.searchParams.get('techstack') ?? '') : '');
+	let activeTechstack = $derived(page.url.searchParams.get('techstack') ?? '');
 	let articles = $derived.by(() => {
 		if (activeTechstack === '') return data.items;
 		return data.items.filter((item) => item.techstack?.includes(activeTechstack));

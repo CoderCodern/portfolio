@@ -13,8 +13,8 @@
 </script>
 
 <Metadata
-	title="Articles | Wiscaksono"
-	description="Discover the latest articles, delve into the world of technology, and explore the latest trends in the tech industry. Stay up-to-date with the latest news, and immerse yourself in the world of technology."
+	title="Articles | Viet Hoang"
+	description="Articles and thoughts on software engineering, .NET, clean architecture, and frontend development."
 />
 
 <h1 class="sr-only">Wisnu Wicaksono's Articles</h1>

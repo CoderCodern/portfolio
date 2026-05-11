@@ -1,6 +1,8 @@
 import type { Project } from '$lib/types';
 import type { LayoutServerLoad } from './$types';
 
+export const prerender = false;
+
 export const load: LayoutServerLoad = async ({ setHeaders }) => {
 	let allTechstacks: string[] = [];
 	const items: Project[] = [];

@@ -6,7 +6,7 @@
 	let { data }: PageProps = $props();
 </script>
 
-<Metadata title={data.meta.title + ' | Wiscaksono'} description={data.meta.description} image={data.meta.poster} />
+<Metadata title={data.meta.title + ' | Viet Hoang'} description={data.meta.description} image={data.meta.poster} />
 
 <header class="group border-ash-700 bg-ash-700 relative mb-5 aspect-video overflow-hidden border lg:aspect-3/1">
 	<img src={data.meta.poster} alt={data.meta.title} class="size-full object-cover object-center" />
@@ -30,5 +30,5 @@
 <article
 	class="prose prose-hr:border-ash-600 prose-pre:bg-ash-800/20 prose-code:before:opacity-0 prose-code:after:opacity-0 prose-code:text-ash-200 prose-code:font-mono prose-pre:border prose-headings:text-ash-200 prose-p:text-ash-400 prose-strong:text-ash-200 prose-li:text-ash-400 prose-li:marker:text-ash-300 prose-a:text-ash-200 prose-blockquote:border-ash-500 prose-p:indent-5 prose-td:text-ash-300 prose-thead:border-ash-300 prose-tr:border-ash-500 mx-auto max-w-3xl font-sans"
 >
-	<data.content />
+	{@html data.content}
 </article>

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { onDestroy } from 'svelte';
-	import { browser } from '$app/environment';
 	import { createWebHaptics } from 'web-haptics/svelte';
 
 	import Icon from '$lib/components/icon.svelte';
@@ -10,7 +9,7 @@
 
 	let { children, data }: LayoutProps = $props();
 
-	let activeTechstack = $derived(browser ? (page.url.searchParams.get('techstack') ?? '') : '');
+	let activeTechstack = $derived(page.url.searchParams.get('techstack') ?? '');
 
 	const { trigger, destroy } = createWebHaptics();
 
