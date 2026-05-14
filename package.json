@@ -26,6 +26,7 @@
 		"@tailwindcss/vite": "^4.1.18",
 		"@types/marked": "^6.0.0",
 		"@types/node": "^25.2.0",
+		"@types/turndown": "^5.0.6",
 		"drizzle-kit": "^0.31.8",
 		"eslint": "^9.39.2",
 		"eslint-config-prettier": "^10.1.8",
@@ -43,16 +44,20 @@
 		"vite": "^7.3.1"
 	},
 	"dependencies": {
+		"@extractus/article-extractor": "^8.1.0",
 		"@fontsource/commit-mono": "^5.2.5",
 		"@notionhq/client": "^2.3.0",
+		"@tryfabric/martian": "^1.2.4",
 		"arctic": "^3.7.0",
 		"drizzle-orm": "^0.45.1",
 		"marked": "^18.0.3",
 		"notion-to-md": "^3.1.9",
+		"openai": "^6.37.0",
 		"postgres": "^3.4.8",
 		"rehype-slug": "^6.0.0",
 		"remark-toc": "^9.0.0",
 		"shiki": "^3.22.0",
+		"turndown": "^7.2.4",
 		"web-haptics": "^0.0.6"
 	},
 	"pnpm": {

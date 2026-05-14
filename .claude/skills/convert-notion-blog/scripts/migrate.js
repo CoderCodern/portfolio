@@ -98,8 +98,27 @@ function buildFrontmatter(meta) {
   return lines.join('\n');
 }
 
+// Maps Notion language names → Shiki-compatible language identifiers
+const NOTION_LANG_MAP = {
+  'plain text': '',
+  'c#': 'csharp',
+  'c++': 'cpp',
+  'c': 'c',
+  'shell': 'bash',
+  'shell script': 'bash',
+  'objective-c': 'objc',
+  'f#': 'fsharp',
+  'vb.net': 'vb',
+};
+
+function normalizeLang(lang) {
+  const key = lang.toLowerCase().trim();
+  return key in NOTION_LANG_MAP ? NOTION_LANG_MAP[key] : key;
+}
+
 /**
  * Cleans markdown produced by notion-to-md:
+ * - Normalises code fence language tags (Notion names → Shiki names).
  * - Strips leading 4-space groups added for nested Notion blocks (prevents
  *   them being misinterpreted as code blocks by the markdown renderer).
  * - Replaces URL-encoded or URL-like image alt text with an empty string.
@@ -110,6 +129,10 @@ function cleanMarkdown(content) {
     .split('\n')
     .map((line) => {
       if (/^\s*```/.test(line)) {
+        if (!inFence) {
+          // Opening fence — normalise the language tag
+          line = line.replace(/^(\s*```)(.*)$/, (_, fence, lang) => fence + normalizeLang(lang));
+        }
         inFence = !inFence;
         return line;
       }
