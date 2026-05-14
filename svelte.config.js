@@ -12,7 +12,13 @@ function getSingletonHighlighter() {
 	if (!highlighterPromise) {
 		highlighterPromise = createHighlighter({
 			themes: ['poimandres'],
-			langs: ['javascript', 'typescript', 'bash', 'jsx', 'tsx', 'html']
+			langs: [
+				'javascript', 'typescript', 'jsx', 'tsx',
+				'html', 'css', 'json', 'yaml', 'xml', 'markdown',
+				'bash', 'shell', 'powershell',
+				'python', 'go', 'rust', 'java', 'kotlin', 'swift',
+				'csharp', 'cpp', 'c', 'php', 'ruby', 'sql'
+			]
 		});
 	}
 	return highlighterPromise;
@@ -28,9 +34,11 @@ const config = {
 			highlight: {
 				highlighter: async (code, lang = 'text') => {
 					const highlighter = await getSingletonHighlighter();
+					const supported = highlighter.getLoadedLanguages();
+					const effectiveLang = supported.includes(lang) ? lang : 'text';
 					const html = escapeSvelte(
 						highlighter.codeToHtml(code, {
-							lang,
+							lang: effectiveLang,
 							theme: 'poimandres',
 							transformers: [
 								{
