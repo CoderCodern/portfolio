@@ -39,7 +39,7 @@
 				</svg>
 			</div>
 		</button>
-		<button class="grid h-6 w-6 place-items-center rounded-full" aria-label="Minimize" data-umami-event="window-control" data-umami-event-action="minimize">
+		<button class="grid h-6 w-6 place-items-center rounded-full" onclick={() => history.back()} aria-label="Go back" data-umami-event="window-control" data-umami-event-action="minimize">
 			<div class="relative grid h-3 w-3 place-items-center rounded-full bg-[#898989] transition-colors group-hover:bg-[#FEBC2D]">
 				<svg class="absolute h-1.5 w-1.5 opacity-0 transition-opacity group-hover:opacity-100" viewBox="0 0 10 10" stroke="#4D3000" stroke-width="1.8" stroke-linecap="round">
 					<path d="M2 5 L8 5" />
