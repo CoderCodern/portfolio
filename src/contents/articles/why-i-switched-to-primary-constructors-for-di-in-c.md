@@ -1,6 +1,7 @@
 ---
 title: "Why I Switched to Primary Constructors for DI in C#"
 publishedDate: April 18, 2026
+category: Backend
 poster: https://www.milanjovanovic.tech/blog-covers/mnw_190.png
 ---
 

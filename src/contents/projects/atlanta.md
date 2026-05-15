@@ -5,6 +5,8 @@ poster: /projects/nashtech-atlanta.png
 techstack:
   - .NET
   - Angular
+date: Feb 2025 – Sep 2025
+category: Finance
 ---
 
 NashTech Vietnam · Feb 2025 – Sep 2025 · Team size: 12+

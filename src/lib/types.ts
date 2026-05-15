@@ -10,6 +10,8 @@ export interface Project {
 	slug: string;
 	poster: string;
 	techstack: string[];
+	date?: string;
+	category?: string;
 }
 
 export interface Article {
@@ -18,4 +20,5 @@ export interface Article {
 	publishedDate: string;
 	poster: string;
 	slug: string;
+	category?: string;
 }

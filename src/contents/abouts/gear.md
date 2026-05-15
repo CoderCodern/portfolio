@@ -47,34 +47,4 @@ const software = [
 	}
 ];
 
-const infrastructure = [
-	{
-		name: 'AWS',
-		desc: 'Experienced in deploying scalable serverless solutions using Lambda, API Gateway, and DynamoDB.',
-		tags: ['Cloud']
-	},
-	{
-		name: 'Azure Services',
-		desc: 'Utilizing Azure App Services and Azure SQL for enterprise-grade hosting and CI/CD pipelines.',
-		tags: ['Cloud']
-	},
-	{
-		name: 'Vercel & Render',
-		desc: 'Platforms of choice for hosting frontend experiments and rapid full-stack prototyping.',
-		tags: ['Hosting']
-	}
-];
-
-const learning = [
-	{
-		name: 'AI Orchestration',
-		desc: 'Building "AI-First" systems focusing on autonomous agents and intelligent business automation.',
-		tags: ['AI/ML']
-	},
-	{
-		name: 'Distributed Systems',
-		desc: 'Exploring event-driven design and high-availability architecture patterns.',
-		tags: ['Architecture']
-	}
-];
 ```

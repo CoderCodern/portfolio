@@ -2,6 +2,7 @@
 title: How Coding Saved Me from Myself
 description: Discover how coding transformed my life by helping me overcome overthinking and find clarity. From front-end creativity to problem-solving, coding became my escape and passion. Learn how it can inspire you too!
 publishedDate: December 28, 2024
+category: Career
 poster: /articles/coding-saved-me/me.webp
 ---
 

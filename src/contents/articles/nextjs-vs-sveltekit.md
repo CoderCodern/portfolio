@@ -2,6 +2,7 @@
 title: SvelteKit vs Next.js
 description: Explore why developers are flocking to SvelteKit for its unparalleled developer experience and performance advantages over Next.js (App Router). Uncover the data and insights shaping the frontend landscape.
 publishedDate: May 26, 2025
+category: Frontend
 poster: https://cc-dam.imgix.net/blog/sk-vs-nextjs-min.jpg?auto=compress&auto=format&w=972&dpr=1&crop=faces&fit=crop&height=384
 ---
 

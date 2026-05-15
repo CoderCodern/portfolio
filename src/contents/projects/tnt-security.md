@@ -4,6 +4,8 @@ description: A security guard rental platform enabling clients to manage service
 poster: /projects/windsoft-vesi.png
 techstack:
   - .NET
+date: Aug 2023 – Dec 2023
+category: Security
 ---
 
 Windsoft Vietnam · Aug 2023 – Dec 2023 · Team size: 5

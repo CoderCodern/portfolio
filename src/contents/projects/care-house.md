@@ -4,6 +4,8 @@ description: A service booking platform connecting customers with cleaning and r
 poster: /projects/windsoft-carehouse.png
 techstack:
   - .NET
+date: Apr 2023 – Nov 2023
+category: E-commerce
 ---
 
 Windsoft Vietnam · Apr 2023 – Nov 2023 · Team size: 8

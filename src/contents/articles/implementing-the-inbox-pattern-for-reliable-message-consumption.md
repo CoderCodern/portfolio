@@ -1,6 +1,7 @@
 ---
 title: "Implementing the Inbox Pattern for Reliable Message Consumption"
 publishedDate: April 4, 2026
+category: System Design
 poster: https://www.milanjovanovic.tech/blog-covers/mnw_188.png
 ---
 
