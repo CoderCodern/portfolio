@@ -4,6 +4,8 @@ description: An e-commerce MiniApp on Zalo offering booking, ride-hailing, deliv
 poster: /projects/windsoft-shopship.png
 techstack:
   - .NET
+date: Dec 2023 – Dec 2024
+category: E-commerce
 ---
 
 Windsoft Vietnam · Dec 2023 – Dec 2024 · Team size: 10

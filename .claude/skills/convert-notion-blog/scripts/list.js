@@ -8,6 +8,8 @@
  */
 
 import { Client, isFullPage } from '@notionhq/client';
+import fs from 'fs/promises';
+import path from 'path';
 
 const token = process.env.NOTION_TOKEN;
 const databaseId = process.env.NOTION_DATABASE_ID;
@@ -56,6 +58,17 @@ function extractMeta(page) {
 }
 
 async function listArticles() {
+  const outputDir = path.resolve('src/contents/articles');
+  let existingSlugs = new Set();
+  try {
+    const files = await fs.readdir(outputDir);
+    for (const f of files) {
+      if (f.endsWith('.md')) existingSlugs.add(f.slice(0, -3));
+    }
+  } catch {
+    // directory may not exist yet
+  }
+
   const response = await notion.databases.query({
     database_id: databaseId,
     filter: {
@@ -72,10 +85,13 @@ async function listArticles() {
     return;
   }
 
+  console.log('  ✓ = already migrated to src/contents/articles/\n');
   articles.forEach((article, i) => {
     const index = String(i + 1).padStart(2, ' ');
+    const migrated = existingSlugs.has(article.slug);
+    const marker = migrated ? '✓' : ' ';
     const title = article.title.padEnd(50, ' ').slice(0, 50);
-    console.log(`[${index}] ${title} (${article.slug}) — ${article.publishedDate}`);
+    console.log(`[${index}] ${marker} ${title} (${article.slug}) — ${article.publishedDate}`);
   });
 }
 

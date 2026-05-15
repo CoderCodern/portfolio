@@ -4,6 +4,8 @@ description: An internal ERP solution managing HR, project progress, team perfor
 poster: /projects/ncc-erp.png
 techstack:
   - .NET
+date: May 2022 – Nov 2022
+category: ERP
 ---
 
 NCCPLUS Vietnam · May 2022 – Nov 2022 · Team size: 8

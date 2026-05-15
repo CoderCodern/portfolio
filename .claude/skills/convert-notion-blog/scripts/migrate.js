@@ -13,6 +13,7 @@ import { Client, isFullPage } from '@notionhq/client';
 import { NotionToMarkdown } from 'notion-to-md';
 import fs from 'fs/promises';
 import path from 'path';
+import { detectCategory, createOpenAIClient } from './ai.js';
 
 const token = process.env.NOTION_TOKEN;
 const databaseId = process.env.NOTION_DATABASE_ID;
@@ -93,6 +94,7 @@ function buildFrontmatter(meta) {
   const lines = ['---', `title: "${meta.title.replace(/"/g, '\\"')}"`];
   if (meta.description) lines.push(`description: "${meta.description.replace(/"/g, '\\"')}"`);
   if (meta.publishedDate) lines.push(`publishedDate: ${meta.publishedDate}`);
+  if (meta.category) lines.push(`category: ${meta.category}`);
   if (meta.poster) lines.push(`poster: ${meta.poster}`);
   lines.push('---', '');
   return lines.join('\n');
@@ -161,6 +163,9 @@ async function fetchContent(notionId) {
 async function migrate() {
   await fs.mkdir(OUTPUT_DIR, { recursive: true });
 
+  const openai = createOpenAIClient();
+  if (!openai) console.log('  (OPENAI_API_KEY not set — skipping category detection)');
+
   const response = await notion.databases.query({
     database_id: databaseId,
     filter: { property: 'Published', date: { is_not_empty: true } },
@@ -204,7 +209,18 @@ async function migrate() {
       }
 
       const content = await fetchContent(meta.notionId);
-      const fileContent = buildFrontmatter(meta) + content;
+
+      let category = '';
+      if (openai) {
+        try {
+          category = await detectCategory(meta.title, meta.description, content, openai);
+          console.log(`  category → ${category}`);
+        } catch {
+          // non-fatal — write without category
+        }
+      }
+
+      const fileContent = buildFrontmatter({ ...meta, category }) + content;
 
       await fs.writeFile(filePath, fileContent, 'utf-8');
       console.log(`  write ${meta.slug}.md  "${meta.title}"`);

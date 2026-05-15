@@ -2,6 +2,7 @@
 title: How to Securely Persist User Data in Zustand with Encrypted Storage
 description: Learn how to protect sensitive user data in your Zustand state management using a secure, encrypted storage solution. This tutorial demonstrates step-by-step how to integrate CryptoJS encryption with Zustand's persistence middleware for enhanced security.
 publishedDate: November 23, 2024
+category: Frontend
 poster: https://www.reversinglabs.com/hs-fs/hubfs/lock-down-appsec-secure-by-default.jpg?width=2800&height=1464&name=lock-down-appsec-secure-by-default.jpg
 ---
 

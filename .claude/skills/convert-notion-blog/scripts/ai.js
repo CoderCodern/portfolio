@@ -136,6 +136,44 @@ export async function smoothMarkdown(markdown, openai) {
   return { markdown: refined, langChanges };
 }
 
+const KNOWN_CATEGORIES = ['Frontend', 'Backend', 'System Design', 'Career'];
+
+const CATEGORY_SYSTEM_PROMPT =
+  'You are a technical blog post categorizer. Classify the article into exactly ONE of:\n' +
+  '- Frontend: React, Next.js, SvelteKit, Vue, CSS, JavaScript/TypeScript, UI components, state management, web APIs\n' +
+  '- Backend: .NET, C#, Java, Node.js server-side, databases, microservices, DI patterns, ORMs\n' +
+  '- System Design: Architecture patterns, distributed systems, messaging, CQRS, event sourcing, scalability, API design strategy\n' +
+  '- Career: Career growth, engineering leadership, soft skills, personal development, team culture\n' +
+  'Reply with ONLY the category name, no explanation.';
+
+/**
+ * Detects which category an article belongs to using GPT-4o-mini.
+ * Returns one of: Frontend | Backend | System Design | Career
+ */
+export async function detectCategory(title, description, markdown, openai) {
+  const preview = [
+    `Title: ${title}`,
+    description ? `Description: ${description}` : '',
+    `Content preview:\n${markdown.slice(0, 2000)}`,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      { role: 'system', content: CATEGORY_SYSTEM_PROMPT },
+      { role: 'user', content: preview },
+    ],
+    max_tokens: 10,
+    temperature: 0,
+  });
+
+  const raw = response.choices[0].message.content.trim();
+  const matched = KNOWN_CATEGORIES.find((c) => c.toLowerCase() === raw.toLowerCase());
+  return matched ?? raw;
+}
+
 /**
  * Creates an OpenAI client from environment. Returns null if key is missing.
  */

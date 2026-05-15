@@ -1,6 +1,7 @@
 ---
 title: "API Versioning Should Be Your Last Resort"
 publishedDate: May 9, 2026
+category: System Design
 poster: https://www.milanjovanovic.tech/blog-covers/mnw_193.png
 ---
 

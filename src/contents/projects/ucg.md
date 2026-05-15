@@ -5,6 +5,8 @@ poster: /projects/ncc-ucg.png
 techstack:
   - .NET
   - Angular
+date: Nov 2022 – Mar 2023
+category: Telecom
 ---
 
 NCCPLUS Vietnam · Nov 2022 – Mar 2023 · Team size: 14

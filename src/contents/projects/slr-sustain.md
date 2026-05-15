@@ -5,6 +5,8 @@ poster: /projects/nashtech-slr.png
 techstack:
   - .NET
   - React
+date: Oct 2025 – Dec 2025
+category: ERP
 ---
 
 NashTech Vietnam · Oct 2025 – Dec 2025 · Team size: 20+

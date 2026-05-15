@@ -5,6 +5,8 @@ poster: /projects/nashtech-seg.png
 techstack:
   - .NET
   - React
+date: Jan 2026 – Present
+category: Enterprise
 ---
 
 NashTech Vietnam · Jan 2026 – Present · Team size: 20+

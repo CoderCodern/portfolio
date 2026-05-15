@@ -14,7 +14,7 @@ import { Client } from '@notionhq/client';
 import { markdownToBlocks } from '@tryfabric/martian';
 import TurndownService from 'turndown';
 import { extract } from '@extractus/article-extractor';
-import { smoothMarkdown, createOpenAIClient } from './ai.js';
+import { smoothMarkdown, detectCategory, createOpenAIClient } from './ai.js';
 
 const token = process.env.NOTION_TOKEN;
 const databaseId = process.env.NOTION_DATABASE_ID;
@@ -149,6 +149,15 @@ async function main() {
     }
   } else {
     console.log('  (OPENAI_API_KEY not set — skipping smoothing)');
+  }
+
+  if (openai) {
+    try {
+      const category = await detectCategory(title, article.description ?? '', finalMarkdown, openai);
+      console.log(`Category: ${category}`);
+    } catch {
+      // non-fatal
+    }
   }
 
   console.log('Creating Notion page...');

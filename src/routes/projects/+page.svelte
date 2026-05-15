@@ -54,8 +54,18 @@
 					style="background-image: url('https://framerusercontent.com/images/rR6HYXBrMmX4cRpXfXUOvpvpB0.png')"
 				></div>
 			</figure>
-			<div class="p-2">
-				<p class="line-clamp-4 text-sm">{article.description}</p>
+			<div class="flex flex-col gap-y-2 p-2">
+				<p class="line-clamp-4 flex-1 text-sm">{article.description}</p>
+				{#if article.date || article.category}
+					<div class="flex flex-wrap items-center gap-2 text-sm">
+						{#if article.date}
+							<p class="text-xs text-[#898989]">{article.date}</p>
+						{/if}
+						{#if article.category}
+							<span class="border border-[#898989]/40 px-1.5 py-0.5 text-xs text-[#898989]">{article.category}</span>
+						{/if}
+					</div>
+				{/if}
 			</div>
 		</a>
 	{/each}

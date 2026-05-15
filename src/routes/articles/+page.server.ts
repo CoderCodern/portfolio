@@ -1,11 +1,12 @@
-import type { PageServerLoad } from './$types';
 import type { Article } from '$lib/types';
+import type { PageServerLoad } from './$types';
 
-export const prerender = true;
+export const prerender = false;
 
 export const load: PageServerLoad = async () => {
 	const paths = import.meta.glob('/src/contents/articles/*.md', { eager: true });
-	const articles: Article[] = [];
+	const items: Article[] = [];
+	let allCategories: string[] = [];
 
 	for (const path in paths) {
 		const file = paths[path];
@@ -13,11 +14,14 @@ export const load: PageServerLoad = async () => {
 
 		if (file && typeof file === 'object' && 'metadata' in file && slug) {
 			const metadata = file.metadata as Omit<Article, 'slug'>;
-			articles.push({ ...metadata, slug });
+			items.push({ ...metadata, slug });
+			if (metadata.category) allCategories.push(metadata.category);
 		}
 	}
 
-	articles.sort((a, b) => new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime());
+	items.sort((a, b) => new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime());
 
-	return { articles };
+	const categories = ['All Articles', ...new Set(allCategories)];
+
+	return { items, categories };
 };
