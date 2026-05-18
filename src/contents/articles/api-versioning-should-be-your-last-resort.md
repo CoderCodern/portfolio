@@ -4,70 +4,52 @@ publishedDate: May 9, 2026
 category: System Design
 poster: https://www.milanjovanovic.tech/blog-covers/mnw_193.png
 ---
+A live directory for your infrastructure that eliminates hardcoded ownership logic in your alert rules—this is the essence of Catalog by [**incident.io**](https://fandf.co/4cIIfB2). By simply adding a service and updating Catalog, your entire response system reconfigures itself seamlessly. [**Read the blog to learn more**](https://fandf.co/4cIIfB2).
 
-A live directory for your infrastructure that replaces hardcoded ownership logic in your alert rules - that's Catalog by [**incident.io**](https://fandf.co/4cIIfB2). Add a service, update Catalog, and your entire response system reconfigures itself. [**Read the blog to learn more**](https://fandf.co/4cIIfB2).
+[**Teleport**](https://fandf.co/3PhCocK) revolutionizes security by replacing static credentials with short-lived certificates tied to cryptographic identities. This unified identity layer and workflow spans servers, Kubernetes, databases, cloud, and MCP. Say goodbye to vaults, standing privileges, and secrets rotation. [**See how it works →**](https://fandf.co/3PhCocK)
 
+Previously, I discussed the implementation of [**API versioning**](https://www.milanjovanovic.tech/blog/api-versioning-in-aspnetcore) in ASP.NET Core. However, a more pressing question arises: _when_ should you version an API?
 
-[**Teleport**](https://fandf.co/3PhCocK) replaces static credentials with short-lived certificates bound to cryptographic identity. One identity layer and workflow across servers, Kubernetes, databases, cloud, and MCP. No vaults, no standing privileges, no secrets rotation. [**See how it works →**](https://fandf.co/3PhCocK)
-
-
-I've written before about implementing [**API versioning**](https://www.milanjovanovic.tech/blog/api-versioning-in-aspnetcore) in ASP.NET Core.
-
-
-But the more important question isn't _how_ to version an API. It's _when_.
-
-
-Every API team eventually reaches for the same escape hatch:
+Every API team inevitably considers the same solution:
 
 > 
->
 > Just create `v2`.
->
->
+> 
 
-It sounds responsible. Except now you maintain two APIs, two sets of docs, two behaviors, and a migration project clients will postpone for as long as possible.
+While this may seem responsible, it leads to the maintenance of two APIs, two sets of documentation, two behaviors, and a migration project that clients will likely delay indefinitely.
 
+I briefly touched on this in [**my article on common REST API design mistakes**](https://www.milanjovanovic.tech/blog/the-5-most-common-rest-api-design-mistakes-and-how-to-avoid-them), but I want to emphasize this point more clearly today:
 
-I also touched on this briefly in [**my REST API design mistakes article**](https://www.milanjovanovic.tech/blog/the-5-most-common-rest-api-design-mistakes-and-how-to-avoid-them), but I want to make the point more directly today:
+**Versioning is a tool for compatibility, not a design strategy.**
 
+Most API changes do not necessitate a new version; they require improved change management.
 
-**Versioning is a compatibility tool. It is not a design strategy.**
+This distinction is crucial.
 
-
-Most API changes do not require a new version. They require better change management.
-
-
-And that distinction matters.
-
-
-If you treat every contract change as a versioning problem, you end up cloning APIs. If you treat it as a change management problem, you start asking better questions:
+When you treat every contract change as a versioning issue, you risk duplicating APIs. Conversely, if you view it as a change management challenge, you begin to ask more insightful questions:
 
 - Can I add instead of replace?
-- Can old and new behavior coexist for a while?
-- Can I introduce a new operation instead of mutating an old one?
-- Can I deprecate this safely with telemetry and a migration path?
+- Can old and new behaviors coexist temporarily?
+- Can I introduce a new operation rather than altering an existing one?
+- Can I safely deprecate this with telemetry and a migration path?
 
-That mindset leads to APIs that age much better.
-
+Adopting this mindset results in APIs that are more sustainable over time.
 
 ## [What Actually Breaks Clients?](https://www.milanjovanovic.tech/blog/api-versioning-should-be-your-last-resort#what-actually-breaks-clients)
 
+Breaking changes are not solely about the URL.
 
-Breaking changes usually aren't about the URL alone.
-
-
-Clients break when you:
+Clients experience breakage when you:
 
 - Remove or rename fields
-- Change the meaning of existing data
+- Alter the meaning of existing data
 - Tighten request validation
-- Change pagination or error formats
-- Assume enum-like values are closed forever
+- Modify pagination or error formats
+- Assume enum-like values are permanently closed
 
-This breaks a client just as surely as deleting an endpoint:
+This can disrupt a client just as effectively as deleting an endpoint:
 
-
-```
+```json
 // Before
 { "total": 100 }
 
@@ -75,42 +57,32 @@ This breaks a client just as surely as deleting an endpoint:
 { "total": { "amount": 100, "currency": "USD" } }
 ```
 
+You may not have changed the path or renamed the endpoint, yet you still broke clients.
 
-You didn't change the path. You didn't rename the endpoint. You still broke clients.
+Instead of asking, "Should this be v2?", consider, "Can the old and new contracts coexist safely?"
 
-
-So instead of asking, "Should this be v2?", ask, "Can the old and new contract safely coexist?"
-
-
-I'll use a simple `orders` API as the running example for the rest of the article.
-
+For the remainder of this article, I will use a simple `orders` API as an example.
 
 ## [The Compatibility Rules](https://www.milanjovanovic.tech/blog/api-versioning-should-be-your-last-resort#the-compatibility-rules)
 
+To ensure an API ages gracefully, I adhere to four fundamental rules:
 
-When I want an API to age well, I keep four rules in mind:
+- Maintain existing fields and behaviors
+- Avoid turning optional request data into required data
+- Do not alter the functionality of an existing operation
+- Ensure that anything new is additive and optional by default
 
-- Keep existing fields and behavior in place
-- Don't turn optional request data into required data
-- Don't change what an existing operation does
-- Make anything new additive and optional by default
+These principles align with the four rules outlined in Z. Nemec's [API Change Management](https://medium.com/good-api/api-change-management-2fe5bba32e9b) article: do not remove anything, do not change processing rules, do not make optional elements mandatory, and ensure that any additions are optional.
 
-These map directly onto the four rules from Z. Nemec's [API Change Management](https://medium.com/good-api/api-change-management-2fe5bba32e9b) article: don't take anything away, don't change processing rules, don't make optional things required, and anything you add must be optional.
-
-
-If you follow those rules, many "versioning problems" turn back into ordinary contract evolution.
-
+By following these guidelines, many so-called "versioning problems" revert to standard contract evolution.
 
 ## [1. Add, Don't Replace](https://www.milanjovanovic.tech/blog/api-versioning-should-be-your-last-resort#1-add-dont-replace)
 
+The safest change is often an additive one.
 
-The safest change is usually an additive one.
+Imagine your original `GET /orders/{id}` response looked like this:
 
-
-Let's say your original `GET /orders/{id}` response looked like this:
-
-
-```
+```json
 {
   "id": "ord_123",
   "status": "paid",
@@ -118,11 +90,9 @@ Let's say your original `GET /orders/{id}` response looked like this:
 }
 ```
 
+Instead of replacing `total`, you can add a new field:
 
-Instead of replacing `total`, add a new field:
-
-
-```
+```json
 {
   "id": "ord_123",
   "status": "paid",
@@ -134,37 +104,28 @@ Instead of replacing `total`, add a new field:
 }
 ```
 
+Existing clients can continue using `total`, while new clients can transition to `totalMoney`. You can mark the old field as deprecated and remove it only after a genuine migration period.
 
-Existing clients keep using `total`. New clients can migrate to `totalMoney`. You mark the old field as deprecated and remove it only after a real migration window.
+This principle extends beyond fields. If you require richer semantics, avoid altering a field's structure. Instead, introduce a new field, link, or operation that explicitly conveys the new meaning.
 
-
-The same idea applies beyond fields. If you need richer semantics, don't mutate a field into a different shape. Add a new field, a new link, or a new operation that carries the new meaning explicitly.
-
-
-Sometimes an ugly contract is the price of compatibility.
-
+Sometimes, a less-than-ideal contract is the price of maintaining compatibility.
 
 ## [2. Make Clients Tolerant Readers](https://www.milanjovanovic.tech/blog/api-versioning-should-be-your-last-resort#2-make-clients-tolerant-readers)
 
-
-A well-behaved client should not explode because the server added a field it doesn't understand.
-
+A well-designed client should not fail simply because the server has added a field it does not recognize.
 
 If the response evolves from this:
 
-
-```
+```json
 {
   "id": "ord_123",
   "status": "paid"
 }
 ```
 
-
 to this:
 
-
-```
+```json
 {
   "id": "ord_123",
   "status": "paid",
@@ -172,117 +133,91 @@ to this:
 }
 ```
 
+Older clients should be able to ignore the additional property and continue functioning.
 
-older clients should ignore the extra property and keep working.
+In .NET, `System.Text.Json` is advantageous because it ignores unknown properties by default. The real challenge often lies with overly strict generated SDKs or contract tests that demand exact JSON matches.
 
+This is a common self-inflicted issue I observe. Teams claim they want backward compatibility, yet they generate client models that reject any unexpected fields in the response.
 
-In .NET, `System.Text.Json` helps because unknown properties are ignored by default. The real risk is usually overly strict generated SDKs or contract tests that assert exact JSON equality.
+This approach is not a compatibility strategy; it is a pitfall.
 
-
-This is one of the most common self-inflicted problems I see. Teams say they want backward compatibility, then generate client models that reject any unexpected field in the response.
-
-
-That is not a compatibility strategy. That is a trap.
-
-
-Your server should be free to add optional data. Your clients should be resilient enough to ignore what they don't understand.
-
+Your server should be allowed to introduce optional data, while your clients should be robust enough to disregard what they do not understand.
 
 ## [3. Don't Change What an Existing Operation Does](https://www.milanjovanovic.tech/blog/api-versioning-should-be-your-last-resort#3-dont-change-what-an-existing-operation-does)
 
+While fields and shapes often dominate compatibility discussions, the most perilous breaking changes often lie in **behavior**.
 
-Fields and shapes get most of the attention in compatibility discussions, but the most dangerous breaking changes hide in **behavior**.
+The URL remains unchanged, the request body stays the same, and the response structure is identical, yet the operation's functionality on the server has altered.
 
+Consider `DELETE /orders/{id}`.
 
-The URL is the same. The request body is the same. The response shape is the same. What the operation _does_ on the server is different.
+Initially, this endpoint performed a soft delete. The order transitioned to an `archived` state, remained in the database, continued to appear in audit reports, and could be restored by support.
 
-
-Take `DELETE /orders/{id}`.
-
-
-When the API shipped, that endpoint was a soft delete. The order moved into an `archived` state, stayed in the database, still showed up in audit reports, and could be restored by support.
-
-
-The contract that clients built on wasn't just the HTTP verb and the path. It was the full behavior:
+The contract that clients relied upon encompassed more than just the HTTP verb and path; it included the full behavior:
 
 - The order is recoverable
-- Related invoices and shipments are untouched
+- Related invoices and shipments remain unaffected
 - Audit history is preserved
-- The same call is safe to retry
+- The same call can be retried safely
 
-Months later, the team decides soft-delete is messy. The "fix" turns `DELETE /orders/{id}` into a hard delete:
+Months later, the team decides that soft deletes are too complicated. They "fix" the situation by converting `DELETE /orders/{id}` into a hard delete:
 
-- The order row is gone
-- Related invoices cascade or get orphaned
+- The order row is permanently removed
+- Related invoices are cascaded or orphaned
 - Audit history loses references
-- Retrying after a network blip can wipe the wrong record
+- Retrying after a network interruption could delete the wrong record
 
-No client noticed at code-review time. The SDK call still compiles. The response is still `204 No Content`. A support tool that used to call `DELETE` and then "undo" it now silently destroys data.
+No client noticed this during code review. The SDK call still compiles, and the response remains `204 No Content`. A support tool that previously called `DELETE` and then "undid" it now silently destroys data.
 
+This scenario exemplifies the kind of change Z. Nemec's rules caution against: **you must not alter the processing rules of an existing operation.** Once clients have integrated, the behavior becomes part of the contract, even if it was never explicitly documented.
 
-This is exactly the kind of change Z. Nemec's rules call out: **you must not change the processing rules of an existing operation.** Once clients have integrated, the behavior _is_ the contract, even if it was never written down anywhere.
+Similar patterns can occur in subtler ways:
 
+- `POST /orders` was idempotent with a client-supplied key, then quietly ceased to be
+- `POST /orders/{id}/cancel` used to trigger automatic refunds, then stopped issuing refunds because "refunds should be a separate call"
+- `PUT /orders/{id}` was originally a full replace, then became a partial merge
+- A webhook that previously fired once per order now fires per line item
 
-The same pattern shows up in subtler ways:
+Each of these changes maintains the URL, verb, and JSON structure while breaking existing integrations in ways that won't be evident in a schema diff.
 
-- `POST /orders` used to be idempotent on a client-supplied key, then quietly stops being
-- `POST /orders/{id}/cancel` used to refund automatically, then stops issuing refunds because "refunds should be a separate call"
-- `PUT /orders/{id}` used to be a full replace, then becomes a partial merge
-- A webhook used to fire once per order, now fires per line item
+The prudent approach remains the same: **add, don't mutate.**
 
-Each of these keeps the URL, the verb, and the JSON shape stable. Each one breaks every existing integration in a way that won't show up in a schema diff.
+If you need a hard delete, expose it as a new operation and leave the existing one intact:
 
-
-The safe move is the same as before: **add, don't mutate.**
-
-
-If you want a hard delete, expose it as a new operation and leave the old one alone:
-
-
-```
+```text
 DELETE /orders/{id}            # still soft-delete, unchanged
 DELETE /orders/{id}?purge=true # new, opt-in hard delete
 ```
 
+Alternatively, introduce an entirely new resource (`DELETE /orders/{id}/purge`) so that the destructive behavior has its own name and permissions.
 
-Or introduce a new resource entirely (`DELETE /orders/{id}/purge`) so the destructive behavior has its own name and its own permissions.
-
-
-The rule is simple: **once an operation ships, its behavior is part of the contract.** You can add new operations next to it. You can deprecate it. You cannot quietly change what it does.
-
+The guiding principle is clear: **once an operation is released, its behavior becomes part of the contract.** You can add new operations alongside it, deprecate it, but you cannot silently alter its functionality.
 
 ## [4. Be Very Careful With Validation](https://www.milanjovanovic.tech/blog/api-versioning-should-be-your-last-resort#4-be-very-careful-with-validation)
 
+This aspect is often underestimated.
 
-This one is underrated.
+There are two variations of the same mistake:
 
+- Changing an existing optional field to a required one
+- Introducing a brand-new field and making it mandatory from the outset
 
-There are two flavors of the same mistake:
+Both scenarios disrupt older clients in the same way. The endpoint path remains unchanged, yet requests that previously succeeded are now rejected.
 
-- Taking an existing optional field and making it required
-- Adding a brand-new field and making it required from day one
+Consider this example with `POST /orders`.
 
-Both break older clients in exactly the same way. The endpoint path doesn't move, but requests that used to succeed now get rejected.
+Yesterday, this request was valid:
 
-
-Here's a simple example using `POST /orders`.
-
-
-Yesterday this request was valid:
-
-
-```
+```json
 {
   "customerId": "cus_123",
   "currency": "USD"
 }
 ```
 
+Today, the API requires a country for tax calculations:
 
-Today the API requires a country for tax calculation:
-
-
-```
+```json
 {
   "customerId": "cus_123",
   "currency": "USD",
@@ -290,154 +225,115 @@ Today the API requires a country for tax calculation:
 }
 ```
 
+Whether `country` was previously optional or nonexistent, the outcome is identical: every existing integration begins to fail at runtime.
 
-Whether `country` was previously optional or didn't exist at all, the result is the same: every existing integration starts failing at runtime.
+A safer approach is to allow missing values for older clients, infer defaults where feasible, or create a new operation for the stricter workflow.
 
+For instance:
 
-A safer path is to accept missing values for older clients, infer defaults where possible, or introduce a new operation for the stricter workflow.
+- Accept missing `country` during a transition period
+- Infer it from an existing billing profile if possible
+- Introduce a new `POST /checkout-sessions` flow that requires the enhanced request model
 
-
-For example:
-
-- Accept missing `country` during a transition window
-- Infer it from an existing billing profile if you can
-- Add a new `POST /checkout-sessions` flow that requires the richer request model
-
-Response changes usually get careful design review. Request validation changes deserve the same scrutiny. And the underlying rule is the one that catches both flavors: **anything you add to the contract has to be optional, and anything that was optional has to stay optional.**
-
+While response changes typically undergo careful design review, request validation changes deserve equal attention. The underlying rule that encompasses both scenarios is simple: **anything added to the contract must be optional, and anything that was optional must remain optional.**
 
 ## [A New Operation Is Often Cheaper Than a New Version](https://www.milanjovanovic.tech/blog/api-versioning-should-be-your-last-resort#a-new-operation-is-often-cheaper-than-a-new-version)
 
+At times, the use case may have evolved sufficiently that adding more flags and optional parameters to an existing endpoint becomes confusing.
 
-Sometimes the use case really did change enough that piling more flags and optional parameters onto an existing endpoint becomes confusing.
+This illustrates a poor evolution path:
 
-
-This is what a bad evolution path looks like:
-
-
-```
+```text
 POST /orders?validateOnly=true&includeTaxEstimate=true&reserveInventory=true
 ```
 
+At this juncture, you no longer have a single clean operation; instead, you have multiple workflows concealed behind one endpoint.
 
-At that point you don't have one clean operation. You have multiple workflows hiding behind one endpoint.
+In such cases, I advocate for a new operation or resource rather than an entirely new API version.
 
-
-That's when I prefer a new operation or resource over a whole API version.
-
-
-```
+```text
 POST /orders
 POST /orders/quote
 POST /checkout-sessions
 ```
 
+This approach preserves the old contract's stability while providing a clear home for the new behavior.
 
-This keeps the old contract stable while giving the new behavior a clean home.
+`POST /orders` remains the straightforward "place an order" endpoint, `POST /orders/quote` becomes the "provide a cost estimate" operation, and `POST /checkout-sessions` can support a more complex, guided flow without compromising the original contract.
 
-
-`POST /orders` stays the simple "place an order" endpoint. `POST /orders/quote` becomes the "tell me what this would cost" operation. `POST /checkout-sessions` can support a richer, more guided flow without contaminating the original contract.
-
-
-That is usually much cheaper than creating `/v2/orders` and dragging the rest of your API along with it.
-
+This method is generally much more efficient than creating `/v2/orders` and dragging the rest of your API along with it.
 
 ## [Deprecate Like You Mean It](https://www.milanjovanovic.tech/blog/api-versioning-should-be-your-last-resort#deprecate-like-you-mean-it)
 
+This is a critical yet often overlooked aspect of API change management.
 
-This is the missing half of API change management.
+Most deprecations are superficial. They may be documented, but no operational changes occur.
 
-
-Most deprecations are fake. They exist in docs, but nothing operational happens.
-
-
-A real deprecation process should include four things:
+A genuine deprecation process should encompass four key elements:
 
 1. Mark the old field or endpoint as deprecated in your OpenAPI description.
 2. Signal the deprecation at runtime.
-3. Give consumers a migration path.
+3. Provide consumers with a migration path.
 4. Measure actual usage before removing anything.
 
-If you're on HTTP, runtime signaling can be as simple as response headers like these:
+For APIs using HTTP, runtime signaling can be straightforward, such as employing response headers like these:
 
-
-```
+```text
 Deprecation: true
 Sunset: Wed, 31 Dec 2026 23:59:59 GMT
 Link: <https://docs.example.com/migrations/orders-total>; rel="deprecation"
 ```
 
+This makes the deprecation visible in documentation, apparent in live traffic, and linked to a genuine migration guide.
 
-Now the deprecation is visible in the docs, visible in live traffic, and connected to an actual migration guide.
+Telemetry plays a crucial role here. If you are unaware of which clients still utilize the deprecated field or endpoint, you are not effectively managing change; you are merely guessing.
 
-
-And this is where telemetry matters. If you don't know which clients still use the deprecated field or endpoint, you are not managing change. You are guessing.
-
-
-Track usage by client ID, API key, tenant, or application name. Then wait until usage is effectively gone before removing anything.
-
+Track usage by client ID, API key, tenant, or application name, and wait until usage has significantly diminished before removing anything.
 
 ## [When Versioning Is Actually The Right Call](https://www.milanjovanovic.tech/blog/api-versioning-should-be-your-last-resort#when-versioning-is-actually-the-right-call)
 
+I am not opposed to versioning.
 
-I am not anti-versioning.
+Version when the old and new semantics cannot coexist safely. Version when the resource model has fundamentally changed. Version when adherence to compatibility rules would lead to a contract that is difficult to understand.
 
+In such situations, versioning should be a deliberate choice.
 
-Version when the old and new semantics cannot coexist safely. Version when the resource model changed fundamentally. Version when compatibility rules would force you into a contract nobody can reason about.
+Deliberate versioning means opting for the smallest break you can justify.
 
+Sometimes this involves a new endpoint shape, a representation variant, or, particularly for public APIs, straightforward URL versioning, which is explicit and easy to communicate.
 
-In those cases, version deliberately.
+The critical factor is not the mechanism you choose, but that you resorted to it because coexistence was not feasible, rather than as a default option.
 
-
-And deliberate versioning means choosing the smallest break you can justify.
-
-
-Sometimes that's a new endpoint shape. Sometimes it's a representation variant. Sometimes, especially for public APIs, it's straightforward URL versioning because it is explicit and easy to communicate.
-
-
-The key is not which mechanism you pick. The key is that you reached for it because coexistence failed, not because it was the first idea on the table.
-
-
-And if you do version, pair it with an actual deprecation process:
+If you do choose to version, ensure it is accompanied by a robust deprecation process:
 
 - Mark old fields or endpoints as deprecated
 - Communicate a removal date
-- Give clients migration examples
+- Provide clients with migration examples
 - Monitor usage before removing anything
 
-The real work is not creating `v2`. The real work is getting consumers off `v1`.
-
+The real challenge lies not in creating `v2`, but in transitioning consumers away from `v1`.
 
 ## [Takeaway](https://www.milanjovanovic.tech/blog/api-versioning-should-be-your-last-resort#takeaway)
 
+The most effective API version is often the one you never have to create.
 
-The best API version is often the one you never have to create.
-
-
-If you want a simple decision rule, use this:
+For a straightforward decision-making rule, consider the following:
 
 1. Can I add instead of replace?
 2. Can old and new contracts coexist during a migration window?
-3. Can I introduce a new operation instead of mutating an old one?
-4. Can I deprecate the old shape with docs, headers, and telemetry?
+3. Can I introduce a new operation instead of altering an existing one?
+4. Can I deprecate the old structure with documentation, headers, and telemetry?
 
-If the answer is yes, you probably don't need a new version.
+If the answer is yes, you likely do not need a new version.
 
+If the answer is no, and the old and new paradigms cannot coexist, version deliberately.
 
-If the answer is no, and the old and new worlds genuinely cannot live side by side, version deliberately.
+That is the crux of the matter.
 
+Design contracts to evolve. Treat clients as long-term integrations, not just today's code. Reserve versioning for scenarios where compatibility genuinely reaches its limit.
 
-That's the real point.
+For a deeper exploration of designing and evolving HTTP APIs, check out [**Pragmatic REST APIs**](https://www.milanjovanovic.tech/pragmatic-rest-apis). In this resource, I delve into the patterns, trade-offs, and implementation details I employ when building APIs that must endure real clients and real changes.
 
+Thank you for reading.
 
-Design contracts to evolve. Treat clients as long-lived integrations, not just today's code. And reserve versioning for the cases where compatibility truly runs out.
-
-
-If you want to go deeper on designing and evolving HTTP APIs, check out [**Pragmatic REST APIs**](https://www.milanjovanovic.tech/pragmatic-rest-apis). It's where I cover the patterns, trade-offs, and implementation details I use when building APIs that need to survive real clients and real change.
-
-
-Thanks for reading.
-
-
-And stay awesome!
-
+Stay awesome!
