@@ -1,7 +1,6 @@
 ---
 name: cv-to-portfolio
-description: Sync Viet Hoang's CV PDF to profile.md, then propagate changes into SvelteKit portfolio content files (src/contents/projects/, src/contents/abouts/). Two-stage workflow: convert PDF → refresh profile, then profile → update portfolio.
-origin: local
+description: Sync Viet Hoang's CV PDF to profile.md, then propagate changes into SvelteKit portfolio content files (src/contents/projects/, src/contents/abouts/). The PDF converter is embedded in the project — no external tools needed.
 ---
 
 # CV → Portfolio Sync
@@ -22,49 +21,51 @@ src/contents/abouts/*.md
 
 ## Stage 1 — Sync CV: PDF → profile.md
 
-### Option A: Using the MCP tool (Claude Code sessions only)
+The PDF converter is embedded in the project. No external tools required.
 
-Ask Claude:
-> "Convert `file:///Users/viethoang/Projects/site/personal-info/Nguyen-Viet-Hoang-March-2026.pdf` to Markdown and update `personal-info/profile.md`"
+```
+personal-info/
+├── tools/                    ← embedded PDF converter (MIT, from microsoft/markitdown)
+│   ├── _pdf_converter.py
+│   ├── _base_converter.py
+│   ├── _stream_info.py
+│   └── _exceptions.py
+├── convert_cv.py             ← runner script
+├── requirements.txt          ← pdfminer.six + pdfplumber only
+├── .venv/                    ← gitignored, created once
+└── Nguyen-Viet-Hoang-March-2026.pdf
+```
 
-Claude will call `convert_to_markdown(uri)` and write the result to `profile.md`.
-
-### Option B: Using the CLI (any terminal)
+### First-time setup (one-time only)
 
 ```bash
 cd ~/Projects/site
-
-# Activate the markitdown venv
-source ~/markitdown-mcp-venv/bin/activate
-
-# Or use the pipx-installed CLI directly
-export PATH="$PATH:/Users/viethoang/.local/bin"
-
-markitdown personal-info/Nguyen-Viet-Hoang-March-2026.pdf -o personal-info/profile.md
+python3 -m venv personal-info/.venv
+source personal-info/.venv/bin/activate
+pip install -r personal-info/requirements.txt
 ```
+
+### Running the conversion
+
+```bash
+cd ~/Projects/site
+personal-info/.venv/bin/python personal-info/convert_cv.py
+```
+
+Output: `Done → profile.md (N characters)`
 
 ### When to run Stage 1
 
-Run Stage 1 whenever:
-- You update the PDF with a new role, project, or certification
-- You want to compare the PDF's extracted content with what's in `profile.md`
+- After you update the PDF with a new role, project, or certification
+- The script overwrites `profile.md` — review the diff before committing
 
-> **Note:** The existing `profile.md` is already comprehensive and manually curated. After a PDF conversion, review the diff before accepting — the PDF extraction may miss formatting nuances.
+> **Note:** `profile.md` is already curated. The raw PDF extraction is good for catching new content, but may miss formatting nuances. Always review the diff.
 
 ---
 
 ## Stage 2 — Sync Portfolio: profile.md → content files
 
-### What profile.md contains
-
-`personal-info/profile.md` is the canonical source for:
-- Work experience (employer, role, dates, tech)
-- Projects (name, description, contributions, stack)
-- Education
-- Certifications
-- Skills
-
-### Portfolio content locations
+### Portfolio content structure
 
 | Content type | Directory | Format |
 |---|---|---|
@@ -99,7 +100,6 @@ Longer paragraph describing the project.
 ## Stack
 
 - Tech · Version / variant
-- Tech · Version / variant
 ```
 
 ### About tab format
@@ -118,7 +118,9 @@ const items = ['a', 'b', 'c'];
 ```
 ```
 
-### Existing project slugs
+### Existing slugs
+
+**Projects** (`src/contents/projects/`):
 
 | Slug | Project |
 |---|---|
@@ -131,7 +133,7 @@ const items = ['a', 'b', 'c'];
 | `ncc-erp.md` | NCC ERP (NCC Plus) |
 | `ucg.md` | UCG (NCC Plus) |
 
-### Existing about slugs
+**Abouts** (`src/contents/abouts/`):
 
 | Slug | Content |
 |---|---|
@@ -141,25 +143,20 @@ const items = ['a', 'b', 'c'];
 
 ### Poster image convention
 
-Project poster images live in `static/projects/`. Current pattern:
-- `nashtech-seg.png`, `nashtech-slr.png`, `nashtech-atlanta.png`
-- `windsoft-shopship.png`, `windsoft-carehouse.png`, `windsoft-vesi.png`
-- `ncc-erp.png`, `ncc-ucg.png`
-
-When adding a new project, drop a poster image in `static/projects/` using the same `<company>-<slug>.png` pattern.
+`static/projects/<company>-<slug>.png` — e.g. `nashtech-seg.png`, `windsoft-shopship.png`.
 
 ---
 
 ## Typical Workflow
 
-### Adding a new job or project from the CV
+### Adding a new job or project to the portfolio
 
 1. Update the PDF with the new role/project
-2. Run Stage 1 to refresh `profile.md`
-3. Review and clean up `profile.md` as needed
+2. Run `personal-info/.venv/bin/python personal-info/convert_cv.py`
+3. Review the diff in `personal-info/profile.md`, clean up as needed
 4. Tell Claude: "Create a new project entry in `src/contents/projects/` for [Project Name] based on `personal-info/profile.md`"
-5. Claude generates the file using the frontmatter + body format above
-6. Add a poster image to `static/projects/` if you have one
+5. Claude generates the file using the format above
+6. Drop a poster image in `static/projects/` if you have one
 
 ### Updating an existing project entry
 
@@ -175,7 +172,7 @@ Tell Claude:
 
 ## Key Constraints (from CLAUDE.md)
 
-- All portfolio routes use SvelteKit file-based routing — new `src/contents/projects/<slug>.md` files appear automatically as project pages
+- New `src/contents/projects/<slug>.md` files appear as portfolio pages automatically
 - TypeScript everywhere, `$lib/...` imports, no relative paths
 - Tailwind CSS v4 with `ash-*` OKLCH color scale — no inline `style=""`
 - Svelte 5 runes only: `$props()`, `$state()`, `$derived()`, `$effect()`
