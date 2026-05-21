@@ -1,30 +1,49 @@
 # CLAUDE.md
 
-SvelteKit 2 + Svelte 5 portfolio site. Deployed on Vercel. Content from Markdown files and Notion API.
+SvelteKit 2 + Svelte 5 portfolio site. Deployed on Vercel (`nodejs22.x`). All content comes from local `.md` files processed by mdsvex.
 
 ## Commands
 
 ```bash
-pnpm dev          # start dev server
+pnpm dev          # start dev server at http://localhost:5173
 pnpm build        # production build
 pnpm preview      # preview production build
 pnpm check        # svelte-check + TS type check
 pnpm lint         # prettier + eslint
 pnpm format       # auto-format
-pnpm db:push      # push Drizzle schema to DB
+pnpm db:push      # push Drizzle schema to DB (guestbook — not yet live)
 pnpm db:studio    # open Drizzle Studio
 ```
 
 ## Architecture
 
-- **Routes** live in `src/routes/` — SvelteKit file-based routing
-- **Content** (projects, about tabs) are `.md` files in `src/contents/`, processed by mdsvex
-- **Articles** come from Notion API at runtime — never prerendered
-- **Server-only code** lives in `src/lib/server/` — never import it client-side
-- **Types** are in `src/lib/types.ts` — no `any`, use proper interfaces
-- **Icons** are SVG symbols in `static/icons.svg`, used via `<Icon id="..." />`
+### UI Shell
 
-## Svelte 5 — Runes Only
+The entire site renders inside a **draggable floating window** (`<main>` in `+layout.svelte`):
+- Desktop: 70vw × 75vh, draggable via mousedown, fullscreen-toggleable
+- Mobile: full viewport, drag/fullscreen disabled
+- Background: animated grid pattern + grain noise (`/grain.webp`)
+- Shadow: animated wave shadow via CSS keyframes
+
+### Content System
+
+All content is `.md` files under `src/contents/`, loaded with `import.meta.glob()` at build time via mdsvex:
+
+| Directory | Route | Notes |
+|-----------|-------|-------|
+| `src/contents/abouts/` | `/abouts/[slug]` | Tabs: `personal`, `work`, `gear`. `/abouts` redirects to `/abouts/personal` |
+| `src/contents/projects/` | `/projects/[slug]` | Filter by `?techstack=` URL param |
+| `src/contents/articles/` | `/articles/[slug]` | Filter by `?category=` URL param, paginated 10/page |
+
+`src/lib/index.ts` exports a single `generateEntries(contentType)` utility used in `+page.server.ts` files to generate prerender entries.
+
+### Routing and Prerendering
+
+- Root layout: `prerender = true` (default for most routes)
+- `/articles` and its layout: `prerender = false` — required because the page reads `?category=` and `?page=` URL searchParams for filtering and pagination
+- Individual article/project/about pages: prerendered via `entries` in `+page.server.ts`
+
+### Svelte 5 — Runes Only
 
 Always use Svelte 5 rune syntax. Never use legacy Svelte 4 patterns.
 
@@ -35,20 +54,27 @@ Always use Svelte 5 rune syntax. Never use legacy Svelte 4 patterns.
 | `$effect(() => { ... })` | `onMount(...)` for reactive logic |
 | `$state(value)` | `let value` for reactive state |
 
-## Tailwind CSS v4
+### Tailwind CSS v4
 
 - Config is **inside `src/app.css`** using `@theme {}` — there is no `tailwind.config.js`
-- Custom colors use OKLCH `ash-*` scale (e.g. `ash-200`, `ash-700`)
+- Custom color scale: `ash-50` through `ash-950` (grayscale OKLCH) + `--color-cyan`
 - Utility classes only — no inline `style=""`, no custom CSS unless utilities can't do it
-- Component `<style>` blocks only for things utilities can't express
+- Component `<style>` blocks only for things utilities can't express (e.g. the wave shadow keyframes in `+layout.svelte`)
 
 ## Key Constraints
 
 - **TypeScript everywhere** — no `.js` files in `src/`
 - **Imports use `$lib/...`** — never relative paths like `../../`
-- **`@notionhq/client` is pinned to v2** — v5 removed `databases.query`, do not upgrade
-- Routes using `searchParams` or Notion API must set `export const prerender = false`
+- Routes using `searchParams` must set `export const prerender = false`
 - Secret env vars use `$env/static/private`, public ones use `$env/static/public`
+- `experimental: { remoteFunctions: true }` and `compilerOptions: { experimental: { async: true } }` are enabled in `svelte.config.js`
+
+## Environment Variables
+
+| Variable | Description | Required |
+|---|---|---|
+| `BASE_URL` | Full origin URL (used by sitemap/robots) | Yes |
+| `DATABASE_URL` | PostgreSQL connection string (guestbook — not yet live) | Planned |
 
 ## Adding Content
 
@@ -59,18 +85,37 @@ title: Project Name
 description: One-line description.
 poster: /projects/<image>.png
 techstack: ['TypeScript', 'SvelteKit']
+date: '2024-01'
+category: 'Web'
 ---
 ```
 Drop poster image in `static/projects/`.
 
-**New about tab:** Create `src/contents/abouts/<slug>.md` with `title` + `description` frontmatter. Tab appears automatically.
+**New about tab:** Create `src/contents/abouts/<slug>.md` with `title` + `description` frontmatter. The tab appears automatically — title format is `<icon-name>.<display-name>` (e.g. `user.personal`).
 
-**New article:** Publish a page in the Notion database (set `Published` date). No rebuild needed.
+**New article:** Create `src/contents/articles/<slug>.md` with frontmatter:
+```md
+---
+title: Article Title
+description: One-line description.
+publishedDate: '2024-01-15'
+poster: /articles/<image>.png
+category: '.NET'
+---
+```
 
-## Environment Variables
+## Planned Features (not yet implemented)
 
-| Variable | Description |
-|---|---|
-| `BASE_URL` | Full origin URL (used by sitemap/robots) |
-| `NOTION_TOKEN` | Notion integration secret (`ntn_` or `secret_` prefix) |
-| `NOTION_DATABASE_ID` | 32-char hex ID of the articles Notion database |
+The following packages are installed but not yet wired up — they are for an upcoming **guestbook** feature:
+
+- `drizzle-orm` + `postgres` — database ORM; schema will live at `src/lib/server/db/schema.ts`
+- `arctic` — OAuth provider (for guestbook authentication)
+- `openai` — AI integration
+- `@notionhq/client`, `notion-to-md`, `@tryfabric/martian` — Notion migration utilities (used by the `/convert-notion-blog` skill, not the running site)
+
+The sitemap already includes `/guestbook` in anticipation of this route being added.
+
+## Analytics and Haptics
+
+- **Umami analytics**: `data-umami-event` attributes on key links and buttons track user interactions (article clicks, project views, about tab switches)
+- **Haptics**: `web-haptics` (`createWebHaptics`) is used on nav links for mobile haptic feedback — always call `onDestroy(destroy)` when using it in a component

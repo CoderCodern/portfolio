@@ -2,11 +2,13 @@
 
 Personal portfolio site for Viet Hoang (Coder Codern), Software Engineer based in Hanoi, Vietnam. Built with SvelteKit and deployed on Vercel.
 
+The UI renders as a draggable floating window (70vw × 75vh on desktop) on a grid-pattern background — fullscreen-capable, with animated grain noise and wave shadow.
+
 Features:
-- **Home** — ASCII banner, introduction
-- **About** — Personal info, work experience, skills, education, certifications, gear
-- **Projects** — Filterable project cards with tech stack tags
-- **Articles** — Curated reading list sourced dynamically from a Notion database
+- **Home** — ASCII banner + interactive Dino game
+- **About** — Tabbed sections (personal, work, gear) from local markdown
+- **Projects** — Filterable cards by tech stack, with poster images
+- **Articles** — Written articles from local markdown, filterable by category with pagination
 
 ---
 
@@ -18,8 +20,7 @@ Features:
 | Styling | [Tailwind CSS v4](https://tailwindcss.com) |
 | Markdown | [mdsvex](https://mdsvex.pngwn.io/) |
 | Syntax highlighting | [Shiki](https://shiki.style/) — `poimandres` theme |
-| Articles source | [Notion API](https://developers.notion.com/) via `@notionhq/client` |
-| Deployment | [Vercel](https://vercel.com) (`@sveltejs/adapter-vercel`) |
+| Deployment | [Vercel](https://vercel.com) (`@sveltejs/adapter-vercel`) (`nodejs22.x`) |
 | Font | [Commit Mono](https://commitmono.com/) |
 
 ---
@@ -43,14 +44,9 @@ Fill in `.env`:
 
 ```env
 BASE_URL="http://localhost:5173"
-
-# Notion integration (for Articles page)
-NOTION_TOKEN="ntn_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-NOTION_DATABASE_ID="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 ```
 
-- `NOTION_TOKEN` — create an internal integration at [notion.so/my-integrations](https://www.notion.so/my-integrations) and share your database with it
-- `NOTION_DATABASE_ID` — the 32-character ID from the database URL (not the page URL)
+`BASE_URL` is required for the sitemap (`/sitemap.xml`). No other env vars are needed for local development.
 
 ---
 
@@ -88,12 +84,10 @@ pnpm format      # auto-format all files
 
 Deployed on [Vercel](https://vercel.com). Every push to `master` triggers an automatic deployment.
 
-**Required environment variables on Vercel:**
+**Required environment variable on Vercel:**
 
 | Variable | Description |
 |---|---|
 | `BASE_URL` | Production domain (e.g. `https://viethoang.dev`) — used by sitemap |
-| `NOTION_TOKEN` | Notion integration secret |
-| `NOTION_DATABASE_ID` | ID of the "My blog" database |
 
-To set them: Vercel Dashboard → Project → Settings → Environment Variables.
+To set it: Vercel Dashboard → Project → Settings → Environment Variables.
