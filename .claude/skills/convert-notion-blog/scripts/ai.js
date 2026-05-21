@@ -136,7 +136,7 @@ export async function smoothMarkdown(markdown, openai) {
   return { markdown: refined, langChanges };
 }
 
-const KNOWN_CATEGORIES = ['Frontend', 'Backend', 'System Design', 'Career'];
+const KNOWN_CATEGORIES = ['Frontend', 'Backend', 'System Design', 'Career', 'AI'];
 
 const CATEGORY_SYSTEM_PROMPT =
   'You are a technical blog post categorizer. Classify the article into exactly ONE of:\n' +
@@ -144,11 +144,12 @@ const CATEGORY_SYSTEM_PROMPT =
   '- Backend: .NET, C#, Java, Node.js server-side, databases, microservices, DI patterns, ORMs\n' +
   '- System Design: Architecture patterns, distributed systems, messaging, CQRS, event sourcing, scalability, API design strategy\n' +
   '- Career: Career growth, engineering leadership, soft skills, personal development, team culture\n' +
+  '- AI: AI tools, LLMs, Claude, Claude Code, GitHub Copilot, prompt engineering, AI-assisted development, AI workflows\n' +
   'Reply with ONLY the category name, no explanation.';
 
 /**
  * Detects which category an article belongs to using GPT-4o-mini.
- * Returns one of: Frontend | Backend | System Design | Career
+ * Returns one of: Frontend | Backend | System Design | Career | AI
  */
 export async function detectCategory(title, description, markdown, openai) {
   const preview = [
