@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Skills: The Passive Knowledge Layer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d; --surface: #161616; --surface2: #1e1e1e;
+    --border: #2a2a2a; --text: #e8e4dc; --muted: #7a7570;
+    --accent: #4caf7d; --accent-dim: #122a1e; --accent2: #e8a84c;
+    --code-bg: #111; --red: #ff7b72; --blue: #79c0ff;
+    --purple: #c9b1f5;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.75; font-size: 17px; }
+
+  /* HERO */
+  .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; padding: 4rem 2rem; position: relative; overflow: hidden; border-bottom: 1px solid var(--border); }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 80% 25%, rgba(76,175,125,0.08) 0%, transparent 70%), radial-gradient(ellipse 40% 40% at 20% 70%, rgba(232,168,76,0.05) 0%, transparent 60%); pointer-events: none; }
+  .hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px); background-size: 60px 60px; pointer-events: none; }
+  .hero-inner { max-width: 800px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+  .series-tag { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); border: 1px solid rgba(76,175,125,0.25); background: rgba(76,175,125,0.06); padding: 6px 14px; border-radius: 2px; margin-bottom: 2rem; }
+  .series-tag::before { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  h1 { font-family: 'Lora', serif; font-size: clamp(2.1rem, 4.5vw, 3.4rem); font-weight: 600; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 1.5rem; max-width: 730px; }
+  h1 em { font-style: italic; color: var(--accent); }
+  .hero-meta { display: flex; align-items: center; gap: 2rem; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; flex-wrap: wrap; }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta span::before { content: ''; display: inline-block; width: 3px; height: 3px; background: var(--muted); border-radius: 50%; }
+  .hero-meta span:first-child::before { display: none; }
+
+  /* LAYOUT */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  article { padding: 5rem 0; }
+  .lead { font-family: 'Lora', serif; font-size: 1.2rem; line-height: 1.85; color: #c5c0b5; margin-bottom: 3rem; padding-bottom: 3rem; border-bottom: 1px solid var(--border); }
+  h2 { font-family: 'Lora', serif; font-size: 1.65rem; font-weight: 600; margin: 3.5rem 0 1rem; }
+  h3 { font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin: 2.5rem 0 0.75rem; }
+  p { margin-bottom: 1.4rem; }
+  strong { font-weight: 500; color: var(--text); }
+  em { font-style: italic; color: #c5c0b5; }
+
+  /* CODE */
+  .code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; margin: 1.75rem 0; overflow: hidden; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--border); background: #0e0e0e; }
+  .code-lang { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  pre { padding: 1.25rem 1.5rem; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.75; color: #c9d1d9; }
+  .kw { color: var(--accent); }
+  .cm { color: #4a5060; font-style: italic; }
+  .st { color: #a5d6ff; }
+  .bad { color: var(--red); }
+  .num { color: var(--purple); }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.83em; background: var(--surface2); border: 1px solid var(--border); color: var(--accent); padding: 2px 7px; border-radius: 3px; }
+
+  /* CALLOUT */
+  .callout { border-left: 3px solid var(--accent); background: var(--accent-dim); padding: 1.25rem 1.5rem; border-radius: 0 6px 6px 0; margin: 2rem 0; font-size: 0.95rem; }
+  .callout.orange { border-left-color: var(--accent2); background: #3d2c12; }
+  .callout.red { border-left-color: var(--red); background: #2a1212; }
+  .callout-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 6px; }
+  .callout.orange .callout-label { color: var(--accent2); }
+  .callout.red .callout-label { color: var(--red); }
+
+  /* COMPONENT TABLE */
+  .comp-table { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .comp-row { display: grid; grid-template-columns: 140px 1fr 1fr; gap: 0; border-bottom: 1px solid var(--border); }
+  .comp-row:last-child { border-bottom: none; }
+  .comp-row.header { background: #0f0f0f; }
+  .comp-cell { padding: 12px 16px; font-size: 13.5px; }
+  .comp-cell.label { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .comp-cell.label.skill { color: var(--accent); }
+  .comp-cell.label.agent { color: var(--blue); }
+  .comp-cell.label.cmd { color: var(--accent2); }
+  .comp-cell.label.hook { color: var(--purple); }
+  .comp-cell.label.rule { color: #aaa; }
+  .comp-cell.header-cell { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .comp-cell.desc { color: #b0a89e; }
+  .comp-cell.trigger { color: var(--muted); font-size: 13px; }
+
+  /* LOCATION TABLE */
+  .loc-grid { display: grid; grid-template-columns: 1fr; gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .loc-row { background: var(--surface); padding: 1.1rem 1.5rem; display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: flex-start; }
+  .loc-icon { font-size: 1.1rem; flex-shrink: 0; }
+  .loc-path { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); margin-bottom: 4px; }
+  .loc-desc { font-size: 13px; color: var(--muted); }
+  .loc-tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 6px; border-radius: 2px; margin-left: 8px; }
+  .loc-tag.g { background: rgba(76,175,125,0.15); color: var(--accent); }
+  .loc-tag.t { background: rgba(121,192,255,0.15); color: var(--blue); }
+
+  /* PATTERN CARDS */
+  .pattern-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .pc { background: var(--surface); padding: 1.5rem; }
+  .pc-letter { font-family: 'Lora', serif; font-size: 2.5rem; font-weight: 600; color: var(--accent); line-height: 1; margin-bottom: 6px; opacity: 0.4; }
+  .pc-name { font-weight: 500; font-size: 15px; color: var(--text); margin-bottom: 8px; }
+  .pc-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 10px; }
+  .pc-use { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); padding: 6px 10px; background: var(--accent-dim); border-radius: 3px; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; margin: 1.75rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 10px 14px; border-bottom: 1px solid var(--border); background: #0f0f0f; }
+  td { padding: 11px 14px; border-bottom: 1px solid #1c1c1c; vertical-align: top; line-height: 1.6; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); white-space: nowrap; }
+  td.bad-cell { color: var(--red); font-size: 13px; }
+  td.good-cell { color: #9ad4b3; font-size: 13px; }
+
+  /* CHECKLIST */
+  .check-list { list-style: none; margin: 1.5rem 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .check-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 14px; font-family: 'JetBrains Mono', monospace; color: var(--muted); }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before { content: '[ ]'; flex-shrink: 0; color: var(--accent); }
+
+  /* ACTIVATION COMPARE */
+  .act-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 6px; overflow: hidden; margin: 1.75rem 0; }
+  .ac-col { background: var(--surface); padding: 1.25rem 1.5rem; }
+  .ac-header { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .ac-header.bad { color: var(--red); }
+  .ac-header.good { color: var(--accent); }
+  .ac-body { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.8; }
+  .ac-body.bad-b { color: #c9a0a0; }
+  .ac-body.good-b { color: #9ad4b3; }
+
+  /* LAYER DIAGRAM */
+  .layer-stack { display: flex; flex-direction: column; gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .layer-item { background: var(--surface); padding: 14px 20px; display: flex; align-items: center; gap: 16px; }
+  .layer-name { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--accent); min-width: 120px; flex-shrink: 0; }
+  .layer-desc { font-size: 13.5px; color: var(--muted); }
+
+  /* DIVIDER */
+  .divider { display: flex; align-items: center; gap: 1rem; margin: 3.5rem 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.1em; }
+
+  blockquote { padding: 1.75rem 2rem; margin: 2.5rem 0; border-left: 3px solid var(--border); }
+  blockquote p { font-family: 'Lora', serif; font-size: 1.15rem; font-style: italic; color: #c5c0b5; line-height: 1.7; margin: 0; }
+
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
+  .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
+
+  footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+
+  @media (max-width: 640px) {
+    .hero { padding: 3rem 1.5rem; }
+    .container { padding: 0 1.5rem; }
+    h1 { font-size: 1.9rem; }
+    article { padding: 3rem 0; }
+    .pattern-cards { grid-template-columns: 1fr; }
+    .comp-row { grid-template-columns: 110px 1fr; }
+    .comp-row .comp-cell.trigger { display: none; }
+    .act-compare { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="series-tag">Learning in public · Episode 03</div>
+    <h1>Skills: The <em>Passive Knowledge Layer</em> That Makes Claude Actually Good at Your Job</h1>
+    <div class="hero-meta">
+      <span>May 2026</span>
+      <span>14 min read</span>
+      <span>Skills · Four Patterns · Global vs Local · Real templates</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<article>
+
+  <p class="lead">
+    After two weeks of Claude Code, I kept running into the same friction: Claude was smart, but
+    it didn't know <em>my</em> workflows. Not the TDD process my team follows, not our REST API conventions,
+    not how we handle errors. Every session I re-explained the same things. Skills are the
+    fix — but before I understood what they actually are, I had completely the wrong mental model.
+    Let me fix that first.
+  </p>
+
+  <h2>The Mental Model Most People Get Wrong</h2>
+
+  <p>
+    Skills are <strong>not</strong> commands. They're <strong>not</strong> agents. They're not "smart prompts."
+    Skills are <strong>passive knowledge modules</strong>. Claude Code loads them based on context and
+    references them when relevant — automatically, without you invoking anything.
+  </p>
+
+  <p>
+    Here's the full ecosystem and where Skills sit within it:
+  </p>
+
+  <div class="comp-table">
+    <div class="comp-row header">
+      <div class="comp-cell header-cell">Component</div>
+      <div class="comp-cell header-cell">What it is</div>
+      <div class="comp-cell header-cell">When it activates</div>
+    </div>
+    <div class="comp-row">
+      <div class="comp-cell label skill">Skill</div>
+      <div class="comp-cell desc">Passive knowledge module</div>
+      <div class="comp-cell trigger">Context-based — automatic</div>
+    </div>
+    <div class="comp-row">
+      <div class="comp-cell label agent">Agent</div>
+      <div class="comp-cell desc">Specialized subassistant</div>
+      <div class="comp-cell trigger">Explicit delegation via Task tool</div>
+    </div>
+    <div class="comp-row">
+      <div class="comp-cell label cmd">Command</div>
+      <div class="comp-cell desc">User-triggered action</div>
+      <div class="comp-cell trigger">You type /command-name</div>
+    </div>
+    <div class="comp-row">
+      <div class="comp-cell label hook">Hook</div>
+      <div class="comp-cell desc">Automation script</div>
+      <div class="comp-cell trigger">Event-triggered (tool use, session end)</div>
+    </div>
+    <div class="comp-row">
+      <div class="comp-cell label rule">Rule</div>
+      <div class="comp-cell desc">Always-on guidelines</div>
+      <div class="comp-cell trigger">Every message, every session</div>
+    </div>
+  </div>
+
+  <div class="callout orange">
+    <div class="callout-label">⚡ The key implication</div>
+    A skill does not execute anything. You invoke agents to do work. Agents <em>read skills</em>
+    to know how to do it well. If you find yourself writing a skill that "runs" something —
+    you probably want a command or a script-backed skill with a companion executable.
+  </div>
+
+  <div class="divider"><span>where it lives</span></div>
+
+  <h2>Global vs Local — Where Your Skill Lives</h2>
+
+  <p>
+    Before building anything, decide where it belongs. This determines who sees it,
+    when it loads, and whether it ships with your project.
+  </p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-lang">Full folder map</span>
+    </div>
+    <pre><span class="cm"># GLOBAL — applies to all your projects</span>
+~/.claude/
+└── skills/
+    ├── my-coding-style/     <span class="kw">← your personal workflow skill</span>
+    │   └── SKILL.md
+    ├── my-git-style/        <span class="kw">← cross-project git conventions</span>
+    │   └── SKILL.md
+    └── learned/             <span class="cm">← auto-generated by Claude, don't edit</span>
+        └── session-log.md
+
+<span class="cm"># LOCAL — specific to one project (committed to git)</span>
+your-project/
+└── .claude/
+    └── skills/
+        ├── api-design/      <span class="kw">← team-shared REST conventions</span>
+        │   └── SKILL.md
+        ├── tdd-workflow/    <span class="kw">← team-shared process enforcement</span>
+        │   └── SKILL.md
+        └── brand-voice/     <span class="kw">← team-shared content guidelines</span>
+            ├── SKILL.md
+            └── references/
+                └── voice-profile-schema.md</pre>
+  </div>
+
+  <div class="loc-grid">
+    <div class="loc-row">
+      <div class="loc-icon">🌍</div>
+      <div>
+        <div class="loc-path">~/.claude/skills/my-skill/<span class="loc-tag g">global</span></div>
+        <div class="loc-desc">Available in all your projects. Never committed to git. For personal workflows and your coding philosophy.</div>
+      </div>
+    </div>
+    <div class="loc-row">
+      <div class="loc-icon">👥</div>
+      <div>
+        <div class="loc-path">.claude/skills/my-skill/<span class="loc-tag t">project</span></div>
+        <div class="loc-desc">This project only. Committed to git and shared with your team. For project conventions, domain knowledge, team processes.</div>
+      </div>
+    </div>
+    <div class="loc-row">
+      <div class="loc-icon">🤖</div>
+      <div>
+        <div class="loc-path">~/.claude/skills/learned/<span class="loc-tag g">auto</span></div>
+        <div class="loc-desc">Auto-generated by Claude based on session patterns. Don't edit manually — let Claude manage this.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-label">💡 Rule of thumb</div>
+    If it's about how <em>you</em> work → global skill (<code>~/.claude/skills/</code>).
+    If it's about how <em>this codebase</em> works → project skill (<code>.claude/skills/</code>).
+  </div>
+
+  <div class="divider"><span>anatomy</span></div>
+
+  <h2>Anatomy of a Skill</h2>
+
+  <p>Every skill is a directory with at least one required file:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-lang">Skill directory structure</span>
+    </div>
+    <pre>.claude/skills/my-skill/
+├── SKILL.md          <span class="cm">← required, must be non-empty</span>
+├── config.json       <span class="cm">← optional — configurable behavior</span>
+├── scripts/          <span class="cm">← optional — companion executables</span>
+│   └── run.js
+└── references/       <span class="cm">← optional — sub-documents for heavy schemas</span>
+    └── schema.md</pre>
+  </div>
+
+  <h3>The Frontmatter</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-lang">SKILL.md frontmatter</span>
+    </div>
+    <pre>---
+name: api-design          <span class="cm"># must match directory name exactly</span>
+description: REST and GraphQL API conventions, HTTP status codes, pagination
+              <span class="cm"># ↑ inline string ONLY — never use | or |- literal blocks</span>
+origin: user              <span class="cm"># user | community | ECC</span>
+---</pre>
+  </div>
+
+  <h3>The Four Required Sections</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-lang">SKILL.md — section order</span>
+    </div>
+    <pre><span class="kw">## When to Activate</span>    <span class="cm">← most important — runtime uses this for auto-discovery</span>
+
+<span class="kw">## Core Reference</span>       <span class="cm">← the actual knowledge: tables, rules, conventions</span>
+
+<span class="kw">## Code Examples</span>        <span class="cm">← copy-pasteable, not pseudocode</span>
+
+<span class="kw">## Anti-Patterns</span>        <span class="cm">← what NOT to do, with concrete examples</span></pre>
+  </div>
+
+  <p>
+    <strong>Length target:</strong> 200–500 lines. Hard cap at 800.
+    A skill over 800 lines is a skill trying to be two skills. Split it.
+  </p>
+
+  <div class="divider"><span>activation</span></div>
+
+  <h2>The "When to Activate" Section Is Load-Bearing</h2>
+
+  <p>
+    This is not just documentation. It's the primary signal the runtime uses to decide whether
+    to load this skill into context at all. A vague section means the skill fires late,
+    inconsistently, or never. Write at least 4 specific, concrete scenarios.
+  </p>
+
+  <div class="act-compare">
+    <div class="ac-col">
+      <div class="ac-header bad">❌ Bad — too vague</div>
+      <div class="ac-body bad-b">## When to Activate
+- When working on APIs.</div>
+    </div>
+    <div class="ac-col">
+      <div class="ac-header good">✅ Good — specific triggers</div>
+      <div class="ac-body good-b">## When to Activate
+- Designing new REST or GraphQL endpoints
+- Reviewing an API contract for consistency
+- Adding pagination to a collection endpoint
+- Writing OpenAPI documentation
+- Deciding between REST and GraphQL
+- Implementing error response schemas</div>
+    </div>
+  </div>
+
+  <div class="divider"><span>four patterns</span></div>
+
+  <h2>The Four Design Patterns</h2>
+
+  <p>
+    After studying the ECC project (Everything Claude Code) — 200+ skills shipped to production —
+    real skills fall into exactly four patterns. Knowing which one to use before you start
+    prevents full rewrites.
+  </p>
+
+  <div class="pattern-cards">
+    <div class="pc">
+      <div class="pc-letter">A</div>
+      <div class="pc-name">Pure Reference</div>
+      <div class="pc-desc">Just a SKILL.md. Dense, structured, heavy on tables and code snippets. No scripts, no sub-docs.</div>
+      <div class="pc-use">API conventions · Language idioms · Design rules</div>
+    </div>
+    <div class="pc">
+      <div class="pc-letter">B</div>
+      <div class="pc-name">Script-Backed</div>
+      <div class="pc-desc">SKILL.md describes the workflow, companion scripts execute it. The skill orchestrates; the script does the work.</div>
+      <div class="pc-use">Session analysis · File generation · Data fetching</div>
+    </div>
+    <div class="pc">
+      <div class="pc-letter">C</div>
+      <div class="pc-name">Workflow</div>
+      <div class="pc-desc">Prescriptive, not just reference. Defines sequential steps Claude must follow — a process to enforce.</div>
+      <div class="pc-use">TDD enforcement · PR review process · Deploy checklist</div>
+    </div>
+    <div class="pc">
+      <div class="pc-letter">D</div>
+      <div class="pc-name">Reference + Sub-docs</div>
+      <div class="pc-desc">Lean SKILL.md that delegates heavy structural details to a references/ subdirectory. Main file stays scannable.</div>
+      <div class="pc-use">Brand voice · Schemas · Reusable artifact producers</div>
+    </div>
+  </div>
+
+  <h3>Pattern A — Pure Reference (the most common starting point)</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-lang">Pattern A — folder structure</span>
+    </div>
+    <pre>.claude/skills/api-design/
+└── SKILL.md              <span class="kw">← 524 lines, dense tables and code snippets</span>
+                           <span class="cm">   no scripts, no sub-docs</span>
+                           <span class="cm">   stable domain, just needs reference mid-task</span></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-lang">.claude/skills/api-design/SKILL.md</span>
+    </div>
+    <pre>---
+name: api-design
+description: REST API design conventions, HTTP status codes, pagination, error schemas
+origin: user
+---
+
+<span class="kw">## When to Activate</span>
+- Designing new REST or GraphQL API endpoints
+- Reviewing API contracts for consistency
+- Adding pagination or filtering to collections
+- Writing OpenAPI documentation
+- Defining error response shapes
+
+<span class="kw">## Core Reference</span>
+
+<span class="kw">### URL conventions</span>
+- Resources are plural nouns: /users, /invoices — <span class="bad">not /getUser</span>
+- Nested resources for ownership: /users/{id}/invoices
+- Actions that don't map to CRUD: /invoices/{id}/send
+
+<span class="kw">### HTTP status codes</span>
+| Code | Use case                                   |
+|------|--------------------------------------------|
+| 200  | Successful GET, PATCH                      |
+| 201  | Successful POST (resource created)         |
+| 204  | Successful DELETE (no body)                |
+| 400  | Malformed request / validation failure     |
+| 401  | Missing or invalid auth token              |
+| 403  | Valid token, insufficient permissions      |
+| 404  | Resource not found                         |
+| 409  | Conflict (duplicate, state mismatch)       |
+| 422  | Business logic rejection                   |
+| 500  | Internal error — <span class="bad">never leak details</span>   |
+
+<span class="kw">## Code Examples</span>
+<span class="cm">// ✅ Standard error shape — use everywhere</span>
+{
+  "error": {
+    "code": "INVOICE_ALREADY_SENT",
+    "message": "This invoice has already been sent.",
+    "field": "status"
+  }
+}
+
+<span class="kw">## Anti-Patterns</span>
+- <span class="bad">❌</span> Verbs in URLs: /getInvoice, /createUser
+- <span class="bad">❌</span> Returning 200 for errors with success: false in body
+- <span class="bad">❌</span> Using 500 for client mistakes — that's a 4xx
+- <span class="bad">❌</span> Different error shapes per endpoint</pre>
+  </div>
+
+  <h3>Pattern B — Script-Backed (workflow + execution)</h3>
+
+  <p>
+    Key design decision from ECC: use a <code>Stop</code> hook (fires once at session end),
+    <strong>not</strong> a <code>UserPromptSubmit</code> hook (fires every message).
+    One execution vs. dozens — the overhead difference is enormous.
+  </p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-lang">Pattern B — folder structure</span>
+    </div>
+    <pre>.claude/skills/continuous-learning/
+├── SKILL.md              <span class="kw">← defines the workflow Claude orchestrates</span>
+├── config.json           <span class="cm">← configurable thresholds (duration, output path)</span>
+└── evaluate-session.sh   <span class="cm">← companion script that does the actual work</span>
+                           <span class="cm">   triggered by Stop hook — once at session end</span></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-lang">.claude/skills/continuous-learning/SKILL.md</span>
+    </div>
+    <pre>---
+name: continuous-learning
+description: Evaluate each coding session and extract lessons for future improvement
+origin: user
+---
+
+<span class="kw">## When to Activate</span>
+- At the end of any coding session
+- When a task takes significantly longer than expected
+- After fixing a bug that required multiple correction cycles
+- When a pattern appears that should be remembered
+
+<span class="kw">## Core Reference</span>
+This skill runs via a Stop hook — once at session end, not per-message.
+
+<span class="kw">### What to evaluate</span>
+1. Decisions made and why
+2. Mistakes and how they were corrected
+3. Patterns that worked well
+4. Patterns to avoid next time
+
+<span class="kw">### Output format</span>
+Append to ~/.claude/skills/learned/session-log.md:
+- Date + project
+- Key decisions
+- Lessons extracted
+- Rules to add to CLAUDE.md (if any)</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-lang">.claude/skills/continuous-learning/config.json</span>
+    </div>
+    <pre>{
+  <span class="st">"min_session_duration_minutes"</span>: <span class="num">10</span>,
+  <span class="st">"output_path"</span>: <span class="st">"~/.claude/skills/learned/session-log.md"</span>,
+  <span class="st">"max_lessons_per_session"</span>: <span class="num">5</span>
+}</pre>
+  </div>
+
+  <h3>Pattern C — Workflow (process enforcement)</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-lang">Pattern C — folder structure</span>
+    </div>
+    <pre>.claude/skills/tdd-workflow/
+└── SKILL.md              <span class="kw">← 514 lines, zero companion files</span>
+                           <span class="cm">   prescriptive steps, not just reference</span>
+                           <span class="cm">   enforces process, not just informs it</span></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-lang">.claude/skills/tdd-workflow/SKILL.md</span>
+    </div>
+    <pre>---
+name: tdd-workflow
+description: Test-driven development workflow with git checkpoints and coverage gates
+origin: user
+---
+
+<span class="kw">## When to Activate</span>
+- Implementing any new feature
+- Fixing a bug (write regression test first)
+- Refactoring existing code
+- Adding a new API endpoint
+
+<span class="kw">## The Workflow</span>
+
+<span class="kw">### Step 1 — Write the failing test</span>
+Write a test describing the desired behavior. Run it. Confirm it fails (RED).
+Never skip — a test that doesn't fail first isn't a test.
+
+<span class="kw">### Step 2 — Implement the minimum</span>
+Write the minimum code to make the test pass. No extra logic. GREEN only.
+
+<span class="kw">### Step 3 — Git checkpoint</span>
+git add -p          <span class="cm"># stage intentionally</span>
+git commit -m <span class="st">"feat: [description] (green)"</span>
+
+<span class="kw">### Step 4 — Refactor</span>
+Clean up. Remove duplication. Run tests after every change.
+<span class="bad">Never refactor on a red test.</span>
+
+<span class="kw">### Step 5 — Verify coverage</span>
+pnpm test:coverage
+<span class="cm"># Gate: no new lines below 80% branch coverage</span>
+
+<span class="kw">## Mocking patterns (this project)</span>
+- Supabase: use createMockSupabaseClient() from src/test/mocks/supabase.ts
+- Redis: use ioredis-mock — <span class="bad">never mock Redis manually</span>
+- OpenAI: use nock to intercept HTTP — <span class="bad">not jest.mock</span>
+
+<span class="kw">## Anti-Patterns</span>
+- <span class="bad">❌</span> Writing implementation before the test
+- <span class="bad">❌</span> Committing on a red test
+- <span class="bad">❌</span> Skipping the refactor step</pre>
+  </div>
+
+  <h3>Pattern D — Reference + Sub-Documents</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-lang">Pattern D — folder structure</span>
+    </div>
+    <pre>.claude/skills/brand-voice/
+├── SKILL.md                      <span class="kw">← 98 lines, stays scannable</span>
+└── references/
+    └── voice-profile-schema.md   <span class="cm">← heavy schema, loaded on demand</span>
+                                   <span class="cm">   consumed by downstream skills</span></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <span class="code-lang">.claude/skills/brand-voice/SKILL.md (98 lines — stays scannable)</span>
+    </div>
+    <pre>---
+name: brand-voice
+description: Generate consistent brand voice profiles for content and documentation
+origin: user
+---
+
+<span class="kw">## When to Activate</span>
+- Writing customer-facing documentation
+- Drafting marketing copy or product descriptions
+- Reviewing content for tone consistency
+
+<span class="kw">## Core Reference</span>
+Produce a VOICE PROFILE block using the schema in
+references/voice-profile-schema.md.
+
+The three voice dimensions:
+- <span class="st">Clarity</span>   — plain language, no undefined jargon
+- <span class="st">Warmth</span>    — human, not corporate; confident, not boastful
+- <span class="st">Precision</span> — specific claims, not vague reassurances
+
+<span class="kw">## Anti-Patterns</span>
+- <span class="bad">❌</span> Generic tone ("professional and friendly") without signals
+- <span class="bad">❌</span> Passive voice in action-oriented contexts
+- <span class="bad">❌</span> Different voice in docs vs in-product copy</pre>
+  </div>
+
+  <div class="divider"><span>anti-patterns</span></div>
+
+  <h2>Anti-Patterns Worth Memorizing</h2>
+
+  <p>From the ECC project's contributing guide and skill validation policy — the failures that appear most often in skill reviews:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Anti-Pattern</th><th>Why it fails</th></tr></thead>
+      <tbody>
+        <tr><td>Scope too broad</td><td class="good-cell">One skill = one domain. "Python, Django, and Flask" is three skills.</td></tr>
+        <tr><td>No code examples</td><td class="good-cell">Theory without practice isn't actionable when Claude is mid-task.</td></tr>
+        <tr><td>Vague "When to Activate"</td><td class="good-cell">Auto-activation won't fire reliably. Needs 4+ specific scenarios.</td></tr>
+        <tr><td>Long prose sections</td><td class="good-cell">Hard to scan mid-task. Use tables, bullets, and headers.</td></tr>
+        <tr><td>description as literal block (|)</td><td class="good-cell">Breaks flat-table renderers downstream. Always inline string.</td></tr>
+        <tr><td>name ≠ directory</td><td class="good-cell">Validator fails immediately. Must match exactly.</td></tr>
+        <tr><td>Script using UserPromptSubmit hook</td><td class="good-cell">Runs every message. Massive overhead. Use Stop hook instead.</td></tr>
+        <tr><td>Over 800 lines</td><td class="good-cell">Split it. A skill that long is two skills fighting for space.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout red">
+    <div class="callout-label">⚠️ On porting skills from other tools</div>
+    Copy the underlying idea, workflow, or structure — not the identity. A skill that requires
+    knowing the upstream repo to understand its purpose is a skill that will confuse future-you
+    at 11pm. Rename it. Reshape it. Make it native to your project.
+  </div>
+
+  <div class="divider"><span>ship it</span></div>
+
+  <h2>The Checklist Before You Ship</h2>
+
+  <ul class="check-list">
+    <li>Focused on exactly one domain — not too broad</li>
+    <li>"When to Activate" has 4+ specific, concrete scenarios</li>
+    <li>At least one copy-pasteable code example (not pseudocode)</li>
+    <li>At least one Anti-Patterns section with concrete examples</li>
+    <li>Under 500 lines (800 hard cap — split if over)</li>
+    <li>Frontmatter: name matches directory, description is inline string</li>
+    <li>No sensitive data — no tokens, passwords, or absolute local paths</li>
+    <li>If script-backed: uses Stop hook, not UserPromptSubmit</li>
+    <li>If porting from another tool: renamed and reshaped to be native</li>
+    <li>Tested: trigger a session where it should activate, verify it does</li>
+  </ul>
+
+  <div class="divider"><span>the bigger picture</span></div>
+
+  <h2>How Skills Fit the Full System</h2>
+
+  <p>Skills, CLAUDE.md, and SOUL.md aren't competing — they're layered. Each handles a different kind of context:</p>
+
+  <div class="layer-stack">
+    <div class="layer-item">
+      <div class="layer-name">SOUL.md</div>
+      <div class="layer-desc">How Claude communicates — tone, style, response defaults</div>
+    </div>
+    <div class="layer-item">
+      <div class="layer-name">CLAUDE.md</div>
+      <div class="layer-desc">What Claude knows about you and your project — permanent briefing</div>
+    </div>
+    <div class="layer-item">
+      <div class="layer-name">Skills</div>
+      <div class="layer-desc">Domain knowledge Claude draws from mid-task — auto-loaded when context matches</div>
+    </div>
+    <div class="layer-item">
+      <div class="layer-name">Commands</div>
+      <div class="layer-desc">Explicit workflows you trigger yourself — /review-pr, /deploy, /document</div>
+    </div>
+    <div class="layer-item">
+      <div class="layer-name">Hooks</div>
+      <div class="layer-desc">Automation that fires on events — linting, secret detection, session logging</div>
+    </div>
+  </div>
+
+  <blockquote>
+    <p>"Write skills you'd want to use yourself. If you wouldn't reference it mid-task because it's
+    too vague, too long, or too broad — neither will Claude."</p>
+  </blockquote>
+
+  <div class="next-post">
+    <div>
+      <div class="next-label">Next in the series</div>
+      <div class="next-title">Week 4 — Subagents: Context Isolation and Delegating Complex Work</div>
+    </div>
+    <div class="next-arrow">→</div>
+  </div>
+
+</article>
+</div>
+
+<footer>
+  <div>Research source: Everything Claude Code (ECC) project skill system documentation</div>
+  <div style="margin-top: 8px; color: #3d3a35;">claude-code-journey.md · episode 03</div>
+</footer>
+
+</body>
+</html>

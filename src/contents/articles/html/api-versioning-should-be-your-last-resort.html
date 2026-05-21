@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Versioning Should Be Your Last Resort</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #e8e4dc;
+    --muted: #7a7570;
+    --accent: #e8a84c;       /* episode accent */
+    --accent-dim: #3d2c12;     /* tinted background for callouts */
+    --code-bg: #111;
+    --green: #4caf7d;
+    --green-dim: #122a1e;
+    --red: #ff7b72;
+    --red-dim: #2a1212;
+    --blue: #79c0ff;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    font-size: 17px;
+  }
+
+  /* ── HERO ─────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 25%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 70%, rgba(232,168,76,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 800px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+
+  .series-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    padding: 6px 14px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  .series-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    max-width: 720px;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-wrap: wrap;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta span::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+  }
+  .hero-meta span:first-child::before { display: none; }
+
+  /* ── LAYOUT ───────────────────────────── */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  article { padding: 5rem 0; }
+
+  .lead {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: #c5c0b5;
+    margin-bottom: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin: 3.5rem 0 1rem;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 2.5rem 0 0.75rem;
+  }
+  p { margin-bottom: 1.4rem; }
+  strong { font-weight: 500; color: var(--text); }
+  em { font-style: italic; color: #c5c0b5; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p.aside { font-size: 14px; color: var(--muted); font-style: italic; margin: -0.5rem 0 1.4rem; }
+
+  /* ── CODE ─────────────────────────────── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 1.75rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #0e0e0e;
+  }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  pre {
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    color: #c9d1d9;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.83em;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  /* Syntax highlight helpers — use as <span class="X"> inside <pre> */
+  .kw  { color: var(--accent); }               /* keywords, headings */
+  .cm  { color: #4a5060; font-style: italic; } /* comments */
+  .st  { color: #a5d6ff; }                     /* strings */
+  .bad { color: var(--red); }                  /* bad examples */
+  .good{ color: var(--green); }                /* good examples */
+  .num { color: #c9b1f5; }                     /* numbers */
+
+  /* ── CALLOUTS ─────────────────────────── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-dim);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 6px 6px 0;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+  }
+  .callout.green { border-left-color: var(--green); background: var(--green-dim); }
+  .callout.red   { border-left-color: var(--red);   background: var(--red-dim);   }
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red   .callout-label { color: var(--red);   }
+
+  /* ── BLOCKQUOTE ───────────────────────── */
+  blockquote {
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    margin: 2.5rem 0;
+  }
+  blockquote::before {
+    content: '"';
+    font-family: 'Lora', serif;
+    font-size: 6rem;
+    color: var(--border);
+    position: absolute;
+    top: -1rem; left: 50%;
+    transform: translateX(-50%);
+    line-height: 1;
+  }
+  blockquote p {
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #c5c0b5;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+
+  /* ── TABLES ───────────────────────────── */
+  .table-wrap { overflow-x: auto; margin: 1.75rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #0f0f0f;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid #1c1c1c; vertical-align: top; line-height: 1.6; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+
+  /* ── DIVIDER ──────────────────────────── */
+  .divider { display: flex; align-items: center; gap: 1rem; margin: 3.5rem 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── COMPARE GRID ─────────────────────── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 6px; overflow: hidden; margin: 1.75rem 0; }
+  .compare-col { background: var(--surface); padding: 1.25rem; }
+  .compare-header { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .compare-header.bad-h  { color: var(--red); }
+  .compare-header.good-h { color: var(--green); }
+  .compare-item { font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .compare-item:last-child { border-bottom: none; }
+  .compare-item.bad-t  { color: #c9a0a0; }
+  .compare-item.good-t { color: #a0c9a8; }
+
+  /* ── CHECKLIST ────────────────────────── */
+  .check-list { list-style: none; margin: 1.5rem 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .check-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before { content: '[ ]'; flex-shrink: 0; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  /* ── WEEK GRID ────────────────────────── */
+  .week-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .week-day { background: var(--surface); padding: 1.25rem; }
+  .week-day-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .week-day-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .week-day-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── NEXT POST ────────────────────────── */
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
+  .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
+
+  /* ── COPY BUTTON ─────────────────────── */
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+  /* ── FOOTER ───────────────────────────── */
+  footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── RESPONSIVE ───────────────────────── */
+  @media (max-width: 640px) {
+    .hero { padding: 3rem 1.5rem; }
+    .container { padding: 0 1.5rem; }
+    h1 { font-size: 2rem; }
+    article { padding: 3rem 0; }
+    .compare { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="series-tag">System Design · Episode —</div>
+    <h1>API Versioning Should Be Your <em>Last Resort</em></h1>
+    <div class="hero-meta">
+      <span>May 2026</span>
+      <span>9 min read</span>
+      <span>System Design · API Design · .NET</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ARTICLE ═══════════════ -->
+<div class="container">
+<article>
+
+  <!-- First paragraph becomes the .lead -->
+  <p class="lead">Previously, I discussed implementing API versioning in ASP.NET Core — but that's the wrong starting question. The right question is <em>when</em> to version an API, and the honest answer is: far less often than your instincts suggest.</p>
+
+  <!-- ── All content sections go here ── -->
+  <p>Every API team arrives at the same reflex:</p>
+
+<blockquote><p>"Just create <code>v2</code>."</p></blockquote>
+
+<p>It feels responsible. What it actually produces is two APIs, two sets of documentation, two diverging behaviors — and a migration project clients will delay until the end of time. <strong>Versioning is a tool for compatibility, not a design strategy.</strong></p>
+
+<p>Most API changes don't require a new version — they require better change management. When you treat contract changes as a versioning problem, you duplicate APIs. When you treat them as a change management challenge, you start asking better questions:</p>
+
+<ul class="check-list">
+  <li>Can I add instead of replace?</li>
+  <li>Can old and new behaviors coexist temporarily?</li>
+  <li>Can I introduce a new operation instead of altering an existing one?</li>
+  <li>Can I deprecate safely with telemetry and a migration path?</li>
+</ul>
+
+<p class="aside"><em>That last bullet is doing more work than it looks like. We'll get there.</em></p>
+
+<div class="divider"><span>what breaks clients</span></div>
+<h2>What Actually Breaks Clients?</h2>
+
+<p>Breaking changes aren't just about URLs. Clients experience breakage when you:</p>
+
+<ul class="check-list">
+  <li>Remove or rename fields</li>
+  <li>Change the meaning of existing data</li>
+  <li>Tighten request validation</li>
+  <li>Modify pagination or error formats</li>
+  <li>Assume enum-like values are permanently closed</li>
+</ul>
+
+<p>This single structural change silently destroys every client that ever integrated with your endpoint:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">json</span>
+  </div>
+  <pre><code><span class="cm">// Before — every client expects a number</span>
+{ "total": 100 }
+
+<span class="cm">// After — field changed from number to object</span>
+{ "total": { "amount": 100, "currency": "USD" } }</code></pre>
+</div>
+
+<p>No path changed. No endpoint renamed. Still broke every client parsing that field.</p>
+
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">❌ The instinct</div>
+    <div class="compare-item bad-t">Should this be <code>v2</code>?</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">✅ The right question</div>
+    <div class="compare-item good-t">Can old and new contracts coexist safely?</div>
+  </div>
+</div>
+
+<p>That reframe changes everything that follows.</p>
+
+<div class="divider"><span>compatibility rules</span></div>
+<h2>The Compatibility Rules</h2>
+
+<p>To make an API age gracefully, four rules cover most scenarios:</p>
+
+<ul class="check-list">
+  <li>Maintain existing fields and behaviors</li>
+  <li>Never turn optional request data into required data</li>
+  <li>Never alter the functionality of an existing operation</li>
+  <li>Ensure anything new is additive and optional by default</li>
+</ul>
+
+<p>These align with Z. Nemec's API Change Management principles: don't remove anything, don't change processing rules, don't make optional elements mandatory, and ensure additions are optional. Follow these consistently and most "versioning problems" revert to standard contract evolution.</p>
+
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>The changes that <em>don't</em> fit these four rules? Those are the ones that actually warrant a version bump. Think of the rules as a filter: if you can satisfy all four, you don't need <code>v2</code>.</p></div>
+
+<div class="divider"><span>add, don't replace</span></div>
+<h2>1. Add, Don't Replace</h2>
+
+<p>The safest change is almost always an additive one. Suppose your original <code>GET /orders/{id}</code> response looks like this:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">json</span>
+  </div>
+  <pre><code>{
+  "id": "ord_123",
+  "status": "paid",
+  "total": 100
+}</code></pre>
+</div>
+
+<p>Instead of replacing <code>total</code> with a richer structure, introduce a new field alongside the existing one:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">json</span>
+  </div>
+  <pre><code>{
+  "id": "ord_123",
+  "status": "paid",
+  "total": 100,
+  "totalMoney": {
+    "amount": 100,
+    "currency": "USD"
+  }
+}</code></pre>
+</div>
+
+<p>Existing clients keep using <code>total</code>. New clients adopt <code>totalMoney</code>. Mark the old field deprecated, track its usage, and remove it only after a genuine migration window — not because you <em>think</em> no one is using it.</p>
+
+<p class="aside"><em>Yes, this means living with a slightly redundant contract for a while. That's the price of compatibility. A beautifully clean contract that breaks clients every six months isn't actually clean.</em></p>
+
+<div class="divider"><span>tolerant readers</span></div>
+<h2>2. Make Clients Tolerant Readers</h2>
+
+<p>A well-designed client shouldn't fail because the server added a field it doesn't recognize. If a response evolves from:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">json</span>
+  </div>
+  <pre><code>{ "id": "ord_123", "status": "paid" }</code></pre>
+</div>
+
+<p>To:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">json</span>
+  </div>
+  <pre><code>{ "id": "ord_123", "status": "paid", "estimatedDeliveryDate": "2026-05-29" }</code></pre>
+</div>
+
+<p>Older clients should ignore the new field and continue functioning. In .NET, <code>System.Text.Json</code> does this by default. The real challenge is teams that want backward compatibility while generating client models that reject any unexpected field in the response.</p>
+
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>Strict generated SDKs and contract tests that demand exact JSON matches are <strong>self-inflicted breaking changes.</strong> Your server is allowed to add optional data. Your clients need to be robust enough to ignore what they don't understand. If yours can't — fix the clients, not the API.</p></div>
+
+<div class="divider"><span>behavior contracts</span></div>
+<h2>3. Don't Change What an Existing Operation Does</h2>
+
+<p>Fields and shapes dominate compatibility discussions. The most dangerous breaking changes are behavioral. The URL is unchanged, the request body identical, the response structure the same — and the operation quietly does something different on the server.</p>
+
+<p>Consider <code>DELETE /orders/{id}</code>, originally a soft delete: order transitions to <code>archived</code>, stays in the database, shows in audit reports, recoverable by support. The implicit contract clients integrated against:</p>
+
+<ul class="check-list">
+  <li>The order is recoverable</li>
+  <li>Related invoices and shipments remain unaffected</li>
+  <li>Audit history is preserved</li>
+  <li>The call can be safely retried</li>
+</ul>
+
+<p>The team decides soft deletes are too complicated and converts <code>DELETE</code> to a hard delete: row permanently removed, invoices cascaded or orphaned, audit history loses references, retry after a network interruption deletes the wrong record. The SDK call still compiles. The response still returns <code>204 No Content</code>. A support tool that called <code>DELETE</code> and then "undid" it now silently destroys data.</p>
+
+<p>If you need a hard delete, expose it as a new operation and leave the existing one intact:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">text</span>
+  </div>
+  <pre><code>DELETE /orders/{id}             <span class="cm"># soft-delete — unchanged</span>
+DELETE /orders/{id}?purge=true  <span class="cm"># new, opt-in hard delete</span></code></pre>
+</div>
+
+<p class="aside"><em>Or introduce a proper resource: <code>DELETE /orders/{id}/purge</code>. Then the destructive path has its own name, its own permissions, and can't be accidentally triggered by someone calling a familiar endpoint.</em></p>
+
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>Once an operation is released, its behavior becomes part of the contract — whether or not it was explicitly documented. You can add new operations alongside it. You can deprecate it. You cannot silently change what it does.</p></div>
+
+<div class="divider"><span>validation changes</span></div>
+<h2>4. Be Very Careful With Validation</h2>
+
+<p>Two variations of the same mistake: changing an existing optional field to required, or introducing a brand-new mandatory field. Both break older clients the same way. Yesterday, this was a valid <code>POST /orders</code> body:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">json</span>
+  </div>
+  <pre><code>{
+  "customerId": "cus_123",
+  "currency": "USD"
+}</code></pre>
+</div>
+
+<p>Today the API requires <code>country</code> for tax calculations:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">json</span>
+  </div>
+  <pre><code>{
+  "customerId": "cus_123",
+  "currency": "USD",
+  "country": "US"  <span class="cm">// new required field — breaks every existing integration</span>
+}</code></pre>
+</div>
+
+<p>Whether <code>country</code> was previously optional or nonexistent, every existing integration starts failing at runtime. Safer approaches:</p>
+
+<ul class="check-list">
+  <li>Accept missing <code>country</code> and infer it from a billing profile during a transition period</li>
+  <li>Make it optional on the existing endpoint; introduce a new <code>POST /checkout-sessions</code> for the stricter model</li>
+  <li>Never ship a new field as required unless it's on a brand-new endpoint</li>
+</ul>
+
+<div class="callout"><div class="callout-label">💡 Tip</div><p>The rule covering both scenarios: <strong>anything added to the contract must be optional, and anything that was optional must remain optional.</strong> Response changes get careful design review. Validation changes deserve exactly the same treatment — they fail just as loudly at runtime.</p></div>
+
+<div class="divider"><span>new operations</span></div>
+<h2>A New Operation Is Often Cheaper Than a New Version</h2>
+
+<p>Sometimes a use case evolves enough that stacking flags and optional params on an existing endpoint becomes genuinely confusing:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">text</span>
+  </div>
+  <pre><code>POST /orders?validateOnly=true&amp;includeTaxEstimate=true&amp;reserveInventory=true</code></pre>
+</div>
+
+<p>That's not one operation — that's three workflows sharing a URL and a prayer.</p>
+
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">❌ The reflex</div>
+    <div class="compare-item bad-t">Create <code>v2/orders</code> and drag the rest of the API with it</div>
+    <div class="compare-item bad-t">Every consumer re-evaluates their entire integration</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">✅ The better call</div>
+    <div class="compare-item good-t">Introduce new operations that explicitly own the new behavior</div>
+    <div class="compare-item good-t">Existing clients are completely unaffected</div>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">text</span>
+  </div>
+  <pre><code>POST /orders              <span class="cm"># place an order — unchanged</span>
+POST /orders/quote        <span class="cm"># cost estimate only</span>
+POST /checkout-sessions   <span class="cm"># full guided flow with stricter model</span></code></pre>
+</div>
+
+<p><code>POST /orders</code> stays stable. New behavior gets a clear home. No existing client is dragged into a version migration they didn't ask for.</p>
+
+<p class="aside"><em>Generally much more efficient than creating <code>/v2/orders</code> and forcing every consumer to re-evaluate their entire integration. Most of them are busy. They will not migrate on your schedule.</em></p>
+
+<div class="divider"><span>proper deprecation</span></div>
+<h2>Deprecate Like You Mean It</h2>
+
+<p>Most deprecations are theater. Something gets documented somewhere, but nothing operationally changes. A real deprecation process has four elements:</p>
+
+<ul class="check-list">
+  <li>Mark the old field or endpoint as deprecated in your OpenAPI description</li>
+  <li>Signal the deprecation at runtime via response headers</li>
+  <li>Provide consumers with a concrete migration path — not just a changelog note</li>
+  <li>Measure actual usage before removing anything</li>
+</ul>
+
+<p>For HTTP APIs, runtime signaling is straightforward:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">http</span>
+  </div>
+  <pre><code>Deprecation: true
+Sunset: Wed, 31 Dec 2026 23:59:59 GMT
+Link: &lt;https://docs.example.com/migrations/orders-total&gt;; rel="deprecation"</code></pre>
+</div>
+
+<p>Visible in documentation. Apparent in live traffic. Linked to a migration guide that actually exists.</p>
+
+<div class="callout"><div class="callout-label">💡 Tip</div><p>Telemetry is not optional. If you don't know which clients still use a deprecated field, you're not managing change — you're guessing. Track by client ID, API key, or tenant. Wait until usage is genuinely near zero before removing anything. <em>"I think no one uses this"</em> is not a deprecation strategy.</p></div>
+
+<div class="divider"><span>when to version</span></div>
+<h2>When Versioning Is Actually The Right Call</h2>
+
+<p>None of this means versioning is wrong. Version when old and new semantics cannot safely coexist. Version when the resource model has fundamentally changed. Version when following the compatibility rules would produce a contract that's genuinely incomprehensible.</p>
+
+<p>Deliberate versioning means choosing the smallest break you can justify: a new endpoint shape, a representation variant, or for public APIs, explicit URL versioning that's easy to communicate. The mechanism matters less than the reasoning behind it.</p>
+
+<p>If you do version, pair it with a real deprecation process:</p>
+
+<ul class="check-list">
+  <li>Mark old fields and endpoints as deprecated</li>
+  <li>Communicate a removal date — and commit to it</li>
+  <li>Provide migration examples, not just documentation</li>
+  <li>Monitor usage before removing anything</li>
+</ul>
+
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>The hardest part of versioning isn't creating <code>v2</code>. It's getting clients to move off <code>v1</code>. Treat <code>v1</code> as a long-term commitment the moment you ship it — because your clients already do, whether you meant them to or not.</p></div>
+
+<div class="divider"><span>takeaway</span></div>
+<h2>Takeaway</h2>
+
+<p>The best API version is often the one you never have to create. Before reaching for versioning, run through this checklist:</p>
+
+<ul class="check-list">
+  <li>Can I add instead of replace?</li>
+  <li>Can old and new contracts coexist during a migration window?</li>
+  <li>Can I introduce a new operation instead of modifying an existing one?</li>
+  <li>Can I deprecate the old structure with docs, runtime headers, and telemetry?</li>
+</ul>
+
+<p>Yes to any of these — you probably don't need a new version. No to all of them, and coexistence is genuinely not feasible — version deliberately, deprecate thoroughly, and give clients a real migration path.</p>
+
+<p>Design contracts to evolve. Treat clients as long-term integrations. Reserve versioning for scenarios where compatibility actually runs out — not because it got a little inconvenient.</p>
+
+<blockquote><p>"The most effective API version is often the one you never have to create."</p></blockquote>
+
+  <!-- ── Series navigation ── -->
+  <div class="next-post">
+    <div>
+      <div class="next-label">Next in the series</div>
+      <div class="next-title">CLAUDE.md: Give Claude Memory &amp; Context Between Sessions</div>
+    </div>
+    <div class="next-arrow">→</div>
+  </div>
+
+</article>
+</div>
+
+<footer>
+  <div>Z. Nemec, "API Change Management" (Medium) · Milan Jovanovic, "API Versioning in ASP.NET Core" · Milan Jovanovic, "The 5 Most Common REST API Design Mistakes" · Milan Jovanovic, "Pragmatic REST APIs"</div>
+  <div style="margin-top: 8px; color: #3d3a35;">claude-code-journey.md · episode —</div>
+</footer>
+
+<script>
+  document.querySelectorAll('.code-block').forEach(block => {
+    const header = block.querySelector('.code-header');
+    const pre = block.querySelector('pre');
+    if (!header || !pre) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText.trim()).then(() => {
+        btn.textContent = '✓ copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    });
+
+    header.appendChild(btn);
+  });
+</script>
+</body>
+</html>

@@ -4,6 +4,7 @@ description: Discover how coding transformed my life by helping me overcome over
 publishedDate: December 28, 2024
 category: Career
 poster: /articles/coding-saved-me/me.webp
+htmlFile: how-coding-saved-me-from-myself
 ---
 
 Have you ever felt like your own thoughts were out to get you? Like no matter what you do, your brain just won’t stop running in circles? That was me for the longest time. I’d overthink everything—whether I was lying in bed, walking around, or just trying to relax. My mind always found something to obsess over. It was exhausting.

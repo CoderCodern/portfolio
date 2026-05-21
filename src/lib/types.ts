@@ -16,9 +16,10 @@ export interface Project {
 
 export interface Article {
 	title: string;
-	description: string;
+	description?: string;
 	publishedDate: string;
 	poster: string;
 	slug: string;
 	category?: string;
+	htmlFile?: string;
 }

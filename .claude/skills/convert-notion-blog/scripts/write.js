@@ -62,10 +62,31 @@ function chunkArray(arr, size) {
   return chunks;
 }
 
+/**
+ * Ensures every table_row in every table block has exactly table_width cells.
+ * The Notion API rejects tables where row cell counts don't match table_width.
+ */
+function sanitizeTableBlocks(blocks) {
+  return blocks.map((block) => {
+    if (block.type !== 'table') return block;
+    const rows = block.table?.children ?? [];
+    if (rows.length === 0) return block;
+    const tableWidth = Math.max(1, rows[0]?.table_row?.cells?.length ?? 1);
+    const sanitizedRows = rows.map((row) => {
+      if (row.type !== 'table_row') return row;
+      const cells = row.table_row?.cells ?? [];
+      const padded = [...cells];
+      while (padded.length < tableWidth) padded.push([]);
+      return { ...row, table_row: { ...row.table_row, cells: padded.slice(0, tableWidth) } };
+    });
+    return { ...block, table: { ...block.table, table_width: tableWidth, children: sanitizedRows } };
+  });
+}
+
 async function createNotionPage(article, markdown) {
   let blocks;
   try {
-    blocks = markdownToBlocks(markdown);
+    blocks = sanitizeTableBlocks(markdownToBlocks(markdown));
   } catch {
     // Fallback: wrap every non-empty paragraph as a plain paragraph block
     blocks = markdown

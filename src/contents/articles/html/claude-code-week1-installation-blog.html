@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Week 1: Installation, Commands &amp; First Workflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #e8e4dc;
+    --muted: #7a7570;
+    --accent: #e8a84c;
+    --accent-dim: #3d2c12;
+    --code-bg: #111;
+    --green: #4caf7d;
+    --green-dim: #122a1e;
+    --red: #ff7b72;
+    --red-dim: #2a1212;
+    --blue: #79c0ff;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    font-size: 17px;
+  }
+
+  /* ── HERO ─────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 25%, rgba(232,168,76,0.10) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 70%, rgba(232,168,76,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 800px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+
+  .series-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(232,168,76,0.30);
+    background: rgba(232,168,76,0.08);
+    padding: 6px 14px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  .series-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    max-width: 720px;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-wrap: wrap;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta span::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+  }
+  .hero-meta span:first-child::before { display: none; }
+
+  /* ── LAYOUT ───────────────────────────── */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  article { padding: 5rem 0; }
+
+  .lead {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: #c5c0b5;
+    margin-bottom: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin: 3.5rem 0 1rem;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 2.5rem 0 0.75rem;
+  }
+  p { margin-bottom: 1.4rem; }
+  strong { font-weight: 500; color: var(--text); }
+  em { font-style: italic; color: #c5c0b5; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p.aside { font-size: 14px; color: var(--muted); font-style: italic; margin: -0.5rem 0 1.4rem; }
+
+  /* ── CODE ─────────────────────────────── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 1.75rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #0e0e0e;
+  }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  pre {
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    color: #c9d1d9;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.83em;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  .kw  { color: var(--accent); }
+  .cm  { color: #4a5060; font-style: italic; }
+  .st  { color: #a5d6ff; }
+  .bad { color: var(--red); }
+  .good{ color: var(--green); }
+  .num { color: #c9b1f5; }
+
+  /* ── CALLOUTS ─────────────────────────── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-dim);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 6px 6px 0;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+  }
+  .callout.green { border-left-color: var(--green); background: var(--green-dim); }
+  .callout.red   { border-left-color: var(--red);   background: var(--red-dim);   }
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red   .callout-label { color: var(--red);   }
+
+  /* ── BLOCKQUOTE ───────────────────────── */
+  blockquote {
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    margin: 2.5rem 0;
+  }
+  blockquote::before {
+    content: '"';
+    font-family: 'Lora', serif;
+    font-size: 6rem;
+    color: var(--border);
+    position: absolute;
+    top: -1rem; left: 50%;
+    transform: translateX(-50%);
+    line-height: 1;
+  }
+  blockquote p {
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #c5c0b5;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+
+  /* ── TABLES ───────────────────────────── */
+  .table-wrap { overflow-x: auto; margin: 1.75rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #0f0f0f;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid #1c1c1c; vertical-align: top; line-height: 1.6; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+
+  /* ── DIVIDER ──────────────────────────── */
+  .divider { display: flex; align-items: center; gap: 1rem; margin: 3.5rem 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── COMPARE GRID ─────────────────────── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 6px; overflow: hidden; margin: 1.75rem 0; }
+  .compare-col { background: var(--surface); padding: 1.25rem; }
+  .compare-header { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .compare-header.bad-h  { color: var(--red); }
+  .compare-header.good-h { color: var(--green); }
+  .compare-item { font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .compare-item:last-child { border-bottom: none; }
+  .compare-item.bad-t  { color: #c9a0a0; }
+  .compare-item.good-t { color: #a0c9a8; }
+
+  /* ── CHECKLIST ────────────────────────── */
+  .check-list { list-style: none; margin: 1.5rem 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .check-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before { content: '[ ]'; flex-shrink: 0; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .check-list li strong { color: var(--text); }
+
+  /* ── WEEK GRID ────────────────────────── */
+  .week-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .week-day { background: var(--surface); padding: 1.25rem; }
+  .week-day-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .week-day-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .week-day-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── NEXT POST ────────────────────────── */
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
+  .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
+
+  /* ── COPY BUTTON ─────────────────────── */
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+  /* ── FOOTER ───────────────────────────── */
+  footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── RESPONSIVE ───────────────────────── */
+  @media (max-width: 640px) {
+    .hero { padding: 3rem 1.5rem; }
+    .container { padding: 0 1.5rem; }
+    h1 { font-size: 2rem; }
+    article { padding: 3rem 0; }
+    .compare { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="series-tag">Learning in Public · Episode 01</div>
+    <h1>Claude Code Week 1: Installation, Commands &amp; <em>First Workflow</em></h1>
+    <div class="hero-meta">
+      <span>May 2026</span>
+      <span>8 min read</span>
+      <span>Installation · First Commands · Real Talk</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ARTICLE ═══════════════ -->
+<div class="container">
+<article>
+
+  <p class="lead">After months of using Claude in the browser—asking questions, generating code snippets, reviewing pull requests—I finally installed Claude Code, the terminal-based coding assistant. I spent a week exploring what it actually does, and here's the unvarnished version of what I found.</p>
+
+  <!-- ── Why I Made the Switch ── -->
+  <div class="divider"><span>the switch</span></div>
+  <h2>Why I Made the Switch</h2>
+
+  <p>The repetitive cycle of copying code from a chat window to my editor, pasting error messages back, and re-explaining relevant files was becoming tedious. Claude Code, people kept saying, is fundamentally different—it operates more like a junior developer that can directly access and modify your codebase.</p>
+
+  <p class="aside"><em>The copy-paste loop gets old fast. Especially when Claude needs context from five different files and you're playing carrier pigeon between two windows.</em></p>
+
+  <div class="callout">
+    <div class="callout-label">⚡ Prerequisites</div>
+    <p>Ensure you have <strong>Node.js 18 or higher</strong> installed. Verify with <code>node --version</code>. A Claude account is required — the <strong>Pro plan is recommended</strong>, as Claude Code can consume many tokens during an active session.</p>
+  </div>
+
+  <!-- ── Installation ── -->
+  <div class="divider"><span>installation</span></div>
+  <h2>Installation — Easier Than Anticipated</h2>
+
+  <p>I expected a complicated setup involving multiple configuration files, environment variables, and possibly a Docker container. I was wrong.</p>
+
+  <h3>Step 1 — Install via npm</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <div class="code-lang">bash</div>
+    </div>
+    <pre>npm install -g @anthropic-ai/claude-code</pre>
+  </div>
+
+  <h3>Step 2 — Authenticate</h3>
+
+  <p>Navigate to your project folder and run <code>claude</code>. On first run, a browser window opens to connect your Anthropic account. Takes less than a minute.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <div class="code-lang">terminal</div>
+    </div>
+    <pre>cd my-project
+claude
+<span class="cm"># Opens browser auth flow on first run</span>
+<span class="good">✓  Logged in as you@example.com</span>
+<span class="good">✓  Welcome to Claude Code</span>
+&gt;</pre>
+  </div>
+
+  <h3>Step 3 (Optional) — VS Code Extension</h3>
+
+  <p>The VS Code extension integrates Claude Code directly into the sidebar. Search <em>"Claude Code"</em> in the marketplace. I use both: terminal for long sessions, the panel for quick questions while reviewing code.</p>
+
+  <p class="aside"><em>That's it. No Docker. No YAML. No three-hour Stack Overflow spiral. I stared at the terminal for a moment genuinely expecting something to go wrong.</em></p>
+
+  <div class="callout green">
+    <div class="callout-label">✓ Verdict</div>
+    <p>No <code>.env</code> file, no manual API key entry. The npm global install manages the binary and browser auth links to your existing Claude account. <strong>Total setup time: approximately three minutes.</strong></p>
+  </div>
+
+  <!-- ── Daily Activities ── -->
+  <div class="divider"><span>week one</span></div>
+  <h2>Daily Activities Overview</h2>
+
+  <p>Instead of a polished success narrative, here's a candid account of my week — including the moments I had no idea what I was doing.</p>
+
+  <div class="week-grid">
+    <div class="week-day">
+      <div class="week-day-label">Day 1–2</div>
+      <div class="week-day-title">Learning to Prompt Differently</div>
+      <div class="week-day-desc">Treated it like a chat assistant. Slowly realized I should provide goals, not steps.</div>
+    </div>
+    <div class="week-day">
+      <div class="week-day-label">Day 3</div>
+      <div class="week-day-title">First Real Task</div>
+      <div class="week-day-desc">Requested a refactor of an auth module. Watched it edit six files simultaneously.</div>
+    </div>
+    <div class="week-day">
+      <div class="week-day-label">Day 4</div>
+      <div class="week-day-title">Discovered CLAUDE.md</div>
+      <div class="week-day-desc">Created my first project memory file. Stopped re-explaining my stack every session.</div>
+    </div>
+    <div class="week-day">
+      <div class="week-day-label">Day 5–7</div>
+      <div class="week-day-title">Built a Daily Workflow</div>
+      <div class="week-day-desc">Morning reviews with <code>/diff</code>, end-of-day <code>/compact</code>. Rhythm established.</div>
+    </div>
+  </div>
+
+  <!-- ── The Aha Moment ── -->
+  <div class="divider"><span>the aha moment</span></div>
+  <h2>The First "Aha" Moment</h2>
+
+  <p>On day three, I had a disorganized authentication module — error handling scattered across files, inconsistent naming conventions, two functions that did nearly the same thing. In the browser, I would have copied one file at a time, requested suggestions, and manually applied them.</p>
+
+  <p>With Claude Code, I just described the problem:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <div class="code-lang">prompt</div>
+    </div>
+    <pre>The auth module under src/auth is inconsistent.
+Error handling is spread across 4 files with different
+patterns. Unify it — pick the cleanest approach already
+in the codebase and apply it everywhere.</pre>
+  </div>
+
+  <p>Claude analyzed the files, identified the dominant pattern, proposed a plan, and — after my approval — edited all six affected files. I ran <code>/diff</code> to review every change before accepting. The whole thing took about 90 seconds. That same task, done manually, would have been 45 minutes of careful, error-prone editing.</p>
+
+  <blockquote>
+    <p>"The shift isn't 'AI writes my code.' It's 'I describe outcomes, Claude handles the execution, I review the result.'"</p>
+  </blockquote>
+
+  <!-- ── Commands ── -->
+  <div class="divider"><span>commands</span></div>
+  <h2>Essential Commands I Used Daily</h2>
+
+  <p>There are over 60 built-in commands. These are the five I opened every session with:</p>
+
+  <ul class="check-list">
+    <li><strong>/diff</strong> — Shows every file Claude modified this session. Use as a checkpoint before moving on. Non-negotiable.</li>
+    <li><strong>/clear</strong> — Completely fresh context. Use this when switching to a genuinely new, unrelated task.</li>
+    <li><strong>/compact</strong> — Compresses conversation history when a session runs long. Run proactively — not after you notice slowdown.</li>
+    <li><strong>/memory</strong> — Shows what Claude has inferred about your project on its own. Read this before writing CLAUDE.md — don't duplicate what it already knows.</li>
+    <li><strong>/help</strong> — Lists all available commands. Type <code>/</code> and browse the full list at least once.</li>
+  </ul>
+
+  <!-- ── CLAUDE.md ── -->
+  <div class="divider"><span>claude.md</span></div>
+  <h2>CLAUDE.md — A Resource I Wish I'd Known About Earlier</h2>
+
+  <p>Each session starts with a blank context window. By day three, I was tired of re-explaining my project — the tech stack, naming conventions, which commands to run. There had to be a better way.</p>
+
+  <p><code>CLAUDE.md</code> is a markdown file in your project root. Claude reads it automatically at the start of every session — a permanent briefing document. Here's the format that worked for me:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <div class="code-lang">markdown</div>
+    </div>
+    <pre><span class="kw"># My Project</span>
+<span class="kw">## Stack</span>
+- Node.js 20, Express, PostgreSQL
+- React 18 on the frontend
+- Docker for local dev
+<span class="kw">## Commands</span>
+- `npm run dev`      — start local server
+- `npm test`         — run test suite
+- `npm run lint:fix` — fix lint errors
+<span class="kw">## Conventions</span>
+- camelCase for variables, PascalCase for components
+- Errors must always be logged before being thrown
+- No default exports
+<span class="kw">## Architecture</span>
+- @docs/architecture.md
+- @docs/api-standards.md</pre>
+  </div>
+
+  <p>The <code>@filename</code> syntax is particularly powerful — Claude imports the content of those files directly. Your existing documentation becomes part of Claude's context. After adding this file, sessions transformed: Claude stopped making assumptions and started working effectively from the first message.</p>
+
+  <div class="callout">
+    <div class="callout-label">💡 Pro Tip</div>
+    <p>Run <code>/memory</code> <em>before</em> drafting your CLAUDE.md. Claude may have already inferred several things about your project automatically. Only add information it doesn't already know — keep the file lean.</p>
+  </div>
+
+  <!-- ── Bonus ── -->
+  <div class="divider"><span>bonus</span></div>
+  <h2>Bonus: Teaching Claude About Yourself</h2>
+
+  <p>Switching from ChatGPT after years of use felt like starting from scratch. GPT had accumulated context about my coding style, my preferences, how I ask questions. I was worried about losing that rapport.</p>
+
+  <p>Claude's memory system works differently — it's intentional and transparent. You control what it knows. Here's how I rebuilt that context from zero:</p>
+
+  <h3>Step 1 — Export Your ChatGPT History (optional)</h3>
+
+  <p>Navigate to <strong>Settings → Data Controls → Export data</strong>. You'll get a zip with <code>conversations.json</code>. Skim it for conversations where you articulated your preferences, stack, or working style. Extract those details — don't paste the whole thing.</p>
+
+  <h3>Step 2 — Enable Claude's Memory</h3>
+
+  <p>Go to <strong>Claude Settings → Memory</strong> and activate <em>"Generate memory from chat history."</em> Claude will automatically extract facts about you during conversations — your role, preferences, recurring patterns — and persist them across sessions. You can view, edit, or delete any memory entry at any time.</p>
+
+  <h3>Step 3 — Write Your Personal Context Prompt</h3>
+
+  <p>Don't wait for Claude to infer everything. Give it a head start by pasting something like this into a new conversation:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <div class="code-lang">prompt</div>
+    </div>
+    <pre>Here's context about me — please remember this:
+<span class="kw">## Who I am</span>
+- Role: fullstack developer, 5 years experience
+- Location / timezone: Hanoi, GMT+7
+- Current focus: learning Claude Code, building side projects
+<span class="kw">## How I like to work with AI</span>
+- Prefer direct answers over long explanations
+- Show code first, explain after if needed
+- I learn by doing, not by reading theory
+- Casual tone is fine — no need to be formal
+<span class="kw">## My tech stack</span>
+- Daily: Node.js, React, PostgreSQL
+- Exploring: agentic AI tools, Claude Code workflows
+<span class="kw">## Things I dislike</span>
+- Bullet-point overload when prose would do
+- Re-explaining basics I already know
+- Overly cautious hedging on technical questions</pre>
+  </div>
+
+  <h3>Step 4 — Set User Preferences in Settings</h3>
+
+  <p>Navigate to <strong>Settings → User preferences</strong> and write a short paragraph there. This is loaded into every conversation as a baseline — before you type anything. Standing instructions.</p>
+
+  <h3>Step 5 — Add a Personal Section to Your Global CLAUDE.md</h3>
+
+  <p>For Claude Code specifically, there's a global memory file at <code>~/.claude/CLAUDE.md</code> — not inside any project, but accessible across all of them:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span></span><span></span><span></span></div>
+      <div class="code-lang">markdown</div>
+    </div>
+    <pre><span class="kw">## About me</span>
+- Fullstack dev, prefer Node/React
+- Casual communication style, direct feedback welcome
+- I review all diffs before accepting — don't rush to summarize
+- Vietnamese is my first language; English technical terms are fine</pre>
+  </div>
+
+  <div class="callout green">
+    <div class="callout-label">✓ Key Difference from GPT</div>
+    <p>Claude's memory is <strong>visible and editable</strong>. If it learns something incorrect about you, you can correct it directly. That's fundamentally better than an opaque model quietly building a profile you can't inspect or modify.</p>
+  </div>
+
+  <!-- ── Friction ── -->
+  <div class="divider"><span>friction</span></div>
+  <h2>Honest Friction Points</h2>
+
+  <p>The experience wasn't entirely seamless. Three things caught me out:</p>
+
+  <p><strong>Context degradation is real.</strong> During long sessions, Claude can lose track of earlier decisions. Run <code>/compact</code> proactively — before you notice a decline, not after. I learned this the hard way after a two-hour session where Claude forgot a constraint I had set at the start.</p>
+
+  <p><strong>Prompting is a skill.</strong> A vague request like "Fix the bug" produces mediocre results. Goal-oriented prompts with clear constraints consistently outperform ambiguous ones:</p>
+
+  <div class="compare">
+    <div class="compare-col">
+      <div class="compare-header bad-h">❌ Vague prompt</div>
+      <div class="compare-item bad-t">"Fix the bug"</div>
+      <div class="compare-item bad-t">"Clean up the auth module"</div>
+      <div class="compare-item bad-t">"Make the tests pass"</div>
+    </div>
+    <div class="compare-col">
+      <div class="compare-header good-h">✅ Goal-oriented prompt</div>
+      <div class="compare-item good-t">"Login returns 200 on invalid credentials — trace it, find the root cause, fix it without changing the function signature"</div>
+      <div class="compare-item good-t">"Unify error handling across src/auth — apply the pattern already used in auth.service.ts"</div>
+      <div class="compare-item good-t">"The UserRepository test is failing on line 42 — read the test, understand what it expects, then fix the implementation"</div>
+    </div>
+  </div>
+
+  <p><strong>Always review before accepting.</strong> Claude may confidently propose changes that are subtly off — not broken, but not quite right. <code>/diff</code> is your safety net. Use it at the end of every session.</p>
+
+  <div class="callout green">
+    <div class="callout-label">✓ End of Week Verdict</div>
+    <p>Claude Code has genuinely changed my workflow. Not because it's magical — because it eliminates the most tedious parts of the edit-test-review cycle. The learning curve is real but short. <strong>By day five, it felt completely natural.</strong></p>
+  </div>
+
+  <!-- ── What's Next ── -->
+  <div class="divider"><span>what's next</span></div>
+  <h2>What Comes Next</h2>
+
+  <p>Week one gave me a solid foundation. Next up: building custom <strong>Skills</strong> — reusable slash commands that encode my team's workflows — and exploring <strong>subagents</strong> for tasks that need isolated context. The system has a lot more depth than what one week exposes.</p>
+
+  <p>If you're on the fence about installing it: just run the npm command. Worst case, it takes three minutes and you never open it again.</p>
+
+  <!-- ── Series navigation ── -->
+  <div class="next-post">
+    <div>
+      <div class="next-label">Next in the series</div>
+      <div class="next-title">Week 2 — CLAUDE.md, Memory &amp; Building My First Skills</div>
+    </div>
+    <div class="next-arrow">→</div>
+  </div>
+
+</article>
+</div>
+
+<footer>
+  <div>Written during a week of practical use · Part of a learning-in-public series on Claude Code</div>
+  <div style="margin-top: 8px; color: #3d3a35;">claude-code-journey.md · episode 01</div>
+</footer>
+
+<script>
+  document.querySelectorAll('.code-block').forEach(block => {
+    const header = block.querySelector('.code-header');
+    const pre = block.querySelector('pre');
+    if (!header || !pre) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText.trim()).then(() => {
+        btn.textContent = '✓ copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    });
+
+    header.appendChild(btn);
+  });
+</script>
+</body>
+</html>

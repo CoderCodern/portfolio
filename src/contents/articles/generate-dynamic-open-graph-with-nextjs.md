@@ -4,6 +4,7 @@ description: One powerful way to enhance your website's shareability on social m
 publishedDate: November 30, 2023
 category: Frontend
 poster: /opengraph-image.png
+htmlFile: generate-dynamic-open-graph-with-nextjs
 ---
 
 One powerful way to enhance your website's shareability on social media platforms is by implementing dynamic Open Graph meta tags. In this comprehensive guide, we'll delve into how you can seamlessly achieve this with Next.js 14, empowering your site to stand out in the crowded digital space.

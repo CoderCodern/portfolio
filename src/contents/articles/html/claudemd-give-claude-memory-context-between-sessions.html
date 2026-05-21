@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLAUDE.md: Give Claude Memory & Context Between Sessions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #e8e4dc;
+    --muted: #7a7570;
+    --accent: #c9b1f5;       /* episode accent */
+    --accent-dim: #1e1529;     /* tinted background for callouts */
+    --code-bg: #111;
+    --green: #4caf7d;
+    --green-dim: #122a1e;
+    --red: #ff7b72;
+    --red-dim: #2a1212;
+    --blue: #79c0ff;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    font-size: 17px;
+  }
+
+  /* ── HERO ─────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 25%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 70%, rgba(232,168,76,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 800px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+
+  .series-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    padding: 6px 14px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  .series-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    max-width: 720px;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-wrap: wrap;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta span::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+  }
+  .hero-meta span:first-child::before { display: none; }
+
+  /* ── LAYOUT ───────────────────────────── */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  article { padding: 5rem 0; }
+
+  .lead {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: #c5c0b5;
+    margin-bottom: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin: 3.5rem 0 1rem;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 2.5rem 0 0.75rem;
+  }
+  p { margin-bottom: 1.4rem; }
+  strong { font-weight: 500; color: var(--text); }
+  em { font-style: italic; color: #c5c0b5; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p.aside { font-size: 14px; color: var(--muted); font-style: italic; margin: -0.5rem 0 1.4rem; }
+
+  /* ── CODE ─────────────────────────────── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 1.75rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #0e0e0e;
+  }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  pre {
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    color: #c9d1d9;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.83em;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  /* Syntax highlight helpers — use as <span class="X"> inside <pre> */
+  .kw  { color: var(--accent); }               /* keywords, headings */
+  .cm  { color: #4a5060; font-style: italic; } /* comments */
+  .st  { color: #a5d6ff; }                     /* strings */
+  .bad { color: var(--red); }                  /* bad examples */
+  .good{ color: var(--green); }                /* good examples */
+  .num { color: #c9b1f5; }                     /* numbers */
+
+  /* ── CALLOUTS ─────────────────────────── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-dim);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 6px 6px 0;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+  }
+  .callout.green { border-left-color: var(--green); background: var(--green-dim); }
+  .callout.red   { border-left-color: var(--red);   background: var(--red-dim);   }
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red   .callout-label { color: var(--red);   }
+
+  /* ── BLOCKQUOTE ───────────────────────── */
+  blockquote {
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    margin: 2.5rem 0;
+  }
+  blockquote::before {
+    content: '"';
+    font-family: 'Lora', serif;
+    font-size: 6rem;
+    color: var(--border);
+    position: absolute;
+    top: -1rem; left: 50%;
+    transform: translateX(-50%);
+    line-height: 1;
+  }
+  blockquote p {
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #c5c0b5;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+
+  /* ── TABLES ───────────────────────────── */
+  .table-wrap { overflow-x: auto; margin: 1.75rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #0f0f0f;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid #1c1c1c; vertical-align: top; line-height: 1.6; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+
+  /* ── DIVIDER ──────────────────────────── */
+  .divider { display: flex; align-items: center; gap: 1rem; margin: 3.5rem 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── COMPARE GRID ─────────────────────── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 6px; overflow: hidden; margin: 1.75rem 0; }
+  .compare-col { background: var(--surface); padding: 1.25rem; }
+  .compare-header { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .compare-header.bad-h  { color: var(--red); }
+  .compare-header.good-h { color: var(--green); }
+  .compare-item { font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .compare-item:last-child { border-bottom: none; }
+  .compare-item.bad-t  { color: #c9a0a0; }
+  .compare-item.good-t { color: #a0c9a8; }
+
+  /* ── CHECKLIST ────────────────────────── */
+  .check-list { list-style: none; margin: 1.5rem 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .check-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before { content: '[ ]'; flex-shrink: 0; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  /* ── WEEK GRID ────────────────────────── */
+  .week-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .week-day { background: var(--surface); padding: 1.25rem; }
+  .week-day-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .week-day-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .week-day-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── NEXT POST ────────────────────────── */
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
+  .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
+
+  /* ── COPY BUTTON ─────────────────────── */
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+  /* ── FOOTER ───────────────────────────── */
+  footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── RESPONSIVE ───────────────────────── */
+  @media (max-width: 640px) {
+    .hero { padding: 3rem 1.5rem; }
+    .container { padding: 0 1.5rem; }
+    h1 { font-size: 2rem; }
+    article { padding: 3rem 0; }
+    .compare { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="series-tag">Learning in Public · Episode 02</div>
+    <h1>CLAUDE.md: Give Claude <em>Memory</em> &amp; Context Between Sessions</h1>
+    <div class="hero-meta">
+      <span>May 2026</span>
+      <span>12 min read</span>
+      <span>Claude Code · CLAUDE.md · Configuration</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ARTICLE ═══════════════ -->
+<div class="container">
+<article>
+
+  <!-- First paragraph becomes the .lead -->
+  <p class="lead">While Week 1 focused on getting Claude Code operational, Week 2 is about making it understand <em>you</em>. The single most impactful lever in the entire Claude Code ecosystem is a plain markdown file named <code>CLAUDE.md</code>. Master it, and every session begins with Claude already knowing your stack, your rules, and your working style. Neglect it, and you spend tokens reintroducing yourself every single day.</p>
+
+  <!-- ── All content sections go here ── -->
+  <p>This article covers the complete hierarchy, how to structure each file, what to actually include, the SOUL.md pattern that gives Claude a persistent personality, and the four rules from Andrej Karpathy's file that accumulated 220,000 combined GitHub stars.</p>
+
+<div class="divider"><span>understanding</span></div>
+<h2>Understanding CLAUDE.md</h2>
+<p><code>CLAUDE.md</code> is a markdown file that Claude Code reads automatically at the start of every conversation — before you type anything. It has no schema, no validation, no required fields. It is plain text that shapes how Claude thinks when working with you.</p>
+<p>Think of it as a permanent briefing document. Every session starts with Claude having already reviewed it.</p>
+<p class="aside"><em>A config file that Claude actually reads, instead of silently ignoring. Novel concept in the AI tooling space.</em></p>
+<blockquote><p>"The problem it solves: Claude Code has no memory between sessions. Without CLAUDE.md, you start from scratch every time. With it, you start from everything that matters."</p></blockquote>
+
+<div class="divider"><span>the hierarchy</span></div>
+<h2>The Hierarchy: Four Levels, One System</h2>
+<p>Here is the part most people miss. CLAUDE.md is not a single file — it is a layered system. Claude reads from multiple locations and merges them together.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre><code>~/.claude/CLAUDE.md          ← 🌍 Global — YOUR soul, across all projects
+~/.claude/SOUL.md            ← 🎭 Personality — how Claude communicates
+~/projects/
+└── my-app/
+    ├── CLAUDE.md            ← 👥 Project — shared with team via git
+    ├── CLAUDE.local.md      ← 🔒 Personal — your notes, gitignored
+    └── src/
+        └── api/
+            └── CLAUDE.md    ← 📁 Subdirectory — lazy-loaded on demand</code></pre>
+</div>
+<div class="table-wrap"><table><thead><tr><th>File</th><th>Who Sees It</th><th>When to Use It</th></tr></thead><tbody><tr><td><code>~/.claude/CLAUDE.md</code></td><td>You only, all projects</td><td>Your coding philosophy, style, personality</td></tr><tr><td><code>~/.claude/SOUL.md</code></td><td>You only, all projects</td><td>Communication style, tone, persona</td></tr><tr><td><code>./CLAUDE.md</code></td><td>Whole team (committed to git)</td><td>Stack, commands, conventions, architecture</td></tr><tr><td><code>./CLAUDE.local.md</code></td><td>You only (gitignored)</td><td>Personal notes, WIP context, local paths</td></tr><tr><td><code>./src/api/CLAUDE.md</code></td><td>Loaded when Claude reads files there</td><td>Domain-specific rules for a module</td></tr></tbody></table></div>
+<div class="callout"><div class="callout-label">💡 Tip</div><p><strong>Precedence rule:</strong> more specific files win. If your global file says "use tabs" but the project file says "2-space indent," the project file wins. This means you can override global defaults per project without ever touching the global file.</p></div>
+
+<div class="divider"><span>global file</span></div>
+<h2>Level 1: The Global File — Your Developer DNA</h2>
+<p><code>~/.claude/CLAUDE.md</code> loads into every project, every session. It should describe <em>you as a developer</em>, not any specific codebase. What to include: your overarching coding philosophy, preferred communication style with Claude, git commit preferences, cross-project tools you always use (e.g. always <code>pnpm</code> over <code>npm</code>), and review habits like always showing a <code>/diff</code> before large changes.</p>
+<p class="aside"><em>This is the file where "always use pnpm" gets to live rent-free across every project you will ever touch.</em></p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre><code># Global Developer Config
+## My Philosophy
+- Prefer simple, readable code over clever abstractions
+- Write the minimum code that actually solves the problem
+- Readability beats brevity. Maintainability beats both.
+## How I Work
+- Always show me a `/diff` summary before large changes
+- Ask before creating new files I didn't specifically request
+- If you're uncertain about intent, ask — don't assume
+## Git Style
+- Conventional commits: feat:, fix:, chore:, docs:
+- One logical change per commit
+- Never use `--no-verify`
+## Tools
+- Package manager: pnpm (not npm or yarn)
+- Always run typecheck after editing TypeScript files</code></pre>
+</div>
+
+<div class="divider"><span>soul.md</span></div>
+<h2>Level 2: SOUL.md — Infusing Claude with Personality</h2>
+<p>This concept reframed how I think about AI tools. Inspired by <code>seaneoliver/claude-code-starter</code> on GitHub, <code>SOUL.md</code> lives at <code>~/.claude/SOUL.md</code> and focuses entirely on <em>how Claude communicates</em> — its tone, persona, and default behaviors when talking to you.</p>
+<p><strong>Why a separate file?</strong> Mixing personality and technical instructions creates noise. Keeping them separate keeps both effective.</p>
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">❌ Without SOUL.md</div>
+    <div class="compare-item bad-t">Verbose when brevity would suffice</div>
+    <div class="compare-item bad-t">Asks clarifying questions before answering</div>
+    <div class="compare-item bad-t">Opens with "I'd be happy to help!"</div>
+    <div class="compare-item bad-t">Offers every possible cause instead of the most likely one</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">✅ With SOUL.md</div>
+    <div class="compare-item good-t">Direct answer first, context only if needed</div>
+    <div class="compare-item good-t">States interpretation, then proceeds</div>
+    <div class="compare-item good-t">Starts with the code or command</div>
+    <div class="compare-item good-t">Names the fix, then the trade-off</div>
+  </div>
+</div>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre><code># Soul — Communication Style
+## Persona
+Direct, senior engineer. No preamble. No apologies. No "Great question!"
+Start with the answer, then explain if needed.
+## Response Defaults
+- Lead with code or commands, not explanations
+- Short responses unless complexity demands more
+- No bullet points when prose would suffice
+- Prefer "here's the fix" over "here are the possible causes"
+## When I Ask for Something Ambiguous
+- State your interpretation first, then proceed
+- Avoid multiple clarifying questions — choose the most likely intent
+- Present trade-offs, not just the solution
+## Code Style in Responses
+- Show diffs, not full file rewrites, for small changes
+- Use the language/framework already in the file you're editing
+- Match existing patterns in the codebase, don't introduce new ones
+## What to Avoid
+- Starting responses with "Certainly!", "Of course!", "Absolutely!"
+- Restating my question back to me before answering
+- Listing every possible option when I asked for a recommendation</code></pre>
+</div>
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>The transformation is real. A bug-fix prompt shifts from a multi-paragraph exploration of possibilities to a targeted answer with working code. SOUL.md has arguably the highest ROI of any single file in the system.</p></div>
+
+<div class="divider"><span>project file</span></div>
+<h2>Level 3: The Project CLAUDE.md — Shared Team Knowledge</h2>
+<p>This is where most people start, and for good reason — it has the highest immediate return. Committed to git, it is visible to every teammate using Claude Code in your repo.</p>
+<p><strong>The golden rule:</strong> document what Claude gets <em>wrong</em>, not everything it should know. Claude can infer patterns from your codebase. CLAUDE.md is for the information it <em>cannot</em> infer.</p>
+<h3>The Optimal Structure</h3>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre><code># [Project Name]
+## What This Project Is
+One or two sentences. Claude needs enough context to make architectural decisions.
+## Stack
+- Runtime: Node.js 20
+- Framework: Express 5
+- Database: PostgreSQL 15 with Prisma ORM
+- Frontend: React 18 + Vite
+- Testing: Vitest + Playwright
+## Commands
+- `pnpm dev`       — start local dev server (port 3000)
+- `pnpm test`      — run unit tests
+- `pnpm test:e2e`  — run Playwright tests
+- `pnpm typecheck` — TypeScript check without emit
+- `pnpm db:push`   — push Prisma schema changes
+## Architecture
+- @docs/ARCHITECTURE.md   ← read this before touching the auth module
+- @docs/API-STANDARDS.md  ← REST conventions for all new routes
+## Conventions
+- camelCase for variables and functions
+- PascalCase for React components and TypeScript types
+- kebab-case for file names
+- No default exports — named exports only
+- Errors must be logged before they are thrown
+## What Claude Often Gets Wrong Here
+- Don't use `require()` — this is ESM only
+- Don't add `console.log` for debugging — use the `logger` utility in src/utils/logger.ts
+- Never modify migration files — create new ones instead
+- The `auth` middleware must be applied before any route handler that touches user data
+## When Compacting
+Preserve: list of modified files, failing tests, current task description</code></pre>
+</div>
+<h3>The <code>@filename</code> Syntax — Your Secret Weapon</h3>
+<p>Instead of embedding lengthy documentation inline, reference it:</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre><code>## Architecture
+- @docs/ARCHITECTURE.md
+- @docs/API-STANDARDS.md</code></pre>
+</div>
+<p>Claude fetches these files on demand and integrates their content — without permanently inflating your token budget by embedding them at session startup.</p>
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>Don't inline <code>@-file</code> references directly inside CLAUDE.md body text — that embeds the entire referenced file on every session start. Write "For complex usage, see <code>path/to/docs.md</code>" instead. Claude fetches it only when relevant. The difference compounds across every session.</p></div>
+
+<div class="divider"><span>local file</span></div>
+<h2>Level 4: CLAUDE.local.md — Your Personal Layer</h2>
+<p>This file lives at your project root but is gitignored — invisible to your team. Use it for work-in-progress context, local path overrides, personal notes that would clutter the team file, and temporary rules during a feature branch.</p>
+<p class="aside"><em>Your local database runs on port 5433? Your team does not need to know. CLAUDE.local.md does.</em></p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre><code># Local Notes (not committed)
+## Current Focus
+Migrating from REST to tRPC — auth routes are partially done.
+Don't add new REST endpoints. All new APIs go through src/trpc/router.ts
+## My Local Setup
+- DB port: 5433 (non-standard)
+- Redis: disabled locally, use in-memory mock
+## WIP
+- UserProfile component is being rewritten — don't reference the old one in src/components/UserProfileLegacy.tsx</code></pre>
+</div>
+
+<div class="divider"><span>karpathy rules</span></div>
+<h2>The Karpathy Rules — 220,000 Stars for a Reason</h2>
+<p>In January 2026, Andrej Karpathy (OpenAI co-founder, former Tesla AI director) described the biggest shift in his programming workflow in two decades: going from 80% manual coding to 80% agent-driven coding with Claude Code. He identified four recurring failure patterns in LLM coding behavior.</p>
+<p>Developer Forrest Chang distilled these observations into a single <code>CLAUDE.md</code> file — <code>forrestchang/andrej-karpathy-skills</code> — which accumulated <strong>220,000 combined GitHub stars</strong> and held the top spot on GitHub Trending for 28 consecutive days. All from a 70-line markdown file.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre><code>## Think Before Coding
+Don't assume. When a request is ambiguous, state your interpretation explicitly. Surface inconsistencies. Ask rather than guess. Present trade-offs before implementing. Don't manage confusion silently.
+## Simplicity First
+Write the minimum code that solves the stated problem. No unrequested abstractions, no speculative features, no "flexibility" nobody asked for. If the existing code is 100 lines, don't rewrite it to 1000 lines "for maintainability."
+## Surgical Changes
+Edit only what is directly relevant to the task. Don't touch adjacent code, comments, or formatting. Every changed line must trace directly to the request. Preserve style, naming, and patterns in the surrounding code.
+## Goal-Driven Execution
+Transform vague instructions into verifiable success criteria. "Fix the bug" becomes "write a test that reproduces it, then make it pass." Loop until the success criteria are met. Don't stop at "probably works."</code></pre>
+</div>
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>Why did this go viral? Because every developer who had used an AI coding agent recognized these failure patterns immediately. And the fix was a text file anyone could copy in 30 seconds. That ratio is hard to beat.</p></div>
+<p>To add Karpathy's rules to your own project:</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">bash</span>
+  </div>
+  <pre><code>echo "" &gt;&gt; CLAUDE.md
+curl https://raw.githubusercontent.com/forrestchang/andrej-karpathy-skills/main/CLAUDE.md &gt;&gt; CLAUDE.md</code></pre>
+</div>
+
+<div class="divider"><span>optimization rules</span></div>
+<h2>The Optimization Rules — Lessons from the Community</h2>
+<p>After reviewing dozens of high-star repositories and Anthropic's documentation, these are the patterns that consistently separate effective CLAUDE.md files from ones that quietly stopped working somewhere around line 200.</p>
+<h3>Keep It Under 300 Lines</h3>
+<p>LLMs can reliably follow roughly 150–200 instructions at most. Claude Code's built-in system prompt already consumes around 50. That leaves about 100–150 instruction slots for your additions. When CLAUDE.md grows too long, Claude doesn't just ignore new instructions — it starts dropping all of them uniformly.</p>
+<p><strong>The test:</strong> for each line, ask — <em>"Would removing this cause Claude to make a mistake?"</em> If the answer is no, cut it.</p>
+<h3>Document What Claude Gets Wrong — Not Everything It Should Know</h3>
+<p>Claude can infer your coding patterns from the codebase. Don't document what it can infer. Focus on the surprises: the non-standard flag, the module where the pattern diverges, the decision that looks wrong but has a reason.</p>
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">❌ Unnecessary (Claude infers this)</div>
+    <div class="compare-item bad-t">Use async/await for async operations</div>
+    <div class="compare-item bad-t">Handle errors with try/catch</div>
+    <div class="compare-item bad-t">Use descriptive variable names</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">✅ Necessary (Claude cannot know this)</div>
+    <div class="compare-item good-t">Never use --legacy-peer-deps — it masks a conflict we are actively tracking</div>
+    <div class="compare-item good-t">PaymentService is a singleton — never instantiate with new</div>
+    <div class="compare-item good-t">The auth middleware must run before any route handler that touches user data</div>
+  </div>
+</div>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre><code># ❌ Unnecessary (Claude infers this from the code)
+- Use async/await for asynchronous operations
+- Handle errors with try/catch
+# ✅ Necessary (Claude can't know this)
+- Never use the `--legacy-peer-deps` flag — it masks a real dependency conflict we're tracking
+- The `PaymentService` class is a singleton — never instantiate it with `new`</code></pre>
+</div>
+<h3>Negative Constraints Need a Positive Alternative</h3>
+<p>An LLM told "never use X" can get stuck — it knows what not to do but not what to do instead. Always pair the prohibition with the preferred alternative.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre><code># ❌ Claude gets stuck
+- Never use --foo-bar flag
+# ✅ Claude knows what to do
+- Never use --foo-bar; prefer --baz instead (avoids the caching issue in CI)</code></pre>
+</div>
+<h3>Customize Compaction Behavior</h3>
+<p>Long sessions get compressed with <code>/compact</code>. Without explicit instructions, Claude may silently lose critical context during compaction.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre><code>## When Compacting
+Always preserve: list of modified files, any failing tests, current task description, and any constraints established earlier in the session.</code></pre>
+</div>
+<h3>Use Hooks for Essential Actions — Not CLAUDE.md</h3>
+<p>Instructions in CLAUDE.md are advisory. Claude reads them and tries to follow, but they can be overridden or forgotten in long sessions. For actions that must happen every time — running a linter, blocking secret commits — use hooks instead.</p>
+<div class="callout"><div class="callout-label">💡 Tip</div><p>Think of CLAUDE.md as a memo and hooks as an enforced policy. Memos get forgotten. Policies run regardless of what Claude decided it felt like doing that session.</p></div>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">bash</span>
+  </div>
+  <pre><code>## In CLAUDE.md (advisory)
+- Run `pnpm typecheck` when you finish editing TypeScript files
+## In Hooks (deterministic — always runs)
+PostToolUse: bash -c "pnpm lint --fix $CLAUDE_TOOL_INPUT_FILE"</code></pre>
+</div>
+
+<div class="divider"><span>file map</span></div>
+<h2>The Complete File Map — What Goes Where</h2>
+<p>This is the full picture. You do not need all of these on day one — start with the global file and the project file, then add layers as the need becomes clear.</p>
+<p class="aside"><em>Yes, there are this many files. No, you do not need them all immediately. Think of it as a toolbox, not a mandatory checklist.</em></p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre><code>~/.claude/
+├── CLAUDE.md         ← Your philosophy, cross-project preferences, git style
+├── SOUL.md           ← Tone, communication style, persona
+└── commands/
+    └── security.md   ← Personal slash commands across all projects
+./                    (project root, committed to git)
+├── CLAUDE.md         ← Stack, commands, conventions, architecture refs
+├── CLAUDE.local.md   ← Personal notes, WIP context (gitignored)
+└── .claude/
+    ├── settings.json      ← Permissions, model, hooks (committed)
+    ├── settings.local.json ← Local overrides (gitignored)
+    └── commands/
+        └── review-pr.md   ← Team slash commands</code></pre>
+</div>
+
+<div class="divider"><span>quick start</span></div>
+<h2>Quick Start: Generate Your First CLAUDE.md</h2>
+<p>Rather than writing it from scratch, let Claude generate the foundation for you.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">bash</span>
+  </div>
+  <pre><code># Inside your project folder
+claude
+&gt; /init</code></pre>
+</div>
+<p>The <code>/init</code> command analyzes your codebase — build systems, test frameworks, coding patterns — and generates a starter CLAUDE.md. Then run <code>/memory</code> to review what it already knows, and add only what is missing.</p>
+<p>Add Karpathy's rules:</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">bash</span>
+  </div>
+  <pre><code>echo "" &gt;&gt; CLAUDE.md
+curl https://raw.githubusercontent.com/forrestchang/andrej-karpathy-skills/main/CLAUDE.md &gt;&gt; CLAUDE.md</code></pre>
+</div>
+<p>Create your global files:</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">bash</span>
+  </div>
+  <pre><code>touch ~/.claude/CLAUDE.md   # Your developer DNA
+touch ~/.claude/SOUL.md     # Your communication style</code></pre>
+</div>
+<div class="callout"><div class="callout-label">💡 Tip</div><p>The entire setup takes about 20 minutes. After that, every session opens with a Claude that already knows who you are, how you work, and what you value. That 20 minutes compounds across every session you will ever have.</p></div>
+
+<div class="divider"><span>treat like code</span></div>
+<h2>Treat CLAUDE.md Like Code</h2>
+<p>The part most people miss: CLAUDE.md is a living document. When Claude makes a mistake you have corrected multiple times, add a rule. When a rule becomes stale because the codebase changed, remove it. Run <code>/memory</code> after several sessions to see what Claude has learned automatically — then update your file to match.</p>
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>The best CLAUDE.md is not the most comprehensive one. It is the most accurate one. A 50-line file with no dead rules will outperform a 400-line manifest that Claude stopped reading somewhere around line 200.</p></div>
+<blockquote><p>"The best CLAUDE.md is not the most comprehensive one. It is the most accurate one."</p></blockquote>
+
+  <!-- ── Series navigation ── -->
+  <div class="next-post">
+    <div>
+      <div class="next-label">Next in the series</div>
+      <div class="next-title">Skills: Build Passive Knowledge Modules for Your AI Workflows</div>
+    </div>
+    <div class="next-arrow">→</div>
+  </div>
+
+</article>
+</div>
+
+<footer>
+  <div><a href="https://github.com/forrestchang/andrej-karpathy-skills">forrestchang/andrej-karpathy-skills</a> · <a href="https://github.com/seaneoliver/claude-code-starter">seaneoliver/claude-code-starter</a> · <a href="https://github.com/MuhammadUsmanGM/claude-code-best-practices">MuhammadUsmanGM/claude-code-best-practices</a> · <a href="https://code.claude.com/docs">Anthropic Claude Code Docs</a></div>
+  <div style="margin-top: 8px; color: #3d3a35;">claude-code-journey.md · episode 02</div>
+</footer>
+
+<script>
+  document.querySelectorAll('.code-block').forEach(block => {
+    const header = block.querySelector('.code-header');
+    const pre = block.querySelector('pre');
+    if (!header || !pre) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText.trim()).then(() => {
+        btn.textContent = '✓ copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    });
+
+    header.appendChild(btn);
+  });
+</script>
+</body>
+</html>

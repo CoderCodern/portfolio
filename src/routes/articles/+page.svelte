@@ -58,6 +58,14 @@
 <div class="grid gap-2 lg:grid-cols-2">
 	{#each articles as article, i (i)}
 		<div class="flex flex-col gap-y-2 border border-[#898989]/20 p-2 md:gap-y-2.5 lg:gap-y-5">
+			{#if article.poster}
+				<img
+					src={article.poster}
+					alt={article.title}
+					class="h-36 w-full object-cover md:h-44"
+					loading={i === 0 ? 'eager' : 'lazy'}
+				/>
+			{/if}
 			<h2 class="text-lg font-semibold text-[#C6C6C6] md:text-xl lg:text-2xl">
 				<a
 					onclick={() => trigger()}

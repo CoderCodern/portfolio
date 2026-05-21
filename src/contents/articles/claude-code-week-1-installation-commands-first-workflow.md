@@ -3,6 +3,7 @@ title: "Claude Code Week 1: Installation, Commands & First Workflow"
 publishedDate: May 20, 2026
 category: AI
 poster: /articles/claude/cover.png
+htmlFile: claude-code-week1-installation-blog
 ---
 
 Content is user-generated and unverified.

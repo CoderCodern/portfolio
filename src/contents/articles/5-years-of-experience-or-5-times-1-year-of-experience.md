@@ -4,6 +4,7 @@ description: "I remember someone telling me after an interview that the candidat
 publishedDate: March 20, 2025
 category: Career
 poster: https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb
+htmlFile: 5-years-of-experience-blog
 ---
 
 I remember someone telling me after an interview that the candidate we just saw did not have 5 years of experience, but 5 times 1 year of experience instead.
