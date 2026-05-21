@@ -3,6 +3,7 @@ title: "API Versioning Should Be Your Last Resort"
 publishedDate: May 9, 2026
 category: System Design
 poster: https://www.milanjovanovic.tech/blog-covers/mnw_193.png
+htmlFile: api-versioning-should-be-your-last-resort
 ---
 A live directory for your infrastructure that eliminates hardcoded ownership logic in your alert rules—this is the essence of Catalog by [**incident.io**](https://fandf.co/4cIIfB2). By simply adding a service and updating Catalog, your entire response system reconfigures itself seamlessly. [**Read the blog to learn more**](https://fandf.co/4cIIfB2).
 

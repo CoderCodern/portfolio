@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5 Years of Experience OR 5 Times 1 Year of Experience?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #e8e4dc;
+    --muted: #7a7570;
+    --accent: #e8a84c;
+    --accent-dim: #3d2c12;
+    --code-bg: #111;
+    --green: #4caf7d;
+    --green-dim: #122a1e;
+    --red: #ff7b72;
+    --red-dim: #2a1212;
+    --blue: #79c0ff;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    font-size: 17px;
+  }
+
+  /* ── HERO ─────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 25%, rgba(232,168,76,0.10) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 70%, rgba(232,168,76,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 800px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+
+  .series-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(232,168,76,0.30);
+    background: rgba(232,168,76,0.08);
+    padding: 6px 14px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  .series-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    max-width: 720px;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-wrap: wrap;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta span::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+  }
+  .hero-meta span:first-child::before { display: none; }
+
+  /* ── LAYOUT ───────────────────────────── */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  article { padding: 5rem 0; }
+
+  .lead {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: #c5c0b5;
+    margin-bottom: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin: 3.5rem 0 1rem;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 2.5rem 0 0.75rem;
+  }
+  p { margin-bottom: 1.4rem; }
+  strong { font-weight: 500; color: var(--text); }
+  em { font-style: italic; color: #c5c0b5; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p.aside { font-size: 14px; color: var(--muted); font-style: italic; margin: -0.5rem 0 1.4rem; }
+
+  /* ── FIGURES ──────────────────────────── */
+  figure {
+    margin: 2rem 0;
+    text-align: center;
+  }
+  figure img {
+    max-width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+  }
+  figcaption {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── LISTS ────────────────────────────── */
+  ul {
+    margin: 1rem 0 1.4rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  ul li { line-height: 1.7; }
+
+  /* ── CALLOUTS ─────────────────────────── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-dim);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 6px 6px 0;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+  }
+  .callout.green { border-left-color: var(--green); background: var(--green-dim); }
+  .callout.red   { border-left-color: var(--red);   background: var(--red-dim);   }
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red   .callout-label { color: var(--red);   }
+
+  /* ── BLOCKQUOTE ───────────────────────── */
+  blockquote {
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    margin: 2.5rem 0;
+  }
+  blockquote::before {
+    content: '"';
+    font-family: 'Lora', serif;
+    font-size: 6rem;
+    color: var(--border);
+    position: absolute;
+    top: -1rem; left: 50%;
+    transform: translateX(-50%);
+    line-height: 1;
+  }
+  blockquote p {
+    font-family: 'Lora', serif;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: #c5c0b5;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+  .quote-attr {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: -1rem;
+    margin-bottom: 2rem;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── DIVIDER ──────────────────────────── */
+  .divider { display: flex; align-items: center; gap: 1rem; margin: 3.5rem 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── COMPARE GRID ─────────────────────── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 6px; overflow: hidden; margin: 1.75rem 0; }
+  .compare-col { background: var(--surface); padding: 1.25rem; }
+  .compare-header { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .compare-header.bad-h  { color: var(--red); }
+  .compare-header.good-h { color: var(--green); }
+  .compare-item { font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .compare-item:last-child { border-bottom: none; }
+  .compare-item.bad-t  { color: #c9a0a0; }
+  .compare-item.good-t { color: #a0c9a8; }
+
+  /* ── COPY BUTTON ─────────────────────── */
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+  /* ── NEXT POST ────────────────────────── */
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
+  .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
+
+  /* ── FOOTER ───────────────────────────── */
+  footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── RESPONSIVE ───────────────────────── */
+  @media (max-width: 640px) {
+    .hero { padding: 3rem 1.5rem; }
+    .container { padding: 0 1.5rem; }
+    h1 { font-size: 2rem; }
+    article { padding: 3rem 0; }
+    .compare { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="series-tag">Software Engineering · Career</div>
+    <h1>5 Years of Experience OR <em>5 Times 1 Year</em> of Experience?</h1>
+    <div class="hero-meta">
+      <span>March 2025</span>
+      <span>5 min read</span>
+      <span>Career · Seniority · Growth</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ARTICLE ═══════════════ -->
+<div class="container">
+<article>
+
+  <p class="lead">I remember someone telling me after an interview that the candidate we just saw did not have 5 years of experience — but 5 times 1 year of experience instead. It was a devastating diagnosis. And the more I thought about it, the more I realised how easy it is to fall into that trap.</p>
+
+  <p>This person kept working on small, very straightforward projects in similar phases. Because of this, they never really developed their skills — and most of their years on paper didn't matter compared to candidates who had been exposed to a broader range of problems and challenges.</p>
+
+  <p>Of course, it makes sense that years in the industry don't directly translate to seniority. But surprisingly, it's often assumed that people will steadily get better over time. The trick is that <strong>it's not steady</strong>, and <strong>there is a ceiling</strong> to what you can accomplish if you stay at the same job and never leave your comfort zone.</p>
+
+  <p class="aside"><em>Years of experience is not the same thing as experience. One is a timestamp. The other is a scar.</em></p>
+
+  <!-- ── Not all roles are equal ── -->
+  <div class="divider"><span>not all roles</span></div>
+  <h2>Not All Roles Are Equal</h2>
+
+  <p>Not all jobs or projects give you the same opportunity for growth. If you're stuck in a position where all you're asked to do is simple frontend work on landing pages with no architectural decisions and no senior colleagues — there's only so far you can go.</p>
+
+  <p>Every job has a skill ceiling. The question is: how high is it? Basically, how much can you actually learn if you keep doing this for years?</p>
+
+  <h3>The Skill Ceiling</h3>
+
+  <p>I like the idea of a "skill ceiling" — often used in video games, <a href="https://en.wiktionary.org/wiki/skill_ceiling" target="_blank">defined as</a> the amount of skill required to master some activity. Here's what it looks like for a typical role:</p>
+
+  <figure>
+    <img src="https://marcgg.com/assets/blog/xp/ceiling.png" alt="Skill ceiling graph — learning fast then plateauing" />
+    <figcaption>You learn quickly at first, then plateau at the role's maximum.</figcaption>
+  </figure>
+
+  <p>You'll learn fast at first, reaching the maximum skill level for that position. You might become very good at that specific thing — but anyone could reach your level in a couple of years. If you keep going past that point:</p>
+
+  <ul>
+    <li>At best, you'll improve marginally.</li>
+    <li>At worst, you'll stagnate — or develop bad habits and actually regress.</li>
+  </ul>
+
+  <h3>Raising the Skill Ceiling</h3>
+
+  <p>If you recognise that you've stopped learning new things, you need to address it. While you stay in this particular role, you'll probably be fine. But if you ever have to switch, you'll be labelled as someone with <em>x times 1 year of experience</em> — simultaneously over-qualified on paper and under-qualified in reality.</p>
+
+  <figure>
+    <img src="https://marcgg.com/assets/blog/xp/more_learning.png" alt="Graph showing growth beyond the initial ceiling" />
+    <figcaption>A good manager, new responsibilities, or a job change resets the learning curve.</figcaption>
+  </figure>
+
+  <p>Your company's role here matters. Part of a manager's job is to provide growth opportunities and visibility over a career path. Colleagues can also help — through inspiration, mentorship, or just raising the bar of what "good" looks like in the room.</p>
+
+  <div class="callout red">
+    <div class="callout-label">⚠️ Red Flag</div>
+    <p>If your current company is <strong>actively keeping you out of growth opportunities</strong>, that's a serious warning sign. They may be creating dependency: you lose external options, lose negotiating power, and become tied to that single job's health and goodwill. That's a trap, not a career.</p>
+  </div>
+
+  <!-- ── Comfort zone ── -->
+  <div class="divider"><span>comfort zone</span></div>
+  <h2>The Comfort Zone</h2>
+
+  <p>You can hit a skill plateau even in a role with a high ceiling — if you're not actively seeking growth. After a few years in a position, you know the job. You can meet expectations without much effort. People appreciate your work. It doesn't require much energy anymore.</p>
+
+  <p class="aside"><em>The comfort zone is called that for a reason. It's genuinely comfortable. That's the whole problem.</em></p>
+
+  <h3>The Comfort Zone Is a Long-Term Risk</h3>
+
+  <p>While it's pleasant short-term, the long-term result is the same as a low-ceiling job: you end up repeating the same year of experience, staying locked in your current position while the world changes around you.</p>
+
+  <p>Things move fast. You don't want to find yourself dependent on a single company's goodwill and health. Doing the same familiar thing for years can also become quietly demoralising — tasks that were once engaging can turn dreadful when stripped of novelty.</p>
+
+  <figure>
+    <img src="https://marcgg.com/assets/blog/xp/comfort.png" alt="Comfort zone plateau graph" />
+    <figcaption>Comfort is the plateau that feels like progress because you're still employed.</figcaption>
+  </figure>
+
+  <h3>Breaking Out Requires Effort</h3>
+
+  <p>Cal Newport's book <em>So Good They Can't Ignore You</em> frames this well. Think of skills and knowledge as career capital — currency you can spend to get the job and life you want. But not all skills are equal:</p>
+
+  <blockquote>
+    <p>"Basic economic theory tells us that if you want something that's both rare and valuable, you need something rare and valuable to offer in return — this is Supply and Demand 101. If you want a great job, you need something of great value to offer in return."</p>
+  </blockquote>
+  <p class="quote-attr">— Cal Newport, <em>So Good They Can't Ignore You</em></p>
+
+  <p>Geoff Colvin captures why most people don't do this:</p>
+
+  <blockquote>
+    <p>"Doing things we know how to do well is enjoyable, and that's exactly the opposite of what deliberate practice demands. Deliberate practice is above all an effort of focus and concentration. That is what makes it 'deliberate', as distinct from the mindless playing of scales that most people engage in."</p>
+  </blockquote>
+  <p class="quote-attr">— Geoff Colvin, <em>Talent Is Overrated</em></p>
+
+  <p>Newport builds on this directly:</p>
+
+  <blockquote>
+    <p>"If you show up and do what you're told, you will reach an 'acceptable level' of ability before plateauing. The good news about deliberate practice is that it will push you past this plateau and into a realm where you have little competition. The bad news is that the reason so few people accomplish this feat is exactly because deliberate practice is often the opposite of enjoyable."</p>
+  </blockquote>
+  <p class="quote-attr">— Cal Newport, referencing Colvin</p>
+
+  <!-- ── Sustainable growth ── -->
+  <div class="divider"><span>sustainable growth</span></div>
+  <h2>Sustainable Skill and Career Growth</h2>
+
+  <h3>Growth Is Not Linear</h3>
+
+  <p>Two things worth internalising before you spiral into a growth obsession:</p>
+
+  <ul>
+    <li><strong>Reaching a plateau is normal.</strong> Maybe business constraints require steady execution for a while. Maybe you've hit your mental capacity and need some time on straightforward tasks to recharge. Plateaus happen. They're fine.</li>
+    <li><strong>Wanting to stay in your comfort zone is normal.</strong> You might be tired, dealing with health, family, or just needing to breathe. Choosing short-term comfort knowingly is not a failure — it's a tradeoff. Make it consciously and you retain control.</li>
+  </ul>
+
+  <p>Trying to be in permanent high-growth mode is not realistic across a whole career. Life is long: you'll have kids, fall sick, move cities, break a leg, focus on a hobby. Unless your job is your single priority, there will be periods of limited professional growth — and that's completely fine.</p>
+
+  <div class="callout">
+    <div class="callout-label">💡 The Key Insight</div>
+    <p>The difference between <em>choosing</em> a comfort period and <em>drifting</em> into one is awareness. One is strategic rest. The other is slow erosion you don't notice until the options have already closed.</p>
+  </div>
+
+  <h3>A Realistic Approach</h3>
+
+  <p>Staying in the comfort zone for too long is the real risk. The sustainable answer is to alternate: periods of plateau (recovery, focus, life events) and periods of deliberate growth (new role, new responsibilities, new challenges).</p>
+
+  <div class="compare">
+    <div class="compare-col">
+      <div class="compare-header bad-h">❌ The trap</div>
+      <div class="compare-item bad-t">Same projects, same stack, same team for years</div>
+      <div class="compare-item bad-t">Avoid feedback or challenges that feel risky</div>
+      <div class="compare-item bad-t">Optimise for comfort over stretch</div>
+      <div class="compare-item bad-t">Assume more years = more value automatically</div>
+    </div>
+    <div class="compare-col">
+      <div class="compare-header good-h">✅ The way out</div>
+      <div class="compare-item good-t">Deliberately seek roles or tasks that feel hard</div>
+      <div class="compare-item good-t">Treat plateaus as planned recovery, not default mode</div>
+      <div class="compare-item good-t">Build career capital in rare, high-value skills</div>
+      <div class="compare-item good-t">Stay aware of your own ceiling — and raise it intentionally</div>
+    </div>
+  </div>
+
+  <figure>
+    <img src="https://marcgg.com/assets/blog/xp/high.png" alt="Career growth chart — alternating plateaus and growth spurts" />
+    <figcaption>Growth, plateau, personal event, refocus. That's a realistic career arc.</figcaption>
+  </figure>
+
+  <p>In this chart we see someone getting good at a job, plateauing, gaining new responsibilities and growing again — then deliberately stepping back for a personal event, then refocusing. That's not a failure arc. That's a life lived with some intention.</p>
+
+  <div class="callout green">
+    <div class="callout-label">✓ Verdict</div>
+    <p>The goal isn't constant growth. It's <strong>intentional growth</strong> — knowing when you're choosing a plateau versus drifting into one. Build rare skills. Stay aware of your ceiling. Give yourself permission to rest, as long as you're the one choosing to.</p>
+  </div>
+
+  <!-- ── Related reading ── -->
+  <div class="next-post">
+    <div>
+      <div class="next-label">Related reading</div>
+      <div class="next-title">Your First Step to Engineering Leadership: Becoming a Senior Dev</div>
+    </div>
+    <div class="next-arrow">→</div>
+  </div>
+
+</article>
+</div>
+
+<footer>
+  <div>Originally published March 2025 · Career &amp; Engineering Growth</div>
+  <div style="margin-top: 8px; color: #3d3a35;">5-years-of-experience.md</div>
+</footer>
+
+<script>
+  document.querySelectorAll('.code-block').forEach(block => {
+    const header = block.querySelector('.code-header');
+    const pre = block.querySelector('pre');
+    if (!header || !pre) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText.trim()).then(() => {
+        btn.textContent = '✓ copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    });
+
+    header.appendChild(btn);
+  });
+</script>
+</body>
+</html>

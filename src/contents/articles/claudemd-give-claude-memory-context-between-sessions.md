@@ -3,6 +3,7 @@ title: "CLAUDE.md: Give Claude Memory & Context Between Sessions"
 publishedDate: May 20, 2026
 category: AI
 poster: /articles/claude/cover.png
+htmlFile: claudemd-give-claude-memory-context-between-sessions
 ---
 
 Content is user-generated and unverified.

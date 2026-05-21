@@ -126,6 +126,28 @@ export async function refineContent(markdown, openai) {
   return response.choices[0].message.content.trim();
 }
 
+const DESCRIPTION_SYSTEM_PROMPT =
+  'Write a concise one-sentence description (under 160 characters) for a technical blog post. ' +
+  'It should be informative and enticing, suitable as a meta description. ' +
+  'Reply with ONLY the description text — no quotes, no trailing punctuation.';
+
+/**
+ * Generates a one-line description for an article using GPT-4o-mini.
+ */
+export async function generateDescription(title, body, openai) {
+  const preview = `Title: ${title}\n\nContent preview:\n${body.slice(0, 2000)}`;
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      { role: 'system', content: DESCRIPTION_SYSTEM_PROMPT },
+      { role: 'user', content: preview },
+    ],
+    max_tokens: 80,
+    temperature: 0.3,
+  });
+  return response.choices[0].message.content.trim().replace(/^["']|["']$/g, '');
+}
+
 /**
  * Runs both passes (language detection then content refinement).
  * Returns { markdown: string, langChanges: Array }

@@ -13,7 +13,7 @@
 
 import fs from 'fs/promises';
 import path from 'path';
-import { detectCodeLanguages, refineContent, createOpenAIClient } from './ai.js';
+import { detectCodeLanguages, refineContent, generateDescription, detectCategory, createOpenAIClient } from './ai.js';
 
 const ARTICLES_DIR = path.resolve('src/contents/articles');
 
@@ -44,16 +44,78 @@ function splitFrontmatter(content) {
   return { frontmatter: '', body: content };
 }
 
+/** Reads a single scalar value from a frontmatter string by key. */
+function getFrontmatterField(fm, key) {
+  const match = fm.match(new RegExp(`^${key}:\\s*(.+)$`, 'm'));
+  if (!match) return null;
+  let v = match[1].trim();
+  if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'")))
+    v = v.slice(1, -1);
+  return v;
+}
+
+/** Appends a key: value line to frontmatter, before the closing ---. */
+function addFrontmatterField(fm, key, value) {
+  const needsQuotes = /[:#,[\]{}&*!|>'"@`]/.test(value) || value !== value.trim();
+  const line = needsQuotes ? `${key}: "${value.replace(/"/g, '\\"')}"` : `${key}: ${value}`;
+  return fm.replace(/\n---\n$/, `\n${line}\n---\n`);
+}
+
+/**
+ * Strips boilerplate injected by Claude artifact exports:
+ * - "Content is user-generated and unverified." line
+ * - Leading blank lines after frontmatter
+ */
+function stripArtifactBoilerplate(body) {
+  return body
+    .replace(/^Content is user-generated and unverified\.\s*\n*/m, '')
+    .replace(/^\n{2,}/, '\n');
+}
+
 function wordCount(text) {
   return text.trim().split(/\s+/).length;
 }
 
 async function smoothFile(filePath) {
-  const content = await fs.readFile(filePath, 'utf-8');
-  const { frontmatter, body } = splitFrontmatter(content);
+  let content = await fs.readFile(filePath, 'utf-8');
+  let { frontmatter, body } = splitFrontmatter(content);
   const filename = path.basename(filePath);
 
   console.log(`\n--- ${filePath} ---`);
+
+  // Pass 0: frontmatter normalization
+  const pass0Changes = [];
+
+  // Strip artifact boilerplate from body
+  const cleanedBody = stripArtifactBoilerplate(body);
+  if (cleanedBody !== body) {
+    pass0Changes.push('stripped artifact boilerplate');
+    body = cleanedBody;
+  }
+
+  // Generate description if missing
+  if (!getFrontmatterField(frontmatter, 'description')) {
+    const title = getFrontmatterField(frontmatter, 'title') ?? filename;
+    const description = await generateDescription(title, body, openai);
+    frontmatter = addFrontmatterField(frontmatter, 'description', description);
+    pass0Changes.push(`description generated: "${description}"`);
+  }
+
+  // Detect category if missing
+  if (!getFrontmatterField(frontmatter, 'category')) {
+    const title = getFrontmatterField(frontmatter, 'title') ?? filename;
+    const description = getFrontmatterField(frontmatter, 'description') ?? '';
+    const category = await detectCategory(title, description, body, openai);
+    frontmatter = addFrontmatterField(frontmatter, 'category', category);
+    pass0Changes.push(`category detected: ${category}`);
+  }
+
+  if (pass0Changes.length === 0) {
+    console.log('[Pass 0] Frontmatter OK — no normalization needed.');
+  } else {
+    console.log(`[Pass 0] Frontmatter normalized (${pass0Changes.length} fix(es)):`);
+    pass0Changes.forEach((c) => console.log(`  ${c}`));
+  }
 
   // Pass 1: language detection
   const { markdown: langTagged, changes: langChanges } = await detectCodeLanguages(body, openai);
@@ -78,7 +140,8 @@ async function smoothFile(filePath) {
 
   const updated = frontmatter + refined;
   await fs.writeFile(filePath, updated, 'utf-8');
-  console.log(`  smooth ${filename}  (${langChanges.length} block(s) tagged, content refined)`);
+  const normNote = pass0Changes.length > 0 ? `, ${pass0Changes.length} frontmatter fix(es)` : '';
+  console.log(`  smooth ${filename}  (${langChanges.length} block(s) tagged, content refined${normNote})`);
   return { written: true, filename };
 }
 
