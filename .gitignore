@@ -21,4 +21,8 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Blog pipeline — intermediate files (safe to delete)
+.claude/tmp/*.md
+BLOG_PIPELINE_NOTES.md
 personal-info/.venv

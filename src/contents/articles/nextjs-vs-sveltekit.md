@@ -4,6 +4,7 @@ description: Explore why developers are flocking to SvelteKit for its unparallel
 publishedDate: May 26, 2025
 category: Frontend
 poster: https://cc-dam.imgix.net/blog/sk-vs-nextjs-min.jpg?auto=compress&auto=format&w=972&dpr=1&crop=faces&fit=crop&height=384
+htmlFile: nextjs-vs-sveltekit
 ---
 
 Alright, buckle up, fellow web warriors, because we're about to dive into the cage match of the decade: **Next.js** (with its shiny new App Router) versus the latest, greatest **SvelteKit**. This isn't going to be some dry, dusty spec sheet comparison written by a bot who thinks "human tone" means adding an emoji at the end of every sentence. We're getting real, we're getting raw, and we're grounding it all in verifiable facts and expert opinions. You've been warned.

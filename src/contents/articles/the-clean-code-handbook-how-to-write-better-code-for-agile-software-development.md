@@ -4,6 +4,7 @@ description: "In Agile, where change is the only constant, clean code is your ar
 publishedDate: February 9, 2025
 category: Career
 poster: https://images.unsplash.com/photo-1617042375876-a13e36732a04?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb
+htmlFile: the-clean-code-handbook-how-to-write-better-code-for-agile-software-development
 ---
 ## **The Clean Code Handbook: How to Write Better Code for Agile Software Development**
 

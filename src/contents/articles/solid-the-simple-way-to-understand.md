@@ -3,6 +3,7 @@ title: "SOLID - The Simple Way To Understand"
 description: "A lot of people, when I ask about SOLID, propably always remember of the first principle (Single Responsability Principle). But when I ask about another, some people don't remember or feel difficult to explain. AND I UNDERSTAND."
 publishedDate: February 27, 2025
 category: Backend
+htmlFile: solid-the-simple-way-to-understand
 ---
 ## **SOLID - A Clear Understanding**
 

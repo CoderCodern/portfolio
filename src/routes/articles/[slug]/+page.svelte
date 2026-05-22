@@ -8,8 +8,20 @@
 	let iframeEl: HTMLIFrameElement | undefined = $state(undefined);
 
 	function resizeIframe() {
-		if (!iframeEl?.contentDocument?.documentElement) return;
-		iframeEl.style.height = iframeEl.contentDocument.documentElement.scrollHeight + 'px';
+		const doc = iframeEl?.contentDocument;
+		if (!doc?.documentElement) return;
+
+		const update = () => {
+			if (iframeEl && doc.documentElement)
+				iframeEl.style.height = doc.documentElement.scrollHeight + 'px';
+		};
+
+		update();
+		doc.querySelectorAll('img').forEach((img) => {
+			if (!(img as HTMLImageElement).complete)
+				img.addEventListener('load', update, { once: true });
+		});
+		doc.fonts?.ready.then(update);
 	}
 </script>
 

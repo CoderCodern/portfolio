@@ -8,24 +8,30 @@
 	let { children } = $props();
 
 	let dragging = $state(false);
-	let isFullscreen = $state(false);
+	let expandLevel = $state<0 | 1 | 2>(0);
 	let offset = $state({ x: 0, y: 0 });
 	let position = $state({ x: 0, y: 0 });
 	let containerElement = $state<HTMLElement | null>(null);
 	let isMobile = $derived(new MediaQuery('(max-width: 1024px)').current);
+	let isWindowed = $derived(expandLevel === 0 && !isMobile);
 
 	function toggleFullscreen() {
 		if (isMobile) return;
-		if (!isFullscreen) containerElement?.requestFullscreen();
-		else {
+		if (expandLevel === 0) {
+			expandLevel = 1;
+			position = { x: 0, y: 0 };
+		} else if (expandLevel === 1) {
+			expandLevel = 2;
+			containerElement?.requestFullscreen();
+		} else {
 			document.exitFullscreen();
+			expandLevel = 0;
 			position = { x: 0, y: 0 };
 		}
-		isFullscreen = !isFullscreen;
 	}
 
 	function onMouseDown(e: MouseEvent) {
-		if (isMobile) return;
+		if (isMobile || expandLevel > 0) return;
 		dragging = true;
 		offset = { x: e.clientX - position.x, y: e.clientY - position.y };
 	}
@@ -40,7 +46,10 @@
 		};
 
 		const handleFullscreenChange = () => {
-			if (!document.fullscreenElement) isFullscreen = false;
+			if (!document.fullscreenElement) {
+				expandLevel = 0;
+				position = { x: 0, y: 0 };
+			}
 		};
 
 		window.addEventListener('mouseup', handleMouseUp, { signal: controller.signal });
@@ -52,7 +61,6 @@
 
 	$effect(() => {
 		if (!isMobile) return;
-
 		position = { x: 0, y: 0 };
 	});
 </script>
@@ -62,13 +70,15 @@
 
 <main
 	bind:this={containerElement}
-	data-fullscreen={isFullscreen || isMobile}
-	class="from-ash-800 to-ash-700 z-10 flex h-dvh w-dvw flex-col overflow-hidden rounded-xl bg-linear-to-tr data-[fullscreen=true]:rounded-none lg:h-[75dvh] lg:w-[70dvw]"
-	class:container-shadow={!isFullscreen || !isMobile}
+	class="from-ash-800 to-ash-700 z-10 flex flex-col overflow-hidden bg-linear-to-tr"
+	class:rounded-xl={isWindowed}
+	class:container-shadow={isWindowed}
+	style:width={isWindowed ? '70dvw' : '100dvw'}
+	style:height={isWindowed ? '75dvh' : '100dvh'}
 	style:transform="translate({position.x}px, {position.y}px)"
 	style:transition={dragging ? 'none' : 'all 0.2s ease-out'}
 >
-	<Header {isFullscreen} {onMouseDown} {toggleFullscreen} />
+	<Header {expandLevel} {onMouseDown} {toggleFullscreen} />
 	{@render children()}
 	<Navbar />
 </main>

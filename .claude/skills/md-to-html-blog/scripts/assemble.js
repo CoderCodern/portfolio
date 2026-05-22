@@ -30,6 +30,7 @@
 import { readFileSync, writeFileSync, unlinkSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { createHighlighter } from 'shiki';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const [,, slug] = process.argv;
@@ -73,17 +74,66 @@ function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function makeCodeBlock(lang, rawContent) {
-  const code = escapeHtml(rawContent.trim());
-  return `<div class="code-block">\n  <div class="code-header">\n    <div class="code-dots"><span></span><span></span><span></span></div>\n    <span class="code-lang">${lang}</span>\n  </div>\n  <pre><code>${code}</code></pre>\n</div>`;
+// All lang identifiers that may appear in markdown fences — includes full names and aliases
+const KNOWN_LANGS = new Set([
+  'ts', 'typescript', 'tsx',
+  'js', 'javascript', 'jsx',
+  'bash', 'sh', 'shell', 'zsh',
+  'json', 'jsonc',
+  'html', 'css', 'scss', 'sass',
+  'svelte', 'vue',
+  'markdown', 'md',
+  'yaml', 'yml',
+  'sql',
+  'csharp', 'cs',
+  'go',
+  'python', 'py',
+  'rust',
+  'toml', 'graphql', 'diff', 'text', 'plaintext',
+  'xml', 'dockerfile',
+]);
+
+function stripBg(out) {
+  return out.replace(/(<pre\b[^>]*?)style="([^"]*)"/, (_, tag, style) => {
+    const cleaned = style.split(';')
+      .filter(s => !s.trim().startsWith('background-color'))
+      .join(';').trim().replace(/;$/, '');
+    return cleaned ? `${tag}style="${cleaned}"` : tag;
+  });
 }
 
 const mdCodeBlocks = existsSync(mdPath) ? extractMdCodeBlocks(readFileSync(mdPath, 'utf8')) : [];
 
+// Collect every lang this article needs, then load them all at once.
+// createHighlighter makes codeToHtml synchronous — no race condition on concurrent calls.
+const dataContent = raw.slice(sep + 15);
+const inlineLangs = [...dataContent.matchAll(/\[code:([a-z]+)\]/gi)].map(m => m[1]);
+const neededLangs = [...new Set([
+  ...mdCodeBlocks.map(b => b.lang),
+  ...inlineLangs,
+  'text',
+])].filter(l => KNOWN_LANGS.has(l));
+
+const highlighter = await createHighlighter({ themes: ['github-dark-dimmed'], langs: neededLangs });
+
+function highlight(lang, rawContent) {
+  const safeLang = KNOWN_LANGS.has(lang) ? lang : 'text';
+  try {
+    return stripBg(highlighter.codeToHtml(rawContent.trim(), { lang: safeLang, theme: 'github-dark-dimmed' }));
+  } catch {
+    return `<pre><code>${escapeHtml(rawContent.trim())}</code></pre>`;
+  }
+}
+
+function makeCodeBlock(lang, rawContent) {
+  const inner = highlight(lang, rawContent);
+  return `<div class="code-block">\n  <div class="code-header">\n    <div class="code-dots"><span></span><span></span><span></span></div>\n    <span class="code-lang">${lang}</span>\n  </div>\n  ${inner}\n</div>`;
+}
+
 function expandShorthand(content) {
-  // [code:N] — passthrough from markdown (must run before [code:lang]...[/code])
-  content = content.replace(/\[code:(\d+)\]/g, (match, n) => {
-    const idx = parseInt(n) - 1;
+  // [code:N] — passthrough from markdown
+  content = content.replace(/\[code:(\d+)\]/g, (_, n) => {
+    const idx = Number.parseInt(n) - 1;
     const block = mdCodeBlocks[idx];
     if (!block) {
       console.warn(`  ⚠ [code:${n}] not found — markdown has ${mdCodeBlocks.length} code block(s)`);
@@ -121,11 +171,11 @@ function expandShorthand(content) {
   });
 
   // Inline/short tags
-  content = content.replace(/\[tip\]([\s\S]*?)\[\/tip\]/g,     (_, t) => `<div class="callout"><div class="callout-label">💡 Tip</div><p>${t.trim()}</p></div>`);
+  content = content.replace(/\[tip\]([\s\S]*?)\[\/tip\]/g,        (_, t) => `<div class="callout"><div class="callout-label">💡 Tip</div><p>${t.trim()}</p></div>`);
   content = content.replace(/\[verdict\]([\s\S]*?)\[\/verdict\]/g, (_, t) => `<div class="callout green"><div class="callout-label">✓ Verdict</div><p>${t.trim()}</p></div>`);
-  content = content.replace(/\[warn\]([\s\S]*?)\[\/warn\]/g,   (_, t) => `<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>${t.trim()}</p></div>`);
-  content = content.replace(/\[aside\]([\s\S]*?)\[\/aside\]/g, (_, t) => `<p class="aside"><em>${t.trim()}</em></p>`);
-  content = content.replace(/\[bq\]([\s\S]*?)\[\/bq\]/g,       (_, t) => `<blockquote><p>${t.trim()}</p></blockquote>`);
+  content = content.replace(/\[warn\]([\s\S]*?)\[\/warn\]/g,       (_, t) => `<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>${t.trim()}</p></div>`);
+  content = content.replace(/\[aside\]([\s\S]*?)\[\/aside\]/g,     (_, t) => `<p class="aside"><em>${t.trim()}</em></p>`);
+  content = content.replace(/\[bq\]([\s\S]*?)\[\/bq\]/g,           (_, t) => `<blockquote><p>${t.trim()}</p></blockquote>`);
 
   return content;
 }
@@ -148,7 +198,7 @@ for (const [key, val] of Object.entries(vars)) {
 writeFileSync(outPath, html);
 unlinkSync(dataPath);
 
-const outPath_ = outPath.replace(process.cwd() + '/', '');
+const outPath_ = outPath.replace(process.cwd() + '\\', '').replace(process.cwd() + '/', '');
 const passthroughNote = mdCodeBlocks.length ? ` (${mdCodeBlocks.length} md code blocks available)` : '';
 console.log(`✓  ${outPath_}`);
 console.log(`   data: ${dataBytes}B (${Math.round(dataBytes/4)} est. tokens) → html: ${html.length}B${passthroughNote}`);

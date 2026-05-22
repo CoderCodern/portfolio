@@ -1,5 +1,5 @@
 ---
-title: "Claude Code Week 1: Installation, Commands & First Workflow"
+title: "Ep 1: Claude Code — Installation, Commands & Your First Workflow"
 publishedDate: May 20, 2026
 category: AI
 poster: /articles/claude/cover.png

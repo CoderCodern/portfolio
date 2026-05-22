@@ -1,13 +1,16 @@
 <script lang="ts">
 	import Face from './face.svelte';
 
-	interface $$Props {
-		isFullscreen: boolean;
+	interface Props {
+		expandLevel: 0 | 1 | 2;
 		onMouseDown: (e: MouseEvent) => void;
 		toggleFullscreen: () => void;
 	}
 
-	let { isFullscreen, onMouseDown, toggleFullscreen }: $$Props = $props();
+	let { expandLevel, onMouseDown, toggleFullscreen }: Props = $props();
+
+	const expandLabels = ['Expand to tab fullscreen', 'Expand to device fullscreen', 'Exit fullscreen'] as const;
+	const expandActions = ['enter-tab-fullscreen', 'enter-device-fullscreen', 'exit-fullscreen'] as const;
 
 	function handleHeaderKeyDown(event: KeyboardEvent) {
 		if (event.key === 'Enter' || event.key === ' ') {
@@ -19,7 +22,7 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <header
-	class={`relative flex cursor-default items-center justify-between overflow-hidden px-4 py-3 ${isFullscreen ? 'lg:cursor-pointer' : 'lg:cursor-grab lg:active:cursor-grabbing'}`}
+	class={`relative flex cursor-default items-center justify-between overflow-hidden px-4 py-3 ${expandLevel > 0 ? 'lg:cursor-pointer' : 'lg:cursor-grab lg:active:cursor-grabbing'}`}
 	ondblclick={toggleFullscreen}
 	onmousedown={onMouseDown}
 	onkeydown={handleHeaderKeyDown}
@@ -49,13 +52,19 @@
 		<button
 			class="grid h-6 w-6 place-items-center rounded-full"
 			onclick={toggleFullscreen}
-			aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+			aria-label={expandLabels[expandLevel]}
 			data-umami-event="window-control"
-			data-umami-event-action={isFullscreen ? 'exit-fullscreen' : 'enter-fullscreen'}
+			data-umami-event-action={expandActions[expandLevel]}
 		>
 			<div class="relative grid h-3 w-3 place-items-center rounded-full bg-[#898989] transition-colors group-hover:bg-[#2BC840]">
 				<svg class="absolute h-1.5 w-1.5 opacity-0 transition-opacity group-hover:opacity-100" viewBox="0 0 10 10" stroke="#003D00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M1 6 L1 9 L4 9 M6 1 L9 1 L9 4" />
+					{#if expandLevel < 2}
+						<!-- expand icon — levels 0 (tab) and 1 (device) -->
+						<path d="M1 6 L1 9 L4 9 M6 1 L9 1 L9 4" />
+					{:else}
+						<!-- compress icon — level 2 (exit) -->
+						<path d="M1 4 L4 4 L4 1 M6 9 L9 9 L9 6" />
+					{/if}
 				</svg>
 			</div>
 		</button>

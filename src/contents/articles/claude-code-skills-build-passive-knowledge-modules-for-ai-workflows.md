@@ -1,5 +1,5 @@
 ---
-title: "Claude Code Skills: Build Passive Knowledge Modules for AI Workflows"
+title: "Ep 3: Claude Code — Skills & Passive Knowledge Modules"
 publishedDate: May 21, 2026
 category: AI
 poster: /articles/claude/cover.png

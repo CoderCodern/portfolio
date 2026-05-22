@@ -13,7 +13,15 @@
 
 import fs from 'fs/promises';
 import path from 'path';
-import { detectCodeLanguages, refineContent, generateDescription, detectCategory, createOpenAIClient } from './ai.js';
+import {
+  detectCodeLanguages,
+  refineContent,
+  generateDescription,
+  detectCategory,
+  createOpenAIClient,
+  resetTokenUsage,
+  formatTokenReport,
+} from './ai.js';
 
 const ARTICLES_DIR = path.resolve('src/contents/articles');
 
@@ -146,6 +154,7 @@ async function smoothFile(filePath) {
 }
 
 async function main() {
+  resetTokenUsage();
   let files = [];
 
   if (smoothAll) {
@@ -176,6 +185,7 @@ async function main() {
   }
 
   console.log(`\nDone. ${written} smoothed, ${skipped} dry-run.`);
+  console.log(`[Tokens] OpenAI: ${formatTokenReport()}`);
 }
 
 main().catch((err) => {

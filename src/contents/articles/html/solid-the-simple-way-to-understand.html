@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOLID - The Simple Way To Understand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #e8e4dc;
+    --muted: #7a7570;
+    --accent: #e8a84c;       /* episode accent */
+    --accent-dim: #3d2c12;     /* tinted background for callouts */
+    --code-bg: #111;
+    --green: #4caf7d;
+    --green-dim: #122a1e;
+    --red: #ff7b72;
+    --red-dim: #2a1212;
+    --blue: #79c0ff;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    font-size: 17px;
+  }
+
+  /* ── HERO ─────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 25%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 70%, rgba(232,168,76,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 800px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+
+  .series-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    padding: 6px 14px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  .series-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    max-width: 720px;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-wrap: wrap;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta span::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+  }
+  .hero-meta span:first-child::before { display: none; }
+
+  /* ── LAYOUT ───────────────────────────── */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  article { padding: 5rem 0; }
+
+  .lead {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: #c5c0b5;
+    margin-bottom: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin: 3.5rem 0 1rem;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 2.5rem 0 0.75rem;
+  }
+  p { margin-bottom: 1.4rem; }
+  strong { font-weight: 500; color: var(--text); }
+  em { font-style: italic; color: #c5c0b5; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p.aside { font-size: 14px; color: var(--muted); font-style: italic; margin: -0.5rem 0 1.4rem; }
+
+  /* ── CODE ─────────────────────────────── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 1.75rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #0e0e0e;
+  }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  pre {
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    color: #c9d1d9;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.83em;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  /* Reset inline-code styles inside code blocks — Shiki handles all colouring */
+  pre code { background: transparent; border: none; padding: 0; color: inherit; border-radius: 0; }
+  /* Syntax highlight helpers — use as <span class="X"> inside <pre> */
+  .kw  { color: var(--accent); }               /* keywords, headings */
+  .cm  { color: #4a5060; font-style: italic; } /* comments */
+  .st  { color: #a5d6ff; }                     /* strings */
+  .bad { color: var(--red); }                  /* bad examples */
+  .good{ color: var(--green); }                /* good examples */
+  .num { color: #c9b1f5; }                     /* numbers */
+
+  /* ── CALLOUTS ─────────────────────────── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-dim);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 6px 6px 0;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+  }
+  .callout.green { border-left-color: var(--green); background: var(--green-dim); }
+  .callout.red   { border-left-color: var(--red);   background: var(--red-dim);   }
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red   .callout-label { color: var(--red);   }
+
+  /* ── BLOCKQUOTE ───────────────────────── */
+  blockquote {
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    margin: 2.5rem 0;
+  }
+  blockquote::before {
+    content: '"';
+    font-family: 'Lora', serif;
+    font-size: 6rem;
+    color: var(--border);
+    position: absolute;
+    top: -1rem; left: 50%;
+    transform: translateX(-50%);
+    line-height: 1;
+  }
+  blockquote p {
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #c5c0b5;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+
+  /* ── TABLES ───────────────────────────── */
+  .table-wrap { overflow-x: auto; margin: 1.75rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #0f0f0f;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid #1c1c1c; vertical-align: top; line-height: 1.6; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+
+  /* ── DIVIDER ──────────────────────────── */
+  .divider { display: flex; align-items: center; gap: 1rem; margin: 3.5rem 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── COMPARE GRID ─────────────────────── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 6px; overflow: hidden; margin: 1.75rem 0; }
+  .compare-col { background: var(--surface); padding: 1.25rem; }
+  .compare-header { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .compare-header.bad-h  { color: var(--red); }
+  .compare-header.good-h { color: var(--green); }
+  .compare-item { font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .compare-item:last-child { border-bottom: none; }
+  .compare-item.bad-t  { color: #c9a0a0; }
+  .compare-item.good-t { color: #a0c9a8; }
+
+  /* ── CHECKLIST ────────────────────────── */
+  .check-list { list-style: none; margin: 1.5rem 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .check-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before { content: '[ ]'; flex-shrink: 0; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  /* ── WEEK GRID ────────────────────────── */
+  .week-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .week-day { background: var(--surface); padding: 1.25rem; }
+  .week-day-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .week-day-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .week-day-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── NEXT POST ────────────────────────── */
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
+  .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
+
+  /* ── COPY BUTTON ─────────────────────── */
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+  /* ── FOOTER ───────────────────────────── */
+  footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── RESPONSIVE ───────────────────────── */
+  @media (max-width: 640px) {
+    .hero { padding: 3rem 1.5rem; }
+    .container { padding: 0 1.5rem; }
+    h1 { font-size: 2rem; }
+    article { padding: 3rem 0; }
+    .compare { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="series-tag">Backend · Episode —</div>
+    <h1>SOLID: <em>The Simple Way</em> to Understand</h1>
+    <div class="hero-meta">
+      <span>February 2025</span>
+      <span>8 min read</span>
+      <span>Architecture · TypeScript · Backend</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ARTICLE ═══════════════ -->
+<div class="container">
+<article>
+
+  <!-- First paragraph becomes the .lead -->
+  <p class="lead">SOLID principles are one of those things where everyone remembers the S, most people vaguely recall the O, and the rest starts to get fuzzy around the L. This article fixes that — each principle explained with TypeScript examples just realistic enough to be recognisable, and just painful enough to make the refactor feel satisfying.</p>
+
+  <!-- ── All content sections go here ── -->
+  <blockquote><p>"Everyone knows the S in SOLID. The other four are where the architecture actually happens."</p></blockquote>
+
+<p>Explaining these principles without code examples is how you get vague definitions that sound wise and mean nothing. So: TypeScript, concrete classes, real violations, real fixes. Let's go.</p>
+
+<div class="divider"><span>single responsibility</span></div>
+<h2>Single Responsibility Principle (SRP)</h2>
+<p>The easiest one to explain, and — somehow — one of the most commonly violated. The rule: a class should have <strong>one reason to change</strong>. Not two. Not five. One.</p>
+<p>Here's a <code>TaskManager</code> class doing far too much with far too much confidence:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">typescript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> TaskManager</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">  constructor</span><span style="color:#ADBAC7">() {}</span></span>
+<span class="line"><span style="color:#DCBDFB">  connectAPI</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {}</span></span>
+<span class="line"><span style="color:#DCBDFB">  createTask</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Create Task"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#DCBDFB">  updateTask</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Update Task"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#DCBDFB">  removeTask</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Remove Task"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#DCBDFB">  sendNotification</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Send Notification"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#DCBDFB">  sendReport</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Send Report"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</div>
+
+<p class="aside"><em>This class connects to an API, manages tasks, sends notifications, and generates reports. It's not a TaskManager — it's a monolith in disguise, and it deserves everything that's about to happen to it in code review.</em></p>
+
+<p>The <code>sendNotification</code> and <code>sendReport</code> methods don't belong here. If the notification service changes, why should the task management class change too? Split the responsibilities:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">typescript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> APIConnector</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">  constructor</span><span style="color:#ADBAC7">() {}</span></span>
+<span class="line"><span style="color:#DCBDFB">  connectAPI</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {}</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Report</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">  constructor</span><span style="color:#ADBAC7">() {}</span></span>
+<span class="line"><span style="color:#DCBDFB">  sendReport</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Send Report"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Notificator</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">  constructor</span><span style="color:#ADBAC7">() {}</span></span>
+<span class="line"><span style="color:#DCBDFB">  sendNotification</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Send Notification"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> TaskManager</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">  constructor</span><span style="color:#ADBAC7">() {}</span></span>
+<span class="line"><span style="color:#DCBDFB">  createTask</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Create Task"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#DCBDFB">  updateTask</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Update Task"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#DCBDFB">  removeTask</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Remove Task"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</div>
+
+<div class="callout"><div class="callout-label">💡 Tip</div><p>Single Responsibility Principle: each class must have one, and only one, reason to change. If you find yourself writing "and" when describing what a class does, it has too many responsibilities.</p></div>
+
+<div class="divider"><span>open closed</span></div>
+<h2>Open/Closed Principle (OCP)</h2>
+<p>Software entities should be <strong>open for extension</strong> but <strong>closed for modification</strong>. In practice: adding new behaviour shouldn't require editing existing code.</p>
+<p>A useful smell to watch for — if a method has a long chain of <code>if/else</code> or <code>switch</code> statements based on a type field, you're probably violating OCP.</p>
+
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>Every time you add a new exam type to <code>approveRequestExam</code>, you open the existing method to bugs. The more types you add, the longer the method grows, the harder it is to test, and the higher the chance a new condition breaks an old one.</p></div>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">typescript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">type</span><span style="color:#F69D50"> ExamType</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F69D50">  type</span><span style="color:#F47067">:</span><span style="color:#96D0FF"> "BLOOD"</span><span style="color:#F47067"> |</span><span style="color:#96D0FF"> "XRay"</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">};</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> ExamApprove</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">  constructor</span><span style="color:#ADBAC7">() {}</span></span>
+<span class="line"><span style="color:#DCBDFB">  approveRequestExam</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">exam</span><span style="color:#F47067">:</span><span style="color:#F69D50"> ExamType</span><span style="color:#ADBAC7">)</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (exam.type </span><span style="color:#F47067">===</span><span style="color:#96D0FF"> "BLOOD"</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">      if</span><span style="color:#ADBAC7"> (</span><span style="color:#6CB6FF">this</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">verifyConditionsBlood</span><span style="color:#ADBAC7">(exam)) {</span></span>
+<span class="line"><span style="color:#ADBAC7">        console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Blood Exam Approved"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">      }</span></span>
+<span class="line"><span style="color:#ADBAC7">    } </span><span style="color:#F47067">else</span><span style="color:#F47067"> if</span><span style="color:#ADBAC7"> (exam.type </span><span style="color:#F47067">===</span><span style="color:#96D0FF"> "XRay"</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">      if</span><span style="color:#ADBAC7"> (</span><span style="color:#6CB6FF">this</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">verifyConditionsXRay</span><span style="color:#ADBAC7">(exam)) {</span></span>
+<span class="line"><span style="color:#ADBAC7">        console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"XRay Exam Approved!"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">      }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#DCBDFB">  verifyConditionsBlood</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">exam</span><span style="color:#F47067">:</span><span style="color:#F69D50"> ExamType</span><span style="color:#ADBAC7">)</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> boolean</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#6CB6FF"> true</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#DCBDFB">  verifyConditionsXRay</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">exam</span><span style="color:#F47067">:</span><span style="color:#F69D50"> ExamType</span><span style="color:#ADBAC7">)</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> boolean</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#6CB6FF"> false</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</div>
+
+<p class="aside"><em>"What if we add ultrasound exams?" — you ask. The answer, with this code, is: find every if/else chain that mentions exam types and add another branch. Enjoy.</em></p>
+
+<p>The fix: define an interface, implement it per type. Adding a new exam type means writing a new class — existing code stays untouched:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">typescript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">type</span><span style="color:#F69D50"> ExamType</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F69D50">  type</span><span style="color:#F47067">:</span><span style="color:#96D0FF"> "BLOOD"</span><span style="color:#F47067"> |</span><span style="color:#96D0FF"> "XRay"</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">};</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">interface</span><span style="color:#F69D50"> ExamApprove</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  approveRequestExam</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">exam</span><span style="color:#F47067">:</span><span style="color:#F69D50"> NewExamType</span><span style="color:#ADBAC7">)</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#DCBDFB">  verifyConditionExam</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">exam</span><span style="color:#F47067">:</span><span style="color:#F69D50"> NewExamType</span><span style="color:#ADBAC7">)</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> boolean</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> BloodExamApprove</span><span style="color:#F47067"> implements</span><span style="color:#6CB6FF"> ExamApprove</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  approveRequestExam</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">exam</span><span style="color:#F47067">:</span><span style="color:#F69D50"> ExamApprove</span><span style="color:#ADBAC7">)</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (</span><span style="color:#6CB6FF">this</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">verifyConditionExam</span><span style="color:#ADBAC7">(exam)) {</span></span>
+<span class="line"><span style="color:#ADBAC7">      console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Blood Exam Approved"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#DCBDFB">  verifyConditionExam</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">exam</span><span style="color:#F47067">:</span><span style="color:#F69D50"> ExamApprove</span><span style="color:#ADBAC7">)</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> boolean</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#6CB6FF"> true</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> RayXExamApprove</span><span style="color:#F47067"> implements</span><span style="color:#6CB6FF"> ExamApprove</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  approveRequestExam</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">exam</span><span style="color:#F47067">:</span><span style="color:#F69D50"> ExamApprove</span><span style="color:#ADBAC7">)</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (</span><span style="color:#6CB6FF">this</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">verifyConditionExam</span><span style="color:#ADBAC7">(exam)) {</span></span>
+<span class="line"><span style="color:#ADBAC7">      console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"RayX Exam Approved"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#DCBDFB">  verifyConditionExam</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">exam</span><span style="color:#F47067">:</span><span style="color:#F69D50"> NewExamType</span><span style="color:#ADBAC7">)</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> boolean</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#6CB6FF"> true</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</div>
+
+<div class="callout"><div class="callout-label">💡 Tip</div><p>Open/Closed Principle: software entities must be open for extension but closed for modification. When a new requirement means editing existing logic rather than adding new code, OCP is being violated.</p></div>
+
+<div class="divider"><span>liskov substitution</span></div>
+<h2>Liskov Substitution Principle (LSP)</h2>
+<p>The one with the intimidating name and the intuitive idea. If you have a base class and a subclass, <strong>you should be able to use the subclass anywhere the base class is expected</strong> — without anything breaking, and without any empty method implementations to paper over the gaps.</p>
+<p>Here's a violation hiding in an inheritance chain:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">typescript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Student</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">  constructor</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">public</span><span style="color:#F69D50"> name</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> string</span><span style="color:#ADBAC7">) {}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#DCBDFB">  study</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`${</span><span style="color:#6CB6FF">this</span><span style="color:#96D0FF">.</span><span style="color:#ADBAC7">name</span><span style="color:#96D0FF">} is studying`</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#DCBDFB">  deliverTCC</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#768390">    /** Problem: Postgraduate students don't deliver TCC */</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> PostgraduateStudent</span><span style="color:#F47067"> extends</span><span style="color:#6CB6FF"> Student</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  study</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`${</span><span style="color:#6CB6FF">this</span><span style="color:#96D0FF">.</span><span style="color:#ADBAC7">name</span><span style="color:#96D0FF">} is studying and researching`</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</div>
+
+<p><code>PostgraduateStudent</code> extends <code>Student</code>, but postgraduate students don't deliver a TCC. The method exists on the parent, so it exists on the child — even though it shouldn't. The inheritance is lying about the relationship.</p>
+
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">❌ Forcing inheritance</div>
+    <div class="compare-item bad-t">PostgraduateStudent extends Student</div>
+    <div class="compare-item bad-t">deliverTCC() exists on subclass — but does nothing</div>
+    <div class="compare-item bad-t">Every consumer of Student now gets a useless method</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">✅ Model the actual relationship</div>
+    <div class="compare-item good-t">Student is the shared base</div>
+    <div class="compare-item good-t">StudentGraduation adds deliverTCC()</div>
+    <div class="compare-item good-t">StudentPostGraduation stays clean — no phantom methods</div>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">typescript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Student</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">  constructor</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">public</span><span style="color:#F69D50"> name</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> string</span><span style="color:#ADBAC7">) {}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#DCBDFB">  study</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`${</span><span style="color:#6CB6FF">this</span><span style="color:#96D0FF">.</span><span style="color:#ADBAC7">name</span><span style="color:#96D0FF">} is studying`</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> StudentGraduation</span><span style="color:#F47067"> extends</span><span style="color:#6CB6FF"> Student</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  study</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`${</span><span style="color:#6CB6FF">this</span><span style="color:#96D0FF">.</span><span style="color:#ADBAC7">name</span><span style="color:#96D0FF">} is studying`</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#DCBDFB">  deliverTCC</span><span style="color:#ADBAC7">() {}</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> StudentPostGraduation</span><span style="color:#F47067"> extends</span><span style="color:#6CB6FF"> Student</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  study</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`${</span><span style="color:#6CB6FF">this</span><span style="color:#96D0FF">.</span><span style="color:#ADBAC7">name</span><span style="color:#96D0FF">} is studying and researching`</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</div>
+
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>Liskov Substitution Principle: derived classes must be substitutable for their base classes. If a subclass needs to leave a method empty or throw "not implemented", the inheritance hierarchy is wrong — not the method.</p></div>
+
+<div class="divider"><span>interface segregation</span></div>
+<h2>Interface Segregation Principle (ISP)</h2>
+<p>A class should not be forced to implement interfaces and methods it doesn't use. The problem usually starts with a fat interface that tries to describe too many things at once:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">typescript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">interface</span><span style="color:#F69D50"> Employee</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  salary</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> number</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#DCBDFB">  generateCommission</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Seller</span><span style="color:#F47067"> implements</span><span style="color:#6CB6FF"> Employee</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  salary</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> number</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#6CB6FF"> 1000</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#DCBDFB">  generateCommission</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Generating Commission"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Receptionist</span><span style="color:#F47067"> implements</span><span style="color:#6CB6FF"> Employee</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  salary</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> number</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#6CB6FF"> 1000</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#DCBDFB">  generateCommission</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#768390">    /** Problem: Receptionist doesn't have a commission */</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</div>
+
+<p class="aside"><em><code>generateCommission(): void { /* Receptionist doesn't have a commission */ }</code> — an empty method implementation is not a solution. It's a comment written in TypeScript telling you the interface is wrong.</em></p>
+
+<p>The fix is to split the interface by responsibility. <code>Employee</code> covers what all employees share. <code>Commissionable</code> covers what only some employees need:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">typescript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">interface</span><span style="color:#F69D50"> Employee</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  salary</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> number</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">interface</span><span style="color:#F69D50"> Commissionable</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  generateCommission</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Seller</span><span style="color:#F47067"> implements</span><span style="color:#6CB6FF"> Employee</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">Commissionable</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  salary</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> number</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#6CB6FF"> 1000</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#DCBDFB">  generateCommission</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> void</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Generating Commission"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Receptionist</span><span style="color:#F47067"> implements</span><span style="color:#6CB6FF"> Employee</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  salary</span><span style="color:#ADBAC7">()</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> number</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#6CB6FF"> 1000</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</div>
+
+<div class="callout"><div class="callout-label">💡 Tip</div><p>Interface Segregation Principle: a class should not be forced to implement interfaces and methods it will not use. When a class implements an interface and leaves methods empty, the interface is doing too much — split it.</p></div>
+
+<div class="divider"><span>dependency inversion</span></div>
+<h2>Dependency Inversion Principle (DIP)</h2>
+<p>High-level modules should not depend on low-level modules. Both should depend on abstractions. In practice: <strong>stop calling <code>new</code> inside your classes</strong> — inject the dependency instead.</p>
+<p>Here's the tight-coupling version. <code>OrderService</code> constructs its own <code>OrderRepository</code>, which means swapping the repository for a test double — or a MongoDB implementation — means editing <code>OrderService</code>:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">typescript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">interface</span><span style="color:#F69D50"> Order</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F69D50">  id</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> number</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F69D50">  name</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> string</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> OrderRepository</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">  constructor</span><span style="color:#ADBAC7">() {}</span></span>
+<span class="line"><span style="color:#DCBDFB">  saveOrder</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">order</span><span style="color:#F47067">:</span><span style="color:#F69D50"> Order</span><span style="color:#ADBAC7">) {}</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> OrderService</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">  private</span><span style="color:#F69D50"> orderRepository</span><span style="color:#F47067">:</span><span style="color:#F69D50"> OrderRepository</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">  constructor</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#6CB6FF">    this</span><span style="color:#ADBAC7">.orderRepository </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#DCBDFB"> OrderRepository</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#DCBDFB">  processOrder</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">order</span><span style="color:#F47067">:</span><span style="color:#F69D50"> Order</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#6CB6FF">    this</span><span style="color:#ADBAC7">.orderRepository.</span><span style="color:#DCBDFB">saveOrder</span><span style="color:#ADBAC7">(order);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</div>
+
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>When a class calls <code>new ConcreteImplementation()</code> in its constructor, it's taking ownership of that dependency. You can't swap it without changing the class. You can't test it without the real thing. You've just hidden a hardcoded dependency inside an object.</p></div>
+
+<p>The fix: inject the dependency through the constructor. <code>OrderService</code> now depends on the type, not the implementation — meaning any repository that satisfies the type works:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">typescript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">interface</span><span style="color:#F69D50"> Order</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F69D50">  id</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> number</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F69D50">  name</span><span style="color:#F47067">:</span><span style="color:#6CB6FF"> string</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> OrderRepository</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">  constructor</span><span style="color:#ADBAC7">() {}</span></span>
+<span class="line"><span style="color:#DCBDFB">  saveOrder</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">order</span><span style="color:#F47067">:</span><span style="color:#F69D50"> Order</span><span style="color:#ADBAC7">) {}</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> OrderService</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">  private</span><span style="color:#F69D50"> orderRepository</span><span style="color:#F47067">:</span><span style="color:#F69D50"> OrderRepository</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">  constructor</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">repository</span><span style="color:#F47067">:</span><span style="color:#F69D50"> OrderRepository</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#6CB6FF">    this</span><span style="color:#ADBAC7">.orderRepository </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> repository;</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#DCBDFB">  processOrder</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">order</span><span style="color:#F47067">:</span><span style="color:#F69D50"> Order</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#6CB6FF">    this</span><span style="color:#ADBAC7">.orderRepository.</span><span style="color:#DCBDFB">saveOrder</span><span style="color:#ADBAC7">(order);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</div>
+
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>Dependency Inversion Principle: depend on abstractions, not concrete implementations. This is why dependency injection frameworks exist — not to be clever, but to make this principle the default rather than the exception.</p></div>
+
+  <!-- ── Series navigation ── -->
+  <div class="next-post">
+    <div>
+      <div class="next-label">Next in the series</div>
+      <div class="next-title"></div>
+    </div>
+    <div class="next-arrow">→</div>
+  </div>
+
+</article>
+</div>
+
+<footer>
+  <div>No external sources.</div>
+  <div style="margin-top: 8px; color: #3d3a35;">claude-code-journey.md · episode —</div>
+</footer>
+
+<script>
+  document.querySelectorAll('.code-block').forEach(block => {
+    const header = block.querySelector('.code-header');
+    const pre = block.querySelector('pre');
+    if (!header || !pre) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText.trim()).then(() => {
+        btn.textContent = '✓ copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    });
+
+    header.appendChild(btn);
+  });
+</script>
+</body>
+</html>
