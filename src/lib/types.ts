@@ -18,8 +18,10 @@ export interface Article {
 	title: string;
 	description?: string;
 	publishedDate: string;
-	poster: string;
+	poster?: string;
 	slug: string;
 	category?: string;
 	htmlFile?: string;
+	series?: string;
+	episode?: number;
 }

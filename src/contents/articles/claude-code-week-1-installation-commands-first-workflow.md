@@ -4,13 +4,15 @@ publishedDate: May 20, 2026
 category: AI
 poster: /articles/claude/cover.png
 htmlFile: claude-code-week1-installation-blog
+series: Claude Code
+episode: 1
 ---
 
 Content is user-generated and unverified.
 
 > 
 >
-> **Learning in Public · Episode 01**
+> **Claude Code · Episode 01**
 >
 >
 

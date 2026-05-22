@@ -197,6 +197,43 @@ export async function detectCategory(title, description, markdown, openai) {
   return matched ?? raw;
 }
 
+const THUMBNAIL_PROMPT_SYSTEM =
+  'You are a DALL-E prompt writer for technical blog post cover images. ' +
+  'Write a vivid, detailed image generation prompt that visually represents the article topic. ' +
+  'Style: dark background, modern tech aesthetic, abstract or diagrammatic, no text or letters in the image. ' +
+  'The image must work as a 16:9 blog header thumbnail. ' +
+  'Reply with ONLY the prompt text — no commentary, no quotes, no preamble.';
+
+/**
+ * Generates a DALL-E 3 thumbnail for a blog post.
+ * Returns the image URL (valid ~1 hour from OpenAI).
+ */
+export async function generateThumbnail(title, description, openai) {
+  const input = `Title: ${title}${description ? `\nDescription: ${description}` : ''}`;
+
+  const promptResponse = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      { role: 'system', content: THUMBNAIL_PROMPT_SYSTEM },
+      { role: 'user', content: input },
+    ],
+    max_tokens: 200,
+    temperature: 0.7,
+  });
+
+  const dallePrompt = promptResponse.choices[0].message.content.trim();
+
+  const imageResponse = await openai.images.generate({
+    model: 'dall-e-3',
+    prompt: dallePrompt,
+    size: '1792x1024',
+    quality: 'standard',
+    n: 1,
+  });
+
+  return imageResponse.data[0].url;
+}
+
 /**
  * Creates an OpenAI client from environment. Returns null if key is missing.
  */

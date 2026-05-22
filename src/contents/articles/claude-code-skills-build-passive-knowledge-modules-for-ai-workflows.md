@@ -4,13 +4,15 @@ publishedDate: May 21, 2026
 category: AI
 poster: /articles/claude/cover.png
 htmlFile: claude-code-week3-skills
+series: Claude Code
+episode: 3
 ---
 
 Content is user-generated and unverified.
 
 > 
 >
-> **Learning in Public · Episode 03**
+> **Claude Code · Episode 03**
 >
 >
 
