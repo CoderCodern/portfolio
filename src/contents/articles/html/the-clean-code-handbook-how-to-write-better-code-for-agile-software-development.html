@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Clean Code Handbook: How to Write Better Code for Agile Software Development</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #e8e4dc;
+    --muted: #7a7570;
+    --accent: #e8a84c;       /* episode accent */
+    --accent-dim: #3d2c12;     /* tinted background for callouts */
+    --code-bg: #111;
+    --green: #4caf7d;
+    --green-dim: #122a1e;
+    --red: #ff7b72;
+    --red-dim: #2a1212;
+    --blue: #79c0ff;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    font-size: 17px;
+  }
+
+  /* ── HERO ─────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 25%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 70%, rgba(232,168,76,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 800px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+
+  .series-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    padding: 6px 14px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  .series-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    max-width: 720px;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-wrap: wrap;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta span::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+  }
+  .hero-meta span:first-child::before { display: none; }
+
+  /* ── LAYOUT ───────────────────────────── */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  article { padding: 5rem 0; }
+
+  .lead {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: #c5c0b5;
+    margin-bottom: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin: 3.5rem 0 1rem;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 2.5rem 0 0.75rem;
+  }
+  p { margin-bottom: 1.4rem; }
+  strong { font-weight: 500; color: var(--text); }
+  em { font-style: italic; color: #c5c0b5; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p.aside { font-size: 14px; color: var(--muted); font-style: italic; margin: -0.5rem 0 1.4rem; }
+
+  /* ── CODE ─────────────────────────────── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 1.75rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #0e0e0e;
+  }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  pre {
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    color: #c9d1d9;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.83em;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  /* Reset inline-code styles inside code blocks — Shiki handles all colouring */
+  pre code { background: transparent; border: none; padding: 0; color: inherit; border-radius: 0; }
+  /* Syntax highlight helpers — use as <span class="X"> inside <pre> */
+  .kw  { color: var(--accent); }               /* keywords, headings */
+  .cm  { color: #4a5060; font-style: italic; } /* comments */
+  .st  { color: #a5d6ff; }                     /* strings */
+  .bad { color: var(--red); }                  /* bad examples */
+  .good{ color: var(--green); }                /* good examples */
+  .num { color: #c9b1f5; }                     /* numbers */
+
+  /* ── CALLOUTS ─────────────────────────── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-dim);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 6px 6px 0;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+  }
+  .callout.green { border-left-color: var(--green); background: var(--green-dim); }
+  .callout.red   { border-left-color: var(--red);   background: var(--red-dim);   }
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red   .callout-label { color: var(--red);   }
+
+  /* ── BLOCKQUOTE ───────────────────────── */
+  blockquote {
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    margin: 2.5rem 0;
+  }
+  blockquote::before {
+    content: '"';
+    font-family: 'Lora', serif;
+    font-size: 6rem;
+    color: var(--border);
+    position: absolute;
+    top: -1rem; left: 50%;
+    transform: translateX(-50%);
+    line-height: 1;
+  }
+  blockquote p {
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #c5c0b5;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+
+  /* ── TABLES ───────────────────────────── */
+  .table-wrap { overflow-x: auto; margin: 1.75rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #0f0f0f;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid #1c1c1c; vertical-align: top; line-height: 1.6; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+
+  /* ── DIVIDER ──────────────────────────── */
+  .divider { display: flex; align-items: center; gap: 1rem; margin: 3.5rem 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── COMPARE GRID ─────────────────────── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 6px; overflow: hidden; margin: 1.75rem 0; }
+  .compare-col { background: var(--surface); padding: 1.25rem; }
+  .compare-header { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .compare-header.bad-h  { color: var(--red); }
+  .compare-header.good-h { color: var(--green); }
+  .compare-item { font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .compare-item:last-child { border-bottom: none; }
+  .compare-item.bad-t  { color: #c9a0a0; }
+  .compare-item.good-t { color: #a0c9a8; }
+
+  /* ── CHECKLIST ────────────────────────── */
+  .check-list { list-style: none; margin: 1.5rem 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .check-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before { content: '[ ]'; flex-shrink: 0; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  /* ── WEEK GRID ────────────────────────── */
+  .week-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .week-day { background: var(--surface); padding: 1.25rem; }
+  .week-day-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .week-day-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .week-day-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── NEXT POST ────────────────────────── */
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
+  .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
+
+  /* ── COPY BUTTON ─────────────────────── */
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+  /* ── FOOTER ───────────────────────────── */
+  footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── RESPONSIVE ───────────────────────── */
+  @media (max-width: 640px) {
+    .hero { padding: 3rem 1.5rem; }
+    .container { padding: 0 1.5rem; }
+    h1 { font-size: 2rem; }
+    article { padding: 3rem 0; }
+    .compare { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="series-tag">Career · Episode </div>
+    <h1>The Clean Code Handbook: Write Code <em>That Outlives You</em></h1>
+    <div class="hero-meta">
+      <span>February 2025</span>
+      <span>18 min read</span>
+      <span>Clean Code · JavaScript · Agile</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ARTICLE ═══════════════ -->
+<div class="container">
+<article>
+
+  <!-- First paragraph becomes the .lead -->
+  <p class="lead">In Agile, where change is the only constant, clean code is your armor. It makes you adaptable, swift, and — most importantly — in control. This handbook breaks down 12 essential design patterns for writing clean, maintainable JavaScript in modern Agile environments. No jargon. No fluff. Just the patterns that separate developers who accelerate as their codebase grows from those who drown in their own technical debt.</p>
+
+  <!-- ── All content sections go here ── -->
+  <div class="divider"><span>the real cost</span></div>
+<h2>The Cost of Bad Code</h2>
+<p>Bad code starts cheap. That's the trap. Early in a project, writing messy code is only <em>slightly</em> more expensive to change than clean code — so developers rationalize it. "We'll refactor later." Later never comes.</p>
+<p>By the maintenance phase, that cost gap doubles. By the legacy phase, updating bad code costs 100% more than it should, while clean code stays manageable at ~45%. The math is brutal and it compounds.</p>
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>According to the 2022 CISQ report, poor software quality cost the U.S. economy at least <strong>$2.41 trillion</strong> — with technical debt accounting for approximately $1.52 trillion of that figure. A 2024 survey found that for over 50% of companies, technical debt makes up more than a quarter of their total IT budget.</p></div>
+<p class="aside"><em>$1.52 trillion in technical debt. Somewhere, someone wrote that code in a hurry and thought "good enough." They were wrong. So were the two developers who had to maintain it after they left.</em></p>
+<p>Here's what the journey of two types of coders looks like over time:</p>
+<img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/c6ubf77uwipf4gtucw8q.png" alt="Clean Coder vs Messy Coder — clean coder starts slow but accelerates, messy coder starts fast and stalls" style="max-width:100%;border-radius:8px;margin:1.5rem 0;">
+<p>The Messy Coder starts fast. The Clean Coder starts slow. Give it six months and the lines cross. Give it a year and the Messy Coder is drowning. The choice is made in the very first pull request.</p>
+<blockquote><p>"In the Agile environment, where change is constant, clean code serves as your protective gear. It enhances your adaptability, speed, and, most importantly, your control over the development process."</p></blockquote>
+
+<div class="divider"><span>ai won't save you</span></div>
+<h2>AI Can't Save You If Your Code Is a Mess</h2>
+<p>When you're stuck, you might reach for an AI tool. Here's the cold truth: <strong>AI cannot rescue you from disorganized code.</strong> It can generate more of it, faster — which is not the same thing as better.</p>
+<p>Think of it like constructing a house on unstable ground. It stands for a while, until one significant wave. AI is just a tool. If you lack the ability to write clean, scalable applications, you're building on sand — now at twice the speed.</p>
+<div class="callout"><div class="callout-label">💡 Tip</div><p>AI amplifies your existing habits. If you write clean code, AI helps you ship faster. If you write messy code, AI helps you create a larger mess with more confidence. Choose accordingly.</p></div>
+<p class="aside"><em>I've seen developers fluent in five languages crash into their own codebases like aerospace engineers who built the plane but never learned to fly it. More languages don't fix the problem. Cleaner structure does.</em></p>
+
+<div class="divider"><span>12 principles</span></div>
+<h2>12 Clean Code Design Patterns for Agile Applications</h2>
+<p>These aren't suggestions. They are the patterns that separate maintainable code from the kind that gets quietly rewritten six months after you leave the team.</p>
+
+<h3>1. Use Names That Mean Something</h3>
+<p>Naming a variable <code>b</code> or a function <code>calc</code> is not saving time — it's borrowing time from your future self at a very high interest rate.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">javascript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// Weak and vague</span></span>
+<span class="line"><span style="color:#F47067">let</span><span style="color:#ADBAC7"> b </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 5</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#768390">// Strong and clear</span></span>
+<span class="line"><span style="color:#F47067">let</span><span style="color:#ADBAC7"> numberOfUsers </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 5</span><span style="color:#ADBAC7">;</span></span></code></pre>
+</div>
+<p class="aside"><em>"Writers of unclear names often avoid taking responsibility for their mistakes." The author of this tip probably named a few things <code>x</code> early in their career. We all did. We all paid for it.</em></p>
+
+<h3>2. Keep Functions Laser-Focused (SRP)</h3>
+<p>The Single Responsibility Principle: a function should do <strong>one thing</strong> and do it exceptionally well. A function that calculates, logs, sends an email, and saves to the database is not a function — it's a liability.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">javascript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// Clean: One job, one focus</span></span>
+<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> calculateTotal</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">a</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">b</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">+</span><span style="color:#ADBAC7"> b;</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> logTotal</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">user</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">total</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`User: ${</span><span style="color:#ADBAC7">user</span><span style="color:#96D0FF">}, Total: ${</span><span style="color:#ADBAC7">total</span><span style="color:#96D0FF">}`</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#768390">// Messy: Trying to do EVERYTHING</span></span>
+<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> calculateAndLogTotal</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">a</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">b</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">user</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">    let</span><span style="color:#ADBAC7"> total </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">+</span><span style="color:#ADBAC7"> b;</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`User: ${</span><span style="color:#ADBAC7">user</span><span style="color:#96D0FF">}, Total: ${</span><span style="color:#ADBAC7">total</span><span style="color:#96D0FF">}`</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</div>
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">❌ The Messy Approach</div>
+    <div class="compare-item bad-t">Function does calculation AND side effects</div>
+    <div class="compare-item bad-t">One change breaks multiple concerns</div>
+    <div class="compare-item bad-t">Impossible to unit test in isolation</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">✅ The Clean Approach</div>
+    <div class="compare-item good-t">Each function has exactly one job</div>
+    <div class="compare-item good-t">Changes are isolated by concern</div>
+    <div class="compare-item good-t">Every function is trivially testable</div>
+  </div>
+</div>
+
+<h3>3. Comment the Why, Not the What</h3>
+<p>A well-written comment explains <strong>why</strong> the code exists — not what it does. If you need a comment to explain what your code is doing, the code is the problem, not the reader.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">javascript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// The user is authenticated before accessing protected resources</span></span>
+<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> isUserLoggedIn</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">session</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#F47067"> !!</span><span style="color:#ADBAC7">session.user;</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</div>
+<p>Here's a real-world shipping cost function that demonstrates good comment discipline in action:</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">javascript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// Shipping rules:</span></span>
+<span class="line"><span style="color:#768390">// - Free shipping for orders over $100</span></span>
+<span class="line"><span style="color:#768390">// - Standard shipping ($10) for orders below $100</span></span>
+<span class="line"><span style="color:#768390">// - Additional $5 for international orders</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> calculateShipping</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">order</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">    let</span><span style="color:#ADBAC7"> shippingCost </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 0</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#768390">    // Check if the order qualifies for free shipping</span></span>
+<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (order.total </span><span style="color:#F47067">>=</span><span style="color:#6CB6FF"> 100</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">        shippingCost </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 0</span><span style="color:#ADBAC7">; </span><span style="color:#768390">// Free shipping</span></span>
+<span class="line"><span style="color:#ADBAC7">    } </span><span style="color:#F47067">else</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">        shippingCost </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 10</span><span style="color:#ADBAC7">; </span><span style="color:#768390">// Standard shipping cost</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#768390">    // Add additional cost for international orders</span></span>
+<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (order.isInternational) {</span></span>
+<span class="line"><span style="color:#ADBAC7">        shippingCost </span><span style="color:#F47067">+=</span><span style="color:#6CB6FF"> 5</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#ADBAC7"> shippingCost;</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#768390">// Example usage</span></span>
+<span class="line"><span style="color:#F47067">const</span><span style="color:#6CB6FF"> order1</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> { total: </span><span style="color:#6CB6FF">120</span><span style="color:#ADBAC7">, isInternational: </span><span style="color:#6CB6FF">false</span><span style="color:#ADBAC7"> };</span></span>
+<span class="line"><span style="color:#F47067">const</span><span style="color:#6CB6FF"> order2</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> { total: </span><span style="color:#6CB6FF">80</span><span style="color:#ADBAC7">, isInternational: </span><span style="color:#6CB6FF">true</span><span style="color:#ADBAC7"> };</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ADBAC7">console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#DCBDFB">calculateShipping</span><span style="color:#ADBAC7">(order1)); </span><span style="color:#768390">// Output: 0</span></span>
+<span class="line"><span style="color:#ADBAC7">console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#DCBDFB">calculateShipping</span><span style="color:#ADBAC7">(order2)); </span><span style="color:#768390">// Output: 15</span></span></code></pre>
+</div>
+<div class="callout"><div class="callout-label">💡 Tip</div><p>Ask yourself: does this comment explain <em>why</em> the code exists, or does it just restate what the code already shows? If it's the latter — delete it. The code speaks for itself. A good comment adds context the code can't.</p></div>
+
+<h3>4. Make Your Code Readable</h3>
+<p>If reading your code feels like solving a riddle, you've already created a bug magnet. Readability isn't a stylistic choice — it's a functional requirement. Unreadable code produces bugs at a rate no linter can keep up with.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">javascript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// Clean: Reads like a story</span></span>
+<span class="line"><span style="color:#F47067">if</span><span style="color:#ADBAC7"> (isLoggedIn) {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Welcome!"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">} </span><span style="color:#F47067">else</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Please log in."</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#768390">// Messy: Feels like chaos</span></span>
+<span class="line"><span style="color:#F47067">if</span><span style="color:#ADBAC7">(isLoggedIn){console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Welcome!"</span><span style="color:#ADBAC7">);}</span><span style="color:#F47067">else</span><span style="color:#ADBAC7">{console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Please log in."</span><span style="color:#ADBAC7">);}</span></span></code></pre>
+</div>
+<p class="aside"><em>The second version is technically valid JavaScript. It also looks like someone's cat walked across the keyboard at 2am during a production incident. Don't be the cat-keyboard developer.</em></p>
+
+<h3>5. Test Everything You Write</h3>
+<p>If you don't write tests, you shouldn't be surprised when code breaks in production. Unit testing verifies individual functions in isolation — like inspecting each brick before building the wall. By the time the wall is up, it's too late.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">javascript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Calculator</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">    add</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">a</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">b</span><span style="color:#ADBAC7">) { </span><span style="color:#F47067">return</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">+</span><span style="color:#ADBAC7"> b; }</span></span>
+<span class="line"><span style="color:#DCBDFB">    subtract</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">a</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">b</span><span style="color:#ADBAC7">) { </span><span style="color:#F47067">return</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">-</span><span style="color:#ADBAC7"> b; }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#768390">// Test it (Unit Test)</span></span>
+<span class="line"><span style="color:#F47067">const</span><span style="color:#6CB6FF"> calculator</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#DCBDFB"> Calculator</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#ADBAC7">console.</span><span style="color:#DCBDFB">assert</span><span style="color:#ADBAC7">(calculator.</span><span style="color:#DCBDFB">add</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">2</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">3</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">===</span><span style="color:#6CB6FF"> 5</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"Addition failed"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">console.</span><span style="color:#DCBDFB">assert</span><span style="color:#ADBAC7">(calculator.</span><span style="color:#DCBDFB">subtract</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">5</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">3</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">===</span><span style="color:#6CB6FF"> 2</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"Subtraction failed"</span><span style="color:#ADBAC7">);</span></span></code></pre>
+</div>
+<p>For real-world auth logic, where correctness actually matters:</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">javascript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Auth</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">    login</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">username</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">password</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">        return</span><span style="color:#ADBAC7"> username </span><span style="color:#F47067">===</span><span style="color:#96D0FF"> "admin"</span><span style="color:#F47067"> &#x26;&#x26;</span><span style="color:#ADBAC7"> password </span><span style="color:#F47067">===</span><span style="color:#96D0FF"> "1234"</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#768390">// Test the Auth class</span></span>
+<span class="line"><span style="color:#F47067">const</span><span style="color:#6CB6FF"> auth</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#DCBDFB"> Auth</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#ADBAC7">console.</span><span style="color:#DCBDFB">assert</span><span style="color:#ADBAC7">(auth.</span><span style="color:#DCBDFB">login</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"admin"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"et5t45#@"</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">===</span><span style="color:#6CB6FF"> true</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"Login failed for valid credentials"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">console.</span><span style="color:#DCBDFB">assert</span><span style="color:#ADBAC7">(auth.</span><span style="color:#DCBDFB">login</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"user"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"wrongpassword"</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">===</span><span style="color:#6CB6FF"> false</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"Login succeeded for invalid credentials"</span><span style="color:#ADBAC7">);</span></span></code></pre>
+</div>
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>Write tests <em>before</em> you're sure the code works. Write them especially <em>before</em> you're sure. That confidence is exactly when bugs hide. TDD isn't ceremony — it's precision.</p></div>
+
+<h3>6. Use Dependency Injection</h3>
+<p>Hardcoding dependencies is like tattooing someone's name on your forehead — permanent, potentially embarrassing, and completely inflexible. Dependency Injection passes dependencies as arguments, making your code swappable and testable.</p>
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">❌ Hardcoded Dependency</div>
+    <div class="compare-item bad-t">Tightly coupled to specific implementation</div>
+    <div class="compare-item bad-t">Cannot swap for testing without hacks</div>
+    <div class="compare-item bad-t">Changing the library breaks the function</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">✅ Injected Dependency</div>
+    <div class="compare-item good-t">Depends on abstraction, not implementation</div>
+    <div class="compare-item good-t">Pass a mock in tests, the real thing in prod</div>
+    <div class="compare-item good-t">New library? Pass a different argument</div>
+  </div>
+</div>
+<p>Always assess the security, performance, and quality of external libraries before injecting them into your project. Some dependencies introduce risks that can jeopardize your entire application — not just the module that imports them.</p>
+
+<h3>7. Structure Your Project Cleanly</h3>
+<p>A well-organized project is the difference between a boutique and a junk drawer. When someone new joins the team, a clean structure means they're productive in hours, not days.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">javascript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// Dependency: Sending emails with Nodemailer</span></span>
+<span class="line"><span style="color:#F47067">const</span><span style="color:#6CB6FF"> nodemailer</span><span style="color:#F47067"> =</span><span style="color:#DCBDFB"> require</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">'nodemailer'</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> sendEmail</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">to</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">subject</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">message</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">    const</span><span style="color:#6CB6FF"> transporter</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> nodemailer.</span><span style="color:#DCBDFB">createTransport</span><span style="color:#ADBAC7">({ </span><span style="color:#768390">/* config */</span><span style="color:#ADBAC7"> });</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#ADBAC7"> transporter.</span><span style="color:#DCBDFB">sendMail</span><span style="color:#ADBAC7">({ from: </span><span style="color:#96D0FF">"programmingwithshahan@gmail.com"</span><span style="color:#ADBAC7">, to, subject, text: message });</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</div>
+<p>Keep <code>src/</code> for production code and <code>tests/</code> separate at the root level. Don't put all tests in one file — as the project grows, locating a specific test becomes its own debugging problem.</p>
+<p class="aside"><em>One massive test file that "tests everything" is technically a test suite. It's also a lie. Split tests by domain, or your green checkmarks will tell you nothing useful about what actually works.</em></p>
+
+<h3>8. Be Consistent with Formatting</h3>
+<p>Don't write code as if you're ten different people on ten different shifts. Consistent formatting reduces cognitive load, prevents misread logic, and eliminates entire categories of code review comments.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">bash</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">myProject/</span></span>
+<span class="line"><span style="color:#F69D50">├──</span><span style="color:#96D0FF"> src/</span><span style="color:#768390">              # Production code</span></span>
+<span class="line"><span style="color:#F69D50">│</span><span style="color:#96D0FF">   ├──</span><span style="color:#96D0FF"> components/</span></span>
+<span class="line"><span style="color:#F69D50">│</span><span style="color:#96D0FF">   ├──</span><span style="color:#96D0FF"> services/</span></span>
+<span class="line"><span style="color:#F69D50">│</span><span style="color:#96D0FF">   └──</span><span style="color:#96D0FF"> utils/</span></span>
+<span class="line"><span style="color:#F69D50">├──</span><span style="color:#96D0FF"> tests/</span><span style="color:#768390">            # Test files</span></span>
+<span class="line"><span style="color:#F69D50">│</span><span style="color:#96D0FF">   ├──</span><span style="color:#96D0FF"> components/</span></span>
+<span class="line"><span style="color:#F69D50">│</span><span style="color:#96D0FF">   ├──</span><span style="color:#96D0FF"> services/</span></span>
+<span class="line"><span style="color:#F69D50">│</span><span style="color:#96D0FF">   └──</span><span style="color:#96D0FF"> utils/</span></span>
+<span class="line"><span style="color:#F69D50">├──</span><span style="color:#96D0FF"> package.json</span><span style="color:#768390">      # Project configuration</span></span>
+<span class="line"><span style="color:#F69D50">└──</span><span style="color:#96D0FF"> README.md</span><span style="color:#768390">         # Documentation</span></span></code></pre>
+</div>
+<div class="callout"><div class="callout-label">💡 Tip</div><p>Set up Prettier and ESLint. Enforce them in CI. Never argue about formatting in a code review again. The tool wins every argument, and it doesn't have feelings about it.</p></div>
+
+<h3>9. Stop Hardcoding Values</h3>
+<p>Hardcoded values are lazy coding. When the business decides <code>maxUsers</code> changes from 100 to 500, do you want to grep 47 files for the number 100? No. Extract constants — name them, and put them where you can find them.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">javascript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">throw</span><span style="color:#F47067"> new</span><span style="color:#DCBDFB"> Error</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Dimensions must be positive numbers."</span><span style="color:#ADBAC7">);</span></span></code></pre>
+</div>
+<p>Store fixed values in a configuration or constants file. When the value changes, you change it in one place. Your future self will write you a thank-you note.</p>
+
+<h3>10. Keep Functions Short</h3>
+<p>If your function exceeds 20 lines, it's doing too much. Break it down. Short functions are precise — they do one thing, they're easy to test, easy to read, and easy to change without fear.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">javascript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// Bad: Hardcoded and rigid</span></span>
+<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> createUser</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#F47067">    const</span><span style="color:#6CB6FF"> maxUsers</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> 100</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (currentUsers </span><span style="color:#F47067">>=</span><span style="color:#ADBAC7"> maxUsers) </span><span style="color:#F47067">throw</span><span style="color:#96D0FF"> "Too many users!"</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#768390">// Clean: Dynamic and flexible</span></span>
+<span class="line"><span style="color:#F47067">const</span><span style="color:#6CB6FF"> MAX_USERS</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> 100</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> createUser</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (currentUsers </span><span style="color:#F47067">>=</span><span style="color:#6CB6FF"> MAX_USERS</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">throw</span><span style="color:#96D0FF"> "Too many users!"</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</div>
+<p class="aside"><em>The 20-line rule isn't scripture. The principle is: if you have to scroll to understand a function, the function is trying to tell you something. It's asking to be broken up. Listen to it.</em></p>
+
+<h3>11. Follow the Boy Scout Rule</h3>
+<p>Always leave the codebase cleaner than you found it. Not a massive refactor — just one small improvement every time you touch a file. Rename a vague variable. Extract a repeated block. Delete a stale comment. Tiny improvements compound over time.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">javascript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// Original code: Hard to read, poorly named variables</span></span>
+<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> calc</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">a</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">b</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">  let</span><span style="color:#ADBAC7"> x </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">+</span><span style="color:#ADBAC7"> b;</span></span>
+<span class="line"><span style="color:#F47067">  let</span><span style="color:#ADBAC7"> y </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> x </span><span style="color:#F47067">*</span><span style="color:#6CB6FF"> 0.2</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">  return</span><span style="color:#ADBAC7"> y;</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#768390">// We're adding to it but not cleaning it up</span></span>
+<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> calcDiscount</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">a</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">b</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">discountRate</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">  let</span><span style="color:#ADBAC7"> total </span><span style="color:#F47067">=</span><span style="color:#DCBDFB"> calc</span><span style="color:#ADBAC7">(a, b);</span></span>
+<span class="line"><span style="color:#F47067">  let</span><span style="color:#ADBAC7"> final </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> total </span><span style="color:#F47067">-</span><span style="color:#ADBAC7"> discountRate;</span></span>
+<span class="line"><span style="color:#F47067">  return</span><span style="color:#ADBAC7"> final;</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</div>
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>Refactoring isn't a sprint you plan — it's a habit you build. The Boy Scout Rule turns every commit into a small improvement. After a year, the codebase is unrecognizably better, and you never had a "refactoring week."</p></div>
+
+<h3>12. Follow the Open/Closed Principle</h3>
+<p>Your code should be <strong>open for extension</strong> but <strong>closed for modification</strong>. Adding a new payment type shouldn't require changing the existing <code>PaymentProcessor</code>. It should require <em>extending</em> it — leaving the original untouched.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">javascript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> PaymentProcessor</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  processPayment</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">paymentType</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">amount</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (paymentType </span><span style="color:#F47067">===</span><span style="color:#96D0FF"> "creditCard"</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">      console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`Processing credit card payment of $${</span><span style="color:#ADBAC7">amount</span><span style="color:#96D0FF">}`</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    } </span><span style="color:#F47067">else</span><span style="color:#F47067"> if</span><span style="color:#ADBAC7"> (paymentType </span><span style="color:#F47067">===</span><span style="color:#96D0FF"> "paypal"</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">      console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`Processing PayPal payment of $${</span><span style="color:#ADBAC7">amount</span><span style="color:#96D0FF">}`</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    } </span><span style="color:#F47067">else</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">      throw</span><span style="color:#F47067"> new</span><span style="color:#DCBDFB"> Error</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Unsupported payment type"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">const</span><span style="color:#6CB6FF"> paymentProcessor</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#DCBDFB"> PaymentProcessor</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#ADBAC7">paymentProcessor.</span><span style="color:#DCBDFB">processPayment</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"creditCard"</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">100</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">paymentProcessor.</span><span style="color:#DCBDFB">processPayment</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"paypal"</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">200</span><span style="color:#ADBAC7">);</span></span></code></pre>
+</div>
+<p class="aside"><em>Every time you reach for <code>else if</code> to handle a new case, ask: should I be extending a class instead? If yes — extend. If you're modifying a class that already works, you're introducing risk for free.</em></p>
+
+<div class="divider"><span>automate it</span></div>
+<h2>Automated Tools for Maintaining Clean Code</h2>
+<p>You cannot "eyeball" code quality at scale. Without automation, you miss obvious mistakes because you're too close to the code, end up with inconsistent styles that make collaboration painful, and break deployments due to overlooked tests. Successful developers automate the discipline so they can focus on the craft.</p>
+
+<h3>Static Analysis — Catch Errors Before Runtime</h3>
+<p>ESLint scans your code for syntax errors, quality rule violations, and logical problems — before you run anything. A typo like calling <code>sume()</code> instead of <code>sum()</code> gets caught at write time, not in production at 3am.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">javascript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// Base class</span></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> PaymentProcessor</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  processPayment</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">amount</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">    throw</span><span style="color:#F47067"> new</span><span style="color:#DCBDFB"> Error</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"processPayment() must be implemented"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#768390">// Credit card payment</span></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> CreditCardPayment</span><span style="color:#F47067"> extends</span><span style="color:#6CB6FF"> PaymentProcessor</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  processPayment</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">amount</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`Processing credit card payment of $${</span><span style="color:#ADBAC7">amount</span><span style="color:#96D0FF">}`</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#768390">// PayPal payment</span></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> PayPalPayment</span><span style="color:#F47067"> extends</span><span style="color:#6CB6FF"> PaymentProcessor</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  processPayment</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">amount</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`Processing PayPal payment of $${</span><span style="color:#ADBAC7">amount</span><span style="color:#96D0FF">}`</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#768390">// Adding a new payment type? Just extend the class!</span></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> ApplePayPayment</span><span style="color:#F47067"> extends</span><span style="color:#6CB6FF"> PaymentProcessor</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#DCBDFB">  processPayment</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">amount</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`Processing Apple Pay payment of $${</span><span style="color:#ADBAC7">amount</span><span style="color:#96D0FF">}`</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#768390">// Usage</span></span>
+<span class="line"><span style="color:#F47067">const</span><span style="color:#6CB6FF"> payments</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> [</span></span>
+<span class="line"><span style="color:#F47067">  new</span><span style="color:#DCBDFB"> CreditCardPayment</span><span style="color:#ADBAC7">(),</span></span>
+<span class="line"><span style="color:#F47067">  new</span><span style="color:#DCBDFB"> PayPalPayment</span><span style="color:#ADBAC7">(),</span></span>
+<span class="line"><span style="color:#F47067">  new</span><span style="color:#DCBDFB"> ApplePayPayment</span><span style="color:#ADBAC7">(),</span></span>
+<span class="line"><span style="color:#ADBAC7">];</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ADBAC7">payments.</span><span style="color:#DCBDFB">forEach</span><span style="color:#ADBAC7">((</span><span style="color:#F69D50">payment</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">=></span><span style="color:#ADBAC7"> payment.</span><span style="color:#DCBDFB">processPayment</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">100</span><span style="color:#ADBAC7">));</span></span></code></pre>
+</div>
+<p>ESLint immediately flags the undefined reference: <code>codeError: 'sume' is not defined.</code> Caught before the function ever executes. That's the trade: a small setup cost in exchange for never shipping that class of bug.</p>
+
+<h3>Automated Formatting — Prettier Ends the Debate</h3>
+<p>Inconsistent spacing, mismatched indentation, missing semicolons — Prettier eliminates all of it automatically on save. Your team stops arguing about style in code reviews and starts reviewing logic instead.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">javascript</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> calculate</span><span style="color:#ADBAC7"> ( </span><span style="color:#F69D50">x</span><span style="color:#ADBAC7"> , </span><span style="color:#F69D50">y</span><span style="color:#ADBAC7"> ){ </span><span style="color:#F47067">return</span><span style="color:#ADBAC7"> x</span><span style="color:#F47067">+</span><span style="color:#ADBAC7"> y;}</span></span>
+<span class="line"><span style="color:#ADBAC7">console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">( </span><span style="color:#DCBDFB">calculate</span><span style="color:#ADBAC7"> (</span><span style="color:#6CB6FF">2</span><span style="color:#ADBAC7">,</span><span style="color:#6CB6FF">3</span><span style="color:#ADBAC7"> ) )</span></span></code></pre>
+</div>
+<div class="callout"><div class="callout-label">💡 Tip</div><p>Prettier is opinionated. That's the feature, not the bug. The entire point is to end the debate permanently. Configure it once, enforce it in CI, and never think about formatting again.</p></div>
+
+<h3>Continuous Integration — Tests That Run Without You</h3>
+<p>GitHub Actions runs your entire test suite automatically on every push and pull request. Only clean, passing code gets merged. You stop "forgetting" to run tests locally, because the pipeline enforces it regardless of what you remembered.</p>
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>CI is not optional in a team environment. Without it, the gap between "tests pass on my machine" and "production is broken" is exactly one Friday afternoon deploy. The rule is simple: if it's not in CI, it's not tested.</p></div>
+
+<div class="divider"><span>documentation</span></div>
+<h2>Documentation Is Not Optional</h2>
+<p>If you think documentation means writing down how the code works — you're already missing the point. Good documentation explains <strong>why</strong> the code works the way it does, not just what it does. That's the distinction between documentation that helps and documentation that's just more text to read and distrust.</p>
+<ul class="check-list">
+  <li>Explain why you chose this approach over the alternative</li>
+  <li>Document why the function exists — what problem does it actually solve?</li>
+  <li>Explain any non-obvious constraint, invariant, or trade-off</li>
+  <li>Update docs in the same commit as the code — no exceptions</li>
+  <li>Delete outdated documentation rather than leaving it to mislead</li>
+</ul>
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">❌ Bad Documentation</div>
+    <div class="compare-item bad-t">Restates what the code already shows</div>
+    <div class="compare-item bad-t">Describes how, never why</div>
+    <div class="compare-item bad-t">Becomes outdated and stays outdated for years</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">✅ Good Documentation</div>
+    <div class="compare-item good-t">Answers "why does this exist?"</div>
+    <div class="compare-item good-t">Explains the decision, not the implementation</div>
+    <div class="compare-item good-t">Updated or deleted in the same commit as the code</div>
+  </div>
+</div>
+<p class="aside"><em>Outdated documentation is a confident lie in writing. It misleads new developers, wastes hours of debugging time, and implicates no one. Delete it or update it. Leaving it is not a neutral choice.</em></p>
+
+<div class="divider"><span>verdict</span></div>
+<h2>The Verdict</h2>
+<p>Clean code isn't a luxury for developers with extra time. It's the only sustainable way to build software in Agile environments where requirements change weekly. The 12 principles here aren't academic theory — they're the patterns that separate developers who accelerate as their codebase grows from those who slow to a crawl under the weight of their own technical debt.</p>
+<blockquote><p>"Writing clean code is essential for thriving in the software development industry. Fortunately, with dedication and practice, anyone can master it."</p></blockquote>
+<p>The choice is made in how you write the next function. Make it count.</p>
+<h3>Frequently Asked Questions</h3>
+<p><strong>What is clean code?</strong> Code that doesn't make you want to throw your laptop out the window.</p>
+<p><strong>Why is clean code important in Agile?</strong> Because Agile is about speed and change — and you can't move fast with a mess.</p>
+<p><strong>What are code smells?</strong> Indicators that you're on the verge of losing control of your own codebase.</p>
+<p><strong>How can I improve my commenting?</strong> Only comment what's necessary. Each comment should explain <em>why</em>, not <em>what</em>. If the code is clear enough to stand alone — delete the comment.</p>
+
+  <!-- ── Series navigation ── -->
+  <div class="next-post">
+    <div>
+      <div class="next-label">Next in the series</div>
+      <div class="next-title">SOLID - The Simple Way To Understand</div>
+    </div>
+    <div class="next-arrow">→</div>
+  </div>
+
+</article>
+</div>
+
+<footer>
+  <div>Consortium for Information and Software Quality (CISQ) — Cost of Poor Software Quality in the U.S. (2022): https://www.it-cisq.org/the-cost-of-poor-quality-software-in-the-us-a-2022-report/ | Original article on FreeCodeCamp: https://www.freecodecamp.org/news/the-clean-code-handbook/</div>
+  <div style="margin-top: 8px; color: #3d3a35;">claude-code-journey.md · episode </div>
+</footer>
+
+<script>
+  document.querySelectorAll('.code-block').forEach(block => {
+    const header = block.querySelector('.code-header');
+    const pre = block.querySelector('pre');
+    if (!header || !pre) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText.trim()).then(() => {
+        btn.textContent = '✓ copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    });
+
+    header.appendChild(btn);
+  });
+</script>
+</body>
+</html>

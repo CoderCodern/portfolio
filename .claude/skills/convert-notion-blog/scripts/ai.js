@@ -1,12 +1,47 @@
 #!/usr/bin/env node
 /**
  * Shared AI helpers for the convert-notion-blog skill.
- * Used by both write.js (before pushing to Notion) and smooth.js (post-migration polish).
+ * Used by write.js, smooth.js, publish.js.
  *
  * Requires: OPENAI_API_KEY in environment.
  */
 
 import OpenAI from 'openai';
+
+// ---------------------------------------------------------------------------
+// Token accumulator — module-level, shared across all calls in a single process
+// ---------------------------------------------------------------------------
+
+const _usage = { promptTokens: 0, completionTokens: 0, images: 0 };
+
+/** Returns a snapshot of accumulated token usage since last reset. */
+export function getTokenUsage() {
+  return { ..._usage };
+}
+
+/** Resets the accumulator — call once at the start of each script run. */
+export function resetTokenUsage() {
+  _usage.promptTokens = 0;
+  _usage.completionTokens = 0;
+  _usage.images = 0;
+}
+
+/**
+ * Returns a formatted one-line cost report.
+ * gpt-4o-mini pricing: $0.15/1M input, $0.60/1M output.
+ * DALL-E 3 standard 1792×1024: $0.080/image.
+ */
+export function formatTokenReport() {
+  const { promptTokens, completionTokens, images } = _usage;
+  const total = promptTokens + completionTokens;
+  const textCost = (promptTokens * 0.15 + completionTokens * 0.6) / 1_000_000;
+  const imageCost = images * 0.08;
+  const totalCost = textCost + imageCost;
+  const imgNote = images ? ` + ${images} DALL-E image(s) ($${imageCost.toFixed(4)})` : '';
+  return `${promptTokens} in + ${completionTokens} out = ${total} tokens (gpt-4o-mini, $${textCost.toFixed(4)})${imgNote} → total $${totalCost.toFixed(4)}`;
+}
+
+// ---------------------------------------------------------------------------
 
 const LANG_DETECT_PROMPT =
   'What programming language is this code snippet? ' +
@@ -24,7 +59,7 @@ const REFINE_SYSTEM_PROMPT =
   'Return only the improved article body with no commentary or preamble.';
 
 /**
- * Parses markdown body into an array of segments:
+ * Parses markdown body into segments:
  *   { type: 'text', content: string }
  *   { type: 'fence', lang: string, code: string, raw: string }
  */
@@ -45,9 +80,8 @@ function parseSegments(body) {
       }
       const raw = '```' + lang + '\n' + codeLines.join('\n') + '\n```';
       segments.push({ type: 'fence', lang, code: codeLines.join('\n'), raw });
-      i++; // skip closing ```
+      i++;
     } else {
-      // Collect consecutive non-fence lines as one text segment
       const textLines = [];
       while (i < lines.length && !lines[i].match(/^```/)) {
         textLines.push(lines[i]);
@@ -60,9 +94,6 @@ function parseSegments(body) {
   return segments;
 }
 
-/**
- * Rebuilds markdown body from segments.
- */
 function segmentsToMarkdown(segments) {
   return segments
     .map((seg) => {
@@ -89,13 +120,15 @@ export async function detectCodeLanguages(markdown, openai) {
 
   const detections = await Promise.all(
     untagged.map(async ({ seg, i }) => {
-      const snippet = seg.code.slice(0, 1500); // cap to keep tokens low
+      const snippet = seg.code.slice(0, 1500);
       const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: `${LANG_DETECT_PROMPT}\n\n${snippet}` }],
         max_tokens: 20,
         temperature: 0,
       });
+      _usage.promptTokens += response.usage?.prompt_tokens ?? 0;
+      _usage.completionTokens += response.usage?.completion_tokens ?? 0;
       const detected = response.choices[0].message.content.trim().toLowerCase().replace(/[^a-z0-9+#]/g, '');
       return { i, detected: detected || 'text' };
     }),
@@ -111,7 +144,6 @@ export async function detectCodeLanguages(markdown, openai) {
 
 /**
  * Pass 2: Refines article body using GPT-4o-mini.
- * Code fences are preserved exactly by the model prompt.
  * Returns refined markdown string.
  */
 export async function refineContent(markdown, openai) {
@@ -123,6 +155,8 @@ export async function refineContent(markdown, openai) {
     ],
     temperature: 0.4,
   });
+  _usage.promptTokens += response.usage?.prompt_tokens ?? 0;
+  _usage.completionTokens += response.usage?.completion_tokens ?? 0;
   return response.choices[0].message.content.trim();
 }
 
@@ -145,6 +179,8 @@ export async function generateDescription(title, body, openai) {
     max_tokens: 80,
     temperature: 0.3,
   });
+  _usage.promptTokens += response.usage?.prompt_tokens ?? 0;
+  _usage.completionTokens += response.usage?.completion_tokens ?? 0;
   return response.choices[0].message.content.trim().replace(/^["']|["']$/g, '');
 }
 
@@ -170,7 +206,7 @@ const CATEGORY_SYSTEM_PROMPT =
   'Reply with ONLY the category name, no explanation.';
 
 /**
- * Detects which category an article belongs to using GPT-4o-mini.
+ * Detects which category an article belongs to.
  * Returns one of: Frontend | Backend | System Design | Career | AI
  */
 export async function detectCategory(title, description, markdown, openai) {
@@ -191,6 +227,8 @@ export async function detectCategory(title, description, markdown, openai) {
     max_tokens: 10,
     temperature: 0,
   });
+  _usage.promptTokens += response.usage?.prompt_tokens ?? 0;
+  _usage.completionTokens += response.usage?.completion_tokens ?? 0;
 
   const raw = response.choices[0].message.content.trim();
   const matched = KNOWN_CATEGORIES.find((c) => c.toLowerCase() === raw.toLowerCase());
@@ -220,6 +258,8 @@ export async function generateThumbnail(title, description, openai) {
     max_tokens: 200,
     temperature: 0.7,
   });
+  _usage.promptTokens += promptResponse.usage?.prompt_tokens ?? 0;
+  _usage.completionTokens += promptResponse.usage?.completion_tokens ?? 0;
 
   const dallePrompt = promptResponse.choices[0].message.content.trim();
 
@@ -230,6 +270,7 @@ export async function generateThumbnail(title, description, openai) {
     quality: 'standard',
     n: 1,
   });
+  _usage.images += 1;
 
   return imageResponse.data[0].url;
 }

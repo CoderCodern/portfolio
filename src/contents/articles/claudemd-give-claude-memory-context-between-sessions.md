@@ -1,5 +1,5 @@
 ---
-title: "CLAUDE.md: Give Claude Memory & Context Between Sessions"
+title: "Ep 2: Claude Code — CLAUDE.md, Memory & Context Between Sessions"
 publishedDate: May 20, 2026
 category: AI
 poster: /articles/claude/cover.png

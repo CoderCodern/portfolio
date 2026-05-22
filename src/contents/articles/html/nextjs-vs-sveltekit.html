@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{PAGE_TITLE}}</title>
+<title>SvelteKit vs Next.js</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -15,8 +15,8 @@
     --border: #2a2a2a;
     --text: #e8e4dc;
     --muted: #7a7570;
-    --accent: {{ACCENT_COLOR}};       /* episode accent */
-    --accent-dim: {{ACCENT_DIM}};     /* tinted background for callouts */
+    --accent: #e8a84c;       /* episode accent */
+    --accent-dim: #3d2c12;     /* tinted background for callouts */
     --code-bg: #111;
     --green: #4caf7d;
     --green-dim: #122a1e;
@@ -25,11 +25,7 @@
     --blue: #79c0ff;
   }
 
-  html {
-    scroll-behavior: smooth;
-    scrollbar-width: none; /* Firefox */
-  }
-  html::-webkit-scrollbar { display: none; } /* Chrome, Safari, Edge */
+  html { scroll-behavior: smooth; }
   body {
     background: var(--bg);
     color: var(--text);
@@ -363,12 +359,12 @@
 <section class="hero">
   <div class="hero-grid"></div>
   <div class="hero-inner">
-    <div class="series-tag">{{SERIES_LABEL}} · Episode {{EPISODE_NUM}}</div>
-    <h1>{{H1_WITH_EM_WRAPPED_KEYWORD}}</h1>
+    <div class="series-tag">Frontend · Episode —</div>
+    <h1>SvelteKit vs Next.js: The <em>Cage Match</em> of the Decade</h1>
     <div class="hero-meta">
-      <span>{{DATE}}</span>
-      <span>{{READ_TIME}} min read</span>
-      <span>{{TAG_1}} · {{TAG_2}} · {{TAG_3}}</span>
+      <span>May 2025</span>
+      <span>11 min read</span>
+      <span>Frontend · SvelteKit · Next.js</span>
     </div>
   </div>
 </section>
@@ -378,16 +374,156 @@
 <article>
 
   <!-- First paragraph becomes the .lead -->
-  <p class="lead">{{FIRST_PARAGRAPH}}</p>
+  <p class="lead">Buckle up — we're diving into the framework showdown of the decade. <strong>Next.js with the App Router</strong> versus <strong>SvelteKit</strong>: one the dominant React meta-framework backed by Vercel, the other the compiler-first challenger that keeps winning "most loved" trophies. This isn't a spec sheet comparison — it's grounded in real survey data, real developer pain points, and one inconvenient truth: a 90% vs 54% satisfaction gap doesn't lie.</p>
 
   <!-- ── All content sections go here ── -->
-  {{CONVERTED_CONTENT}}
+  <div class="divider"><span>the heart of the matter</span></div>
+<h2>The Unseen Battle: Developer Sentiment</h2>
+<p>Beyond technical specs, <strong>developer sentiment is the canary in the coal mine</strong> for a framework's long-term trajectory. Recent industry surveys give us hard data to work with — and the numbers are striking.</p>
+
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">😬 Next.js (App Router)</div>
+    <div class="compare-item bad-t">54% satisfaction — State of JS 2024</div>
+    <div class="compare-item bad-t">59.5% admired — Stack Overflow 2024</div>
+    <div class="compare-item bad-t">"Overall more negative opinions over time" — State of JS velocity metric</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">🏆 SvelteKit</div>
+    <div class="compare-item good-t">90% satisfaction — State of JS 2024</div>
+    <div class="compare-item good-t">72.8% admired — Stack Overflow 2024</div>
+    <div class="compare-item good-t">73% of users actively want to keep using it</div>
+  </div>
+</div>
+
+<p>The Stack Overflow survey adds a real-world data point worth noting: Stack Overflow's own development team chose Svelte to build the 2024 Developer Survey results site — their first time using it. When the people who run the world's largest developer Q&A platform reach for a new tool, it tends to be because the old one was giving them grief.</p>
+
+<blockquote><p>"A 90% satisfaction rate versus 54% isn't a gap — it's a chasm. And developer satisfaction has a way of becoming developer adoption over time."</p></blockquote>
+
+<p>The pattern here is telling. Next.js maintains high <em>usage</em> — driven by maturity, the React ecosystem, and enterprise inertia. But declining satisfaction scores and the "more negative opinions over time" velocity metric suggest that developers are using it because they have to, not because they love it. SvelteKit's numbers point in the opposite direction: people who use it actually want to keep using it. That's a different kind of momentum.</p>
+
+<p class="aside"><em>High usage and high satisfaction diverging is exactly how framework transitions happen. Angular had high usage too, right until it didn't.</em></p>
+
+<div class="divider"><span>round 1 routing</span></div>
+<h2>Round 1: Routing</h2>
+<p><strong>Next.js App Router</strong> introduced a folder-based routing system with the <code>app/</code> directory and <code>page.tsx</code> files, enabling nested layouts and granular loading states. The tradeoff is real: more control comes with more complexity, a steeper learning curve, and routing patterns that have left many developers reaching for the docs more than they expected.</p>
+
+<p><strong>SvelteKit</strong> uses <code>src/routes/</code> with <code>+page.svelte</code> for pages and <code>+layout.svelte</code> for shared UI. Filesystem routing that does exactly what it looks like it does.</p>
+
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">❌ Next.js App Router</div>
+    <div class="compare-item bad-t">app/ + page.tsx + layout.tsx + loading.tsx + error.tsx...</div>
+    <div class="compare-item bad-t">Caching behaviour surprises lurking in every route</div>
+    <div class="compare-item bad-t">Learning curve steep enough to need a guide</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">✅ SvelteKit</div>
+    <div class="compare-item good-t">src/routes/ + +page.svelte — one convention, no ceremony</div>
+    <div class="compare-item good-t">Routing does what you expect, consistently</div>
+    <div class="compare-item good-t">Described as "intuitive" by developers coming from both sides</div>
+  </div>
+</div>
+
+<p class="aside"><em>The Next.js App Router file convention is what happens when you design by committee and then ship before the committee agrees.</em></p>
+
+<div class="divider"><span>round 2 data</span></div>
+<h2>Round 2: Data Loading</h2>
+<p><strong>Next.js App Router</strong> introduced React Server Components, which fundamentally changed how data fetching works. The <code>fetch()</code> API gets automatic request deduplication and caching — which sounds great until you realise Next.js <em>overrides the global fetch function</em> to make it happen.</p>
+
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>Overriding a built-in browser API to add caching is not a minor implementation detail — it's a footgun that trips developers when the cached response is stale, the cache isn't invalidating when expected, or when hydration errors appear because server and client renders disagree. Debugging framework magic is not the same as debugging your code.</p></div>
+
+<p>Kent C. Dodds — a developer not known for mincing words — put the underlying problem plainly:</p>
+
+<blockquote><p>"Next.js is like 'enzyme' in that it wraps platform APIs, whereas Remix exposes them directly. That leads to less transferable knowledge — and I want to invest my time in skills that work across the web, not just inside one framework."</p></blockquote>
+
+<p>His specific example: instead of recommending the web platform's native Stale-While-Revalidate cache-control directive for static builds, Next.js invented Incremental Static Regeneration — a custom abstraction over a standard that already existed. You learn ISR. ISR only works in Next.js.</p>
+
+<p><strong>SvelteKit</strong> takes the opposite approach. Data fetching lives in a <code>load()</code> function that runs server-side before the page renders, passing data as props to the component. The implementation builds directly on native Web APIs — <code>fetch</code>, <code>Request</code>, <code>Response</code>, <code>Headers</code>. What you learn in SvelteKit applies to the web platform. What you learn in SvelteKit's <code>load()</code> function also makes you better at writing backend services. That's a good trade.</p>
+
+<p class="aside"><em>"We enhanced fetch with caching" is a sentence that sounds like a feature until it's 11 PM and you're reading the Next.js caching docs for the third time this week.</em></p>
+
+<div class="divider"><span>round 3 api</span></div>
+<h2>Round 3: The API Layer</h2>
+<p><strong>Next.js</strong> provides API routes as serverless functions living alongside your frontend. Useful for simple endpoints — until you need to deploy somewhere that isn't Vercel.</p>
+
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>Dodds is direct about this: Next.js is "difficult to deploy anywhere but Vercel." Netlify developers have described supporting Next.js as "particularly challenging due to frequent changes." Self-hosting it as a Node.js app is — and this is a direct quote — "a huge pain." Vendor lock-in dressed up as convenience is still vendor lock-in.</p></div>
+
+<p><strong>SvelteKit</strong> handles server routes through <code>+server.js</code> files — HTTP handlers that take a <code>RequestEvent</code> and return a <code>Response</code>. Web standards, again. And deployment flexibility is handled via adapters:</p>
+
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">❌ Next.js deployment story</div>
+    <div class="compare-item bad-t">First-class on Vercel; everyone else gets second-class</div>
+    <div class="compare-item bad-t">Frequent breaking changes make external hosting a moving target</div>
+    <div class="compare-item bad-t">Self-hosting documented as an afterthought</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">✅ SvelteKit adapters</div>
+    <div class="compare-item good-t">Node.js, Vercel, Netlify, Cloudflare Workers, Docker — pick one</div>
+    <div class="compare-item good-t">Swap adapters in config with no application code changes</div>
+    <div class="compare-item good-t">Static export, SSR, edge functions, offline PWA — same codebase</div>
+  </div>
+</div>
+
+<p class="aside"><em>"We support other platforms" and "it works great on other platforms" are two very different statements. One of them requires you to check the GitHub issues first.</em></p>
+
+<div class="divider"><span>round 4 dx</span></div>
+<h2>Round 4: Developer Experience</h2>
+<p><strong>Next.js App Router</strong> has introduced a class of DX issues that would have been considered dealbreakers in an earlier era. Developers report a 10–20% increase in development complexity compared to traditional React. The dev server has been documented as "painfully slow", with page renders clocking in at 200–700ms. Fast refresh breaks often enough that server restarts after code changes are part of the workflow, not exceptions to it.</p>
+
+<p>Dodds frames the deeper issue as a philosophy problem: Next.js has "too much magic" and violates the principle of least surprise. Overriding global <code>fetch</code>. Shipping React canary features as stable. Introducing experimental APIs like React's "taint" API into production applications without clear warnings. His term for it: "experimenting on my users."</p>
+
+<p><strong>SvelteKit</strong> is where the satisfaction scores make sense. The compiler does the heavy lifting — less JavaScript to write, less JavaScript to ship, less JavaScript to debug. Reactive primitives like <code>$state</code> and <code>$derived</code> are built in; you don't reach for a state management library because you don't need one. The whole philosophy is "just web standards, as little framework-specific knowledge as possible."</p>
+
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">😤 Next.js App Router DX</div>
+    <div class="compare-item bad-t">Dev server 200-700ms renders — in development</div>
+    <div class="compare-item bad-t">Fast refresh that breaks; server restarts as standard practice</div>
+    <div class="compare-item bad-t">Server Components require rethinking mental models you spent years building</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">😌 SvelteKit DX</div>
+    <div class="compare-item good-t">Sub-millisecond HMR; Vite-powered dev server</div>
+    <div class="compare-item good-t">Write less code — the compiler handles what React makes you do manually</div>
+    <div class="compare-item good-t">Reactive primitives that work the way reactive things should work</div>
+  </div>
+</div>
+
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>SvelteKit's 90% satisfaction rate isn't a fluke — it maps directly to concrete DX wins: less boilerplate, no framework-overridden globals, no hydration errors, and a dev server that doesn't make you question your career choices.</p></div>
+
+<div class="divider"><span>performance edge</span></div>
+<h2>The Engine Under the Hood: SvelteKit's Performance Edge</h2>
+<p>The DX story is compelling, but it's grounded in a concrete architectural difference. SvelteKit is a <strong>compiler</strong>, not a runtime framework. At build time, Svelte transforms components into highly optimised, imperative vanilla JavaScript. Nothing ships to the browser that doesn't need to be there.</p>
+
+<p>The most significant consequence: <strong>no Virtual DOM</strong>. React's diffing and reconciliation overhead simply doesn't exist in Svelte. DOM updates are direct and surgical. The result:</p>
+
+<ul class="check-list">
+  <li><strong>Smaller bundles</strong> — the framework runtime doesn't ship to the client because there isn't one</li>
+  <li><strong>Faster initial loads</strong> — smaller bundles and optimised output improve Core Web Vitals directly</li>
+  <li><strong>Minimal runtime overhead</strong> — no reconciler, no VDOM diffing, efficient even on lower-powered devices</li>
+</ul>
+
+<p class="aside"><em>"But React's VDOM diffing is highly optimised" is a sentence that is true and also misses the point — the fastest diffing algorithm is the one you don't run.</em></p>
+
+<p>This isn't a micro-benchmark win on a contrived demo. It's a structural advantage that compounds as your application grows: more components, more state, more interactions — and the gap between a framework with runtime overhead and one without widens at every step.</p>
+
+<div class="divider"><span>the verdict</span></div>
+<h2>The Verdict</h2>
+<p><strong>Next.js with the App Router</strong> is a mature, powerful framework with a vast ecosystem and strong enterprise backing. If you have a team of experienced React developers, an existing Next.js codebase, and a deployment budget that includes Vercel's pricing at scale — it works. It ships real products. It will continue to ship real products.</p>
+
+<p>But if you're choosing today, the evidence points somewhere specific. SvelteKit's compiler architecture delivers structurally smaller bundles and faster load times. Its adherence to web standards means skills transfer — to other frameworks, to backend services, to the platform itself. Its adapter system means you're not married to a hosting provider. And its 90% satisfaction rate means the developers using it are, on the whole, not suffering.</p>
+
+<p>The framework that gets out of your way and lets you build tends to win in the end. Not because of marketing, not because of enterprise contracts — but because the developers using it actually want to keep using it. That's a moat that's harder to erode than market share.</p>
+
+<blockquote><p>"SvelteKit won't judge you for your past mistakes with useEffect dependency arrays. It doesn't even know what those are."</p></blockquote>
 
   <!-- ── Series navigation ── -->
   <div class="next-post">
     <div>
       <div class="next-label">Next in the series</div>
-      <div class="next-title">{{NEXT_EPISODE_TITLE}}</div>
+      <div class="next-title"></div>
     </div>
     <div class="next-arrow">→</div>
   </div>
@@ -396,8 +532,8 @@
 </div>
 
 <footer>
-  <div>{{FOOTER_REFERENCES}}</div>
-  <div style="margin-top: 8px; color: #3d3a35;">claude-code-journey.md · episode {{EPISODE_NUM}}</div>
+  <div>State of JS 2024 survey. Stack Overflow Developer Survey 2024. Kent C. Dodds — public commentary on Next.js and web platform alignment.</div>
+  <div style="margin-top: 8px; color: #3d3a35;">claude-code-journey.md · episode —</div>
 </footer>
 
 <script>

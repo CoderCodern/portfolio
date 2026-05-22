@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Implementing the Inbox Pattern for Reliable Message Consumption</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #e8e4dc;
+    --muted: #7a7570;
+    --accent: #e8a84c;       /* episode accent */
+    --accent-dim: #3d2c12;     /* tinted background for callouts */
+    --code-bg: #111;
+    --green: #4caf7d;
+    --green-dim: #122a1e;
+    --red: #ff7b72;
+    --red-dim: #2a1212;
+    --blue: #79c0ff;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    font-size: 17px;
+  }
+
+  /* ── HERO ─────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 25%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 70%, rgba(232,168,76,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 800px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+
+  .series-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    padding: 6px 14px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  .series-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    max-width: 720px;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-wrap: wrap;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta span::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+  }
+  .hero-meta span:first-child::before { display: none; }
+
+  /* ── LAYOUT ───────────────────────────── */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  article { padding: 5rem 0; }
+
+  .lead {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: #c5c0b5;
+    margin-bottom: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin: 3.5rem 0 1rem;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 2.5rem 0 0.75rem;
+  }
+  p { margin-bottom: 1.4rem; }
+  strong { font-weight: 500; color: var(--text); }
+  em { font-style: italic; color: #c5c0b5; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p.aside { font-size: 14px; color: var(--muted); font-style: italic; margin: -0.5rem 0 1.4rem; }
+
+  /* ── CODE ─────────────────────────────── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 1.75rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #0e0e0e;
+  }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  pre {
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    color: #c9d1d9;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.83em;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  /* Reset inline-code styles inside code blocks — Shiki handles all colouring */
+  pre code { background: transparent; border: none; padding: 0; color: inherit; border-radius: 0; }
+  /* Syntax highlight helpers — use as <span class="X"> inside <pre> */
+  .kw  { color: var(--accent); }               /* keywords, headings */
+  .cm  { color: #4a5060; font-style: italic; } /* comments */
+  .st  { color: #a5d6ff; }                     /* strings */
+  .bad { color: var(--red); }                  /* bad examples */
+  .good{ color: var(--green); }                /* good examples */
+  .num { color: #c9b1f5; }                     /* numbers */
+
+  /* ── CALLOUTS ─────────────────────────── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-dim);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 6px 6px 0;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+  }
+  .callout.green { border-left-color: var(--green); background: var(--green-dim); }
+  .callout.red   { border-left-color: var(--red);   background: var(--red-dim);   }
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red   .callout-label { color: var(--red);   }
+
+  /* ── BLOCKQUOTE ───────────────────────── */
+  blockquote {
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    margin: 2.5rem 0;
+  }
+  blockquote::before {
+    content: '"';
+    font-family: 'Lora', serif;
+    font-size: 6rem;
+    color: var(--border);
+    position: absolute;
+    top: -1rem; left: 50%;
+    transform: translateX(-50%);
+    line-height: 1;
+  }
+  blockquote p {
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #c5c0b5;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+
+  /* ── TABLES ───────────────────────────── */
+  .table-wrap { overflow-x: auto; margin: 1.75rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #0f0f0f;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid #1c1c1c; vertical-align: top; line-height: 1.6; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+
+  /* ── DIVIDER ──────────────────────────── */
+  .divider { display: flex; align-items: center; gap: 1rem; margin: 3.5rem 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── COMPARE GRID ─────────────────────── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 6px; overflow: hidden; margin: 1.75rem 0; }
+  .compare-col { background: var(--surface); padding: 1.25rem; }
+  .compare-header { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .compare-header.bad-h  { color: var(--red); }
+  .compare-header.good-h { color: var(--green); }
+  .compare-item { font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .compare-item:last-child { border-bottom: none; }
+  .compare-item.bad-t  { color: #c9a0a0; }
+  .compare-item.good-t { color: #a0c9a8; }
+
+  /* ── CHECKLIST ────────────────────────── */
+  .check-list { list-style: none; margin: 1.5rem 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .check-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before { content: '[ ]'; flex-shrink: 0; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  /* ── WEEK GRID ────────────────────────── */
+  .week-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .week-day { background: var(--surface); padding: 1.25rem; }
+  .week-day-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .week-day-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .week-day-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── NEXT POST ────────────────────────── */
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
+  .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
+
+  /* ── COPY BUTTON ─────────────────────── */
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+  /* ── FOOTER ───────────────────────────── */
+  footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── RESPONSIVE ───────────────────────── */
+  @media (max-width: 640px) {
+    .hero { padding: 3rem 1.5rem; }
+    .container { padding: 0 1.5rem; }
+    h1 { font-size: 2rem; }
+    article { padding: 3rem 0; }
+    .compare { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="series-tag">System Design · Episode —</div>
+    <h1>Implementing the Inbox Pattern for <em>Reliable Message Consumption</em></h1>
+    <div class="hero-meta">
+      <span>April 2026</span>
+      <span>10 min read</span>
+      <span>System Design · .NET · PostgreSQL</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ARTICLE ═══════════════ -->
+<div class="container">
+<article>
+
+  <!-- First paragraph becomes the .lead -->
+  <p class="lead">The Outbox pattern handles reliable <em>publishing</em> — but what about the consumer side? When a broker redelivers a message after a crash or timeout, your consumer can silently execute the same logic twice. The <strong>Inbox pattern</strong> is the consumer-side counterpart: it guarantees each incoming message is processed <strong>exactly once</strong>, even under relentless broker retries.</p>
+
+  <!-- ── All content sections go here ── -->
+  <div class="divider"><span>why you need it</span></div>
+<h2>Why You Need an Inbox</h2>
+<p>Most message brokers operate on an <strong>at-least-once delivery</strong> model. The broker guarantees every message <em>will</em> be delivered — but it does <strong>not</strong> guarantee each message arrives only once.</p>
+
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>At-least-once delivery is the default for RabbitMQ, Azure Service Bus, Kafka, and most other brokers. If your consumers aren't idempotent and you haven't centralized deduplication, you are already processing duplicates — you just haven't noticed yet.</p></div>
+
+<p>Consider the common failure scenario:</p>
+<ol>
+  <li>The broker delivers a message to your consumer.</li>
+  <li>Your consumer processes the message successfully.</li>
+  <li>Before the ACK reaches the broker, the connection drops.</li>
+  <li>The broker assumes the message was lost and redelivers it.</li>
+  <li>Your consumer processes the same message <strong>twice</strong>.</li>
+</ol>
+
+<p class="aside"><em>Step 5 is the one that shows up in your on-call rotation at 2 AM — usually after a deploy, usually on the message that charges a customer.</em></p>
+
+<p>One solution is making each handler <strong>idempotent</strong>, but this requires every consumer to check a deduplication table before executing any work. The Inbox pattern centralizes that check in a single infrastructure mechanism. The process:</p>
+
+<ol>
+  <li>A message arrives from the broker.</li>
+  <li>Instead of processing immediately, <strong>write it to an inbox table</strong>.</li>
+  <li>If the message already exists (duplicate), the write is silently ignored.</li>
+  <li>A background process reads unprocessed messages and dispatches them.</li>
+</ol>
+
+<figure style="margin: 2rem 0; text-align: center;">
+  <img src="https://www.milanjovanovic.tech/blogs/mnw_188/inbox_pattern_sequence_diagram.png" alt="Inbox pattern sequence diagram" style="max-width: 100%; border-radius: 6px; border: 1px solid var(--border);">
+  <figcaption style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--muted); font-family: 'JetBrains Mono', monospace;">Reception decoupled from processing — the consumer becomes a lightweight persistence layer</figcaption>
+</figure>
+
+<div class="divider"><span>the schema</span></div>
+<h2>Inbox Database Schema</h2>
+<p>The <code>inbox_messages</code> table stores every incoming message. Its structure deliberately mirrors the Outbox pattern's table:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">sql</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">CREATE</span><span style="color:#F47067"> TABLE</span><span style="color:#DCBDFB"> IF</span><span style="color:#F47067"> NOT</span><span style="color:#F47067"> EXISTS</span><span style="color:#ADBAC7"> inbox_messages (</span></span>
+<span class="line"><span style="color:#ADBAC7">    id UUID </span><span style="color:#F47067">PRIMARY KEY</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#F47067">    type</span><span style="color:#F47067"> VARCHAR</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">255</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">NOT NULL</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#ADBAC7">    content JSONB </span><span style="color:#F47067">NOT NULL</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#ADBAC7">    received_on_utc </span><span style="color:#F47067">TIMESTAMP WITH TIME ZONE</span><span style="color:#F47067"> NOT NULL</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#ADBAC7">    processed_on_utc </span><span style="color:#F47067">TIMESTAMP WITH TIME ZONE</span><span style="color:#F47067"> NULL</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#ADBAC7">    error </span><span style="color:#F47067">TEXT</span><span style="color:#F47067"> NULL</span></span>
+<span class="line"><span style="color:#ADBAC7">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">CREATE</span><span style="color:#F47067"> INDEX</span><span style="color:#DCBDFB"> IF</span><span style="color:#F47067"> NOT</span><span style="color:#F47067"> EXISTS</span><span style="color:#ADBAC7"> idx_inbox_messages_unprocessed</span></span>
+<span class="line"><span style="color:#F47067">ON</span><span style="color:#6CB6FF"> public</span><span style="color:#ADBAC7">.</span><span style="color:#6CB6FF">inbox_messages</span><span style="color:#ADBAC7"> (received_on_utc, processed_on_utc)</span></span>
+<span class="line"><span style="color:#F47067">INCLUDE</span><span style="color:#ADBAC7"> (id, </span><span style="color:#F47067">type</span><span style="color:#ADBAC7">, content)</span></span>
+<span class="line"><span style="color:#F47067">WHERE</span><span style="color:#ADBAC7"> processed_on_utc </span><span style="color:#F47067">IS</span><span style="color:#F47067"> NULL</span><span style="color:#ADBAC7">;</span></span></code></pre>
+</div>
+
+<p>Two design decisions carry most of the weight. The <code>id</code> column enables idempotent inserts via <code>ON CONFLICT DO NOTHING</code> — the entire deduplication mechanism reduces to a single SQL clause. The filtered index (<code>WHERE processed_on_utc IS NULL</code>) keeps the index lean by excluding processed rows; without it, you'd be scanning an ever-growing index for a shrinking working set.</p>
+
+<div class="callout"><div class="callout-label">💡 Tip</div><p>The <code>INCLUDE (id, type, content)</code> on the filtered index means the processor can satisfy queries entirely from the index without a heap fetch — a meaningful throughput gain once your inbox sees serious volume.</p></div>
+
+<p>Messages between services share an <code>IntegrationEvent</code> base record. The <code>MessageId</code> is what drives deduplication at the <code>id</code> column:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> abstract</span><span style="color:#F47067"> record</span><span style="color:#F69D50"> IntegrationEvent</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">Guid</span><span style="color:#F69D50"> MessageId</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> sealed</span><span style="color:#F47067"> record</span><span style="color:#F69D50"> OrderCreatedIntegrationEvent</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">Guid</span><span style="color:#F69D50"> OrderId</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    : </span><span style="color:#F69D50">IntegrationEvent</span><span style="color:#ADBAC7">(Guid.</span><span style="color:#DCBDFB">CreateVersion7</span><span style="color:#ADBAC7">());</span></span></code></pre>
+</div>
+
+<p class="aside"><em><code>Guid.CreateVersion7()</code> generates time-ordered UUIDs — better index locality than random v4 GUIDs, available since .NET 9. Small detail, measurable difference at scale.</em></p>
+
+<div class="divider"><span>the consumer</span></div>
+<h2>Inbox Consumer</h2>
+<p>The consumer is a generic MassTransit <code>IConsumer&lt;T&gt;</code>. Its entire responsibility is to write the incoming message to the inbox table and return. No business logic. No event dispatching. No decisions.</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">internal</span><span style="color:#F47067"> sealed</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> InboxConsumer</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">T</span><span style="color:#ADBAC7">>(</span><span style="color:#F69D50">NpgsqlDataSource</span><span style="color:#F69D50"> dataSource</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    : </span><span style="color:#F69D50">IConsumer</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">T</span><span style="color:#ADBAC7">> </span><span style="color:#F47067">where</span><span style="color:#F69D50"> T</span><span style="color:#ADBAC7"> : </span><span style="color:#F69D50">IntegrationEvent</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> async</span><span style="color:#F69D50"> Task</span><span style="color:#DCBDFB"> Consume</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">ConsumeContext</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">T</span><span style="color:#ADBAC7">> </span><span style="color:#F69D50">context</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#F47067">        await</span><span style="color:#F47067"> using</span><span style="color:#F47067"> var</span><span style="color:#F69D50"> connection</span><span style="color:#F47067"> =</span><span style="color:#F47067"> await</span><span style="color:#ADBAC7"> dataSource.</span><span style="color:#DCBDFB">OpenConnectionAsync</span><span style="color:#ADBAC7">(</span></span>
+<span class="line"><span style="color:#ADBAC7">            context.CancellationToken);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">        const</span><span style="color:#F47067"> string</span><span style="color:#F69D50"> sql</span><span style="color:#F47067"> =</span></span>
+<span class="line"><span style="color:#96D0FF">            @"</span><span style="color:#F47067">""</span></span>
+<span class="line"><span style="color:#96D0FF">            INSERT INTO public.inbox_messages (id, type, content, received_on_utc)</span></span>
+<span class="line"><span style="color:#96D0FF">            VALUES (@Id, @Type, @Content::jsonb, @ReceivedOnUtc)</span></span>
+<span class="line"><span style="color:#96D0FF">            ON CONFLICT (id) DO NOTHING;</span></span>
+<span class="line"><span style="color:#F47067">            ""</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">        await</span><span style="color:#ADBAC7"> connection.</span><span style="color:#DCBDFB">ExecuteAsync</span><span style="color:#ADBAC7">(sql, </span><span style="color:#F47067">new</span></span>
+<span class="line"><span style="color:#ADBAC7">        {</span></span>
+<span class="line"><span style="color:#ADBAC7">            Id </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> context.Message.MessageId,</span></span>
+<span class="line"><span style="color:#ADBAC7">            Type </span><span style="color:#F47067">=</span><span style="color:#F47067"> typeof</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">T</span><span style="color:#ADBAC7">).FullName,</span></span>
+<span class="line"><span style="color:#ADBAC7">            Content </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> JsonSerializer.</span><span style="color:#DCBDFB">Serialize</span><span style="color:#ADBAC7">(context.Message),</span></span>
+<span class="line"><span style="color:#ADBAC7">            ReceivedOnUtc </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> DateTime.UtcNow</span></span>
+<span class="line"><span style="color:#ADBAC7">        });</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</div>
+
+<p>The <code>ON CONFLICT (id) DO NOTHING</code> clause is the critical line. If the broker redelivers the same message — after a crash, a timeout, or a network blip — the second insert is silently discarded. The consumer ACKs and moves on.</p>
+
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>One generic <code>InboxConsumer&lt;T&gt;</code> covers every integration event type. Register it once, and every event gets the same idempotent persistence guarantee with zero per-handler boilerplate.</p></div>
+
+<div class="divider"><span>the processor</span></div>
+<h2>Inbox Processor</h2>
+<p>The processor runs as a background service or scheduled job. It fetches unprocessed messages in batches, dispatches them to their handlers, and writes the results — all within a single transaction:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">internal</span><span style="color:#F47067"> sealed</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> InboxProcessor</span><span style="color:#ADBAC7">(</span></span>
+<span class="line"><span style="color:#F69D50">    NpgsqlDataSource</span><span style="color:#F69D50"> dataSource</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#F69D50">    IEventDispatcher</span><span style="color:#F69D50"> eventDispatcher</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#F69D50">    ILogger</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">InboxProcessor</span><span style="color:#ADBAC7">> </span><span style="color:#F69D50">logger</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F47067">    private</span><span style="color:#F47067"> const</span><span style="color:#F47067"> int</span><span style="color:#F69D50"> BatchSize</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> 1000</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> async</span><span style="color:#F69D50"> Task</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F47067">int</span><span style="color:#ADBAC7">> </span><span style="color:#DCBDFB">Execute</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">CancellationToken</span><span style="color:#F69D50"> cancellationToken</span><span style="color:#F47067"> =</span><span style="color:#F47067"> default</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#F47067">        await</span><span style="color:#F47067"> using</span><span style="color:#F47067"> var</span><span style="color:#F69D50"> connection</span><span style="color:#F47067"> =</span></span>
+<span class="line"><span style="color:#F47067">            await</span><span style="color:#ADBAC7"> dataSource.</span><span style="color:#DCBDFB">OpenConnectionAsync</span><span style="color:#ADBAC7">(cancellationToken);</span></span>
+<span class="line"><span style="color:#F47067">        await</span><span style="color:#F47067"> using</span><span style="color:#F47067"> var</span><span style="color:#F69D50"> transaction</span><span style="color:#F47067"> =</span></span>
+<span class="line"><span style="color:#F47067">            await</span><span style="color:#ADBAC7"> connection.</span><span style="color:#DCBDFB">BeginTransactionAsync</span><span style="color:#ADBAC7">(cancellationToken);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">        var</span><span style="color:#F69D50"> messages</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> (</span><span style="color:#F47067">await</span><span style="color:#ADBAC7"> connection.</span><span style="color:#DCBDFB">QueryAsync</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">InboxMessage</span><span style="color:#ADBAC7">>(</span></span>
+<span class="line"><span style="color:#96D0FF">            @"</span><span style="color:#F47067">""</span></span>
+<span class="line"><span style="color:#96D0FF">            SELECT id AS Id, type AS Type, content AS Content</span></span>
+<span class="line"><span style="color:#96D0FF">            FROM inbox_messages</span></span>
+<span class="line"><span style="color:#96D0FF">            WHERE processed_on_utc IS NULL</span></span>
+<span class="line"><span style="color:#96D0FF">            ORDER BY received_on_utc</span></span>
+<span class="line"><span style="color:#96D0FF">            LIMIT @BatchSize</span></span>
+<span class="line"><span style="color:#96D0FF">            FOR UPDATE SKIP LOCKED</span></span>
+<span class="line"><span style="color:#F47067">            ""</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#F47067">            new</span><span style="color:#ADBAC7"> { BatchSize },</span></span>
+<span class="line"><span style="color:#F69D50">            transaction</span><span style="color:#ADBAC7">: transaction)).</span><span style="color:#DCBDFB">AsList</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">        var</span><span style="color:#F69D50"> processedAt</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> DateTime.UtcNow;</span></span>
+<span class="line"><span style="color:#F47067">        var</span><span style="color:#F69D50"> results</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> List</span><span style="color:#ADBAC7">&#x3C;(</span><span style="color:#F69D50">Guid</span><span style="color:#F69D50"> Id</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">DateTime</span><span style="color:#F69D50"> ProcessedAt</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">string</span><span style="color:#ADBAC7">? </span><span style="color:#F69D50">Error</span><span style="color:#ADBAC7">)>(</span></span>
+<span class="line"><span style="color:#ADBAC7">            messages.Count);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">        foreach</span><span style="color:#ADBAC7"> (</span><span style="color:#F47067">var</span><span style="color:#F69D50"> message</span><span style="color:#F47067"> in</span><span style="color:#ADBAC7"> messages)</span></span>
+<span class="line"><span style="color:#ADBAC7">        {</span></span>
+<span class="line"><span style="color:#F47067">            try</span></span>
+<span class="line"><span style="color:#ADBAC7">            {</span></span>
+<span class="line"><span style="color:#F47067">                var</span><span style="color:#F69D50"> messageType</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> Type.</span><span style="color:#DCBDFB">GetType</span><span style="color:#ADBAC7">(message.Type)</span><span style="color:#F47067">!</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">                var</span><span style="color:#F69D50"> deserialized</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> JsonSerializer.</span><span style="color:#DCBDFB">Deserialize</span><span style="color:#ADBAC7">(</span></span>
+<span class="line"><span style="color:#ADBAC7">                    message.Content, messageType)</span><span style="color:#F47067">!</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">                await</span><span style="color:#ADBAC7"> eventDispatcher.</span><span style="color:#DCBDFB">DispatchAsync</span><span style="color:#ADBAC7">(deserialized, cancellationToken);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#ADBAC7">                results.</span><span style="color:#DCBDFB">Add</span><span style="color:#ADBAC7">((message.Id, processedAt, </span><span style="color:#6CB6FF">null</span><span style="color:#ADBAC7">));</span></span>
+<span class="line"><span style="color:#ADBAC7">            }</span></span>
+<span class="line"><span style="color:#F47067">            catch</span><span style="color:#ADBAC7"> (</span><span style="color:#F69D50">Exception</span><span style="color:#F69D50"> ex</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">            {</span></span>
+<span class="line"><span style="color:#ADBAC7">                logger.</span><span style="color:#DCBDFB">LogError</span><span style="color:#ADBAC7">(ex, </span><span style="color:#96D0FF">"Failed to process inbox message {Id}"</span><span style="color:#ADBAC7">, message.Id);</span></span>
+<span class="line"><span style="color:#ADBAC7">                results.</span><span style="color:#DCBDFB">Add</span><span style="color:#ADBAC7">((message.Id, processedAt, ex.</span><span style="color:#DCBDFB">ToString</span><span style="color:#ADBAC7">()));</span></span>
+<span class="line"><span style="color:#ADBAC7">            }</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">        if</span><span style="color:#ADBAC7"> (results.Count </span><span style="color:#F47067">></span><span style="color:#6CB6FF"> 0</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">        {</span></span>
+<span class="line"><span style="color:#F47067">            await</span><span style="color:#ADBAC7"> connection.</span><span style="color:#DCBDFB">ExecuteAsync</span><span style="color:#ADBAC7">(</span></span>
+<span class="line"><span style="color:#96D0FF">                @"</span><span style="color:#F47067">""</span></span>
+<span class="line"><span style="color:#96D0FF">                UPDATE inbox_messages</span></span>
+<span class="line"><span style="color:#96D0FF">                SET processed_on_utc = v.processed_on_utc,</span></span>
+<span class="line"><span style="color:#96D0FF">                    error = v.error</span></span>
+<span class="line"><span style="color:#96D0FF">                FROM UNNEST(@Ids, @ProcessedAts, @Errors)</span></span>
+<span class="line"><span style="color:#96D0FF">                    AS v(id, processed_on_utc, error)</span></span>
+<span class="line"><span style="color:#96D0FF">                WHERE inbox_messages.id = v.id</span></span>
+<span class="line"><span style="color:#F47067">                ""</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#F47067">                new</span></span>
+<span class="line"><span style="color:#ADBAC7">                {</span></span>
+<span class="line"><span style="color:#ADBAC7">                    Ids </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> results.</span><span style="color:#DCBDFB">Select</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">r</span><span style="color:#F47067"> =></span><span style="color:#ADBAC7"> r.Id).</span><span style="color:#DCBDFB">ToArray</span><span style="color:#ADBAC7">(),</span></span>
+<span class="line"><span style="color:#ADBAC7">                    ProcessedAts </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> results.</span><span style="color:#DCBDFB">Select</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">r</span><span style="color:#F47067"> =></span><span style="color:#ADBAC7"> r.ProcessedAt).</span><span style="color:#DCBDFB">ToArray</span><span style="color:#ADBAC7">(),</span></span>
+<span class="line"><span style="color:#ADBAC7">                    Errors </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> results.</span><span style="color:#DCBDFB">Select</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">r</span><span style="color:#F47067"> =></span><span style="color:#ADBAC7"> r.Error).</span><span style="color:#DCBDFB">ToArray</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">                },</span></span>
+<span class="line"><span style="color:#F69D50">                transaction</span><span style="color:#ADBAC7">: transaction);</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">        await</span><span style="color:#ADBAC7"> transaction.</span><span style="color:#DCBDFB">CommitAsync</span><span style="color:#ADBAC7">(cancellationToken);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">        return</span><span style="color:#ADBAC7"> messages.Count;</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</div>
+
+<p>Three implementation choices here are worth calling out explicitly:</p>
+
+<ul class="check-list">
+  <li><strong>FOR UPDATE SKIP LOCKED</strong> — multiple processor instances can run concurrently. Each instance locks the rows it selects; others skip them and take the next available batch. Horizontal scaling with no coordination overhead.</li>
+  <li><strong>UNNEST batch update</strong> — all results written back in one round-trip instead of N individual UPDATEs. At batch size 1000, the difference between one query and a thousand is not subtle.</li>
+  <li><strong>Error isolation</strong> — a failed message records its exception and doesn't block the rest of the batch. The transaction rolls back only if the entire batch operation fails, not on individual handler errors.</li>
+</ul>
+
+<p class="aside"><em>If the processor crashes mid-batch, the transaction rolls back and messages reappear in the next run as if nothing happened. This is where you appreciate PostgreSQL's transactional guarantees instead of taking them for granted.</em></p>
+
+<div class="divider"><span>watch out for</span></div>
+<h2>Things to Watch Out For</h2>
+
+<h3>Table Growth</h3>
+<p>The inbox table grows indefinitely without cleanup. Delete processed messages after a retention period, partition by time range and drop old partitions, or archive to cold storage if you need the history. Pick one and implement it before production.</p>
+
+<div class="callout"><div class="callout-label">💡 Tip</div><p>A scheduled job running <code>DELETE FROM inbox_messages WHERE processed_on_utc &lt; NOW() - INTERVAL '7 days'</code> is often all you need. The filtered index keeps live-message queries fast regardless of how many processed rows accumulate.</p></div>
+
+<h3>Poison Messages</h3>
+<p>If a message continually fails, it gets marked with an error each run but never leaves the active queue. Implement a maximum retry count — after N failures, move the message to a dead-letter table and trigger an alert.</p>
+
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>A poison message with no retry cap will silently consume processor cycles on every run, forever. It won't crash anything. It won't alert anyone. It will just quietly waste resources until someone looks at the error column and finds a timestamp from six weeks ago.</p></div>
+
+<h3>Ordering</h3>
+<p><code>ORDER BY received_on_utc</code> gives approximate ordering by arrival time, but strict ordering is <strong>not</strong> guaranteed with <code>SKIP LOCKED</code> across multiple processors. If per-aggregate ordering matters, partition by aggregate ID and ensure only one processor handles each partition.</p>
+
+<h3>Monitoring</h3>
+<p>Track the lag between <code>received_on_utc</code> and <code>processed_on_utc</code>. A widening gap signals the processor can't keep up — increase batch size, tighten the polling interval, or scale out additional instances.</p>
+
+<p class="aside"><em>"We should add monitoring" is the distributed systems equivalent of "we should back up the database." Everyone agrees. Nobody does it until something goes wrong.</em></p>
+
+<div class="divider"><span>inbox vs idempotent</span></div>
+<h2>Inbox vs. Idempotent Consumer</h2>
+<p>Both patterns prevent duplicate processing, but they differ in <em>when</em> processing occurs and <em>who controls</em> retries.</p>
+<p>The <strong>Idempotent Consumer</strong> processes inline: check dedup table → do the work → record dedup entry, all in one transaction. If it fails, the broker redelivers on its own schedule — you have no control over timing or backoff.</p>
+<p>The <strong>Inbox pattern</strong> separates reception from processing. The consumer writes and ACKs immediately. The processor owns retries: reset <code>processed_on_utc</code> to <code>NULL</code> for messages under a retry threshold, implement backoff, scale horizontally.</p>
+
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">⚠️ Idempotent Consumer</div>
+    <div class="compare-item bad-t">Processes messages inline — broker controls retry timing</div>
+    <div class="compare-item bad-t">Every handler must implement its own deduplication check</div>
+    <div class="compare-item bad-t">No batching — one message processed per broker delivery</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">✅ Inbox Pattern</div>
+    <div class="compare-item good-t">Decouples reception from processing — you own retry scheduling</div>
+    <div class="compare-item good-t">Single infrastructure layer centralizes all deduplication</div>
+    <div class="compare-item good-t">Batch processing with SKIP LOCKED for horizontal scale</div>
+  </div>
+</div>
+
+<blockquote><p>"The Inbox pattern doesn't make message processing simpler — it makes the complexity manageable. You trade implicit broker behaviour for explicit control you can observe, tune, and scale."</p></blockquote>
+
+<div class="divider"><span>summary</span></div>
+<h2>Summary</h2>
+<p>The Inbox pattern is the consumer-side counterpart to the Outbox. Four mechanisms carry the implementation:</p>
+
+<ul class="check-list">
+  <li><strong>ON CONFLICT DO NOTHING</strong> — idempotent inserts; deduplication in a single SQL clause</li>
+  <li><strong>Decoupled reception and processing</strong> — the consumer is a lightweight writer; all retry logic lives in the processor</li>
+  <li><strong>FOR UPDATE SKIP LOCKED</strong> — horizontal scaling of the processor with no inter-instance coordination</li>
+  <li><strong>UNNEST batch updates</strong> — all results written back in one database round-trip</li>
+</ul>
+
+  <!-- ── Series navigation ── -->
+  <div class="next-post">
+    <div>
+      <div class="next-label">Next in the series</div>
+      <div class="next-title"></div>
+    </div>
+    <div class="next-arrow">→</div>
+  </div>
+
+</article>
+</div>
+
+<footer>
+  <div>Original concepts by Milan Jovanović (milanjovanovic.tech). Related reading: Outbox Pattern, Idempotent Consumer Pattern, Scaling the Outbox with FOR UPDATE SKIP LOCKED, Optimizing Bulk Database Updates in .NET.</div>
+  <div style="margin-top: 8px; color: #3d3a35;">claude-code-journey.md · episode —</div>
+</footer>
+
+<script>
+  document.querySelectorAll('.code-block').forEach(block => {
+    const header = block.querySelector('.code-header');
+    const pre = block.querySelector('pre');
+    if (!header || !pre) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText.trim()).then(() => {
+        btn.textContent = '✓ copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    });
+
+    header.appendChild(btn);
+  });
+</script>
+</body>
+</html>

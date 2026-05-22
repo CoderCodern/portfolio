@@ -3,6 +3,7 @@ title: "Implementing the Inbox Pattern for Reliable Message Consumption"
 publishedDate: April 4, 2026
 category: System Design
 poster: https://www.milanjovanovic.tech/blog-covers/mnw_188.png
+htmlFile: implementing-the-inbox-pattern-for-reliable-message-consumption
 ---
 
 The [**Outbox pattern**](https://www.milanjovanovic.tech/blog/implementing-the-outbox-pattern) has garnered significant attention, and for good reason. However, it's essential to consider the consumer side as well.
