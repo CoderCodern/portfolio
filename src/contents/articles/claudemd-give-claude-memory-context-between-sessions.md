@@ -4,13 +4,15 @@ publishedDate: May 20, 2026
 category: AI
 poster: /articles/claude/cover.png
 htmlFile: claudemd-give-claude-memory-context-between-sessions
+series: Claude Code
+episode: 2
 ---
 
 Content is user-generated and unverified.
 
 > 
 >
-> **Learning in Public · Episode 02**
+> **Claude Code · Episode 02**
 >
 >
 

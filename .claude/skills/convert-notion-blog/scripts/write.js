@@ -14,7 +14,10 @@ import { Client } from '@notionhq/client';
 import { markdownToBlocks } from '@tryfabric/martian';
 import TurndownService from 'turndown';
 import { extract } from '@extractus/article-extractor';
-import { smoothMarkdown, detectCategory, createOpenAIClient } from './ai.js';
+import { createWriteStream, mkdirSync } from 'fs';
+import { pipeline } from 'stream/promises';
+import { resolve } from 'path';
+import { smoothMarkdown, detectCategory, generateThumbnail, createOpenAIClient } from './ai.js';
 
 const token = process.env.NOTION_TOKEN;
 const databaseId = process.env.NOTION_DATABASE_ID;
@@ -34,6 +37,16 @@ if (!urlArg) {
 
 const articleUrl = urlArg.slice('--url='.length);
 const notion = new Client({ auth: token });
+
+async function downloadThumbnail(imageUrl, slug) {
+  const dir = resolve(process.cwd(), `static/articles/${slug}`);
+  mkdirSync(dir, { recursive: true });
+  const dest = resolve(dir, 'cover.png');
+  const response = await fetch(imageUrl);
+  if (!response.ok) throw new Error(`Failed to fetch image: ${response.status}`);
+  await pipeline(response.body, createWriteStream(dest));
+  return `/articles/${slug}/cover.png`;
+}
 
 function titleToSlug(title) {
   return title
@@ -172,6 +185,9 @@ async function main() {
     console.log('  (OPENAI_API_KEY not set — skipping smoothing)');
   }
 
+  let thumbnailUrl = article.image ?? null;
+  let localCoverPath = null;
+
   if (openai) {
     try {
       const category = await detectCategory(title, article.description ?? '', finalMarkdown, openai);
@@ -179,15 +195,29 @@ async function main() {
     } catch {
       // non-fatal
     }
+
+    try {
+      console.log('Generating thumbnail with DALL-E 3...');
+      const dalleUrl = await generateThumbnail(title, article.description ?? '', openai);
+      localCoverPath = await downloadThumbnail(dalleUrl, slug);
+      thumbnailUrl = dalleUrl;
+      console.log(`Thumbnail: ${localCoverPath}`);
+    } catch (err) {
+      console.warn(`  (thumbnail generation failed: ${err.message})`);
+    }
   }
 
+  // Patch article.image so createNotionPage uses the DALL-E URL for the cover
+  const articleWithCover = { ...article, image: thumbnailUrl };
+
   console.log('Creating Notion page...');
-  const page = await createNotionPage(article, finalMarkdown);
+  const page = await createNotionPage(articleWithCover, finalMarkdown);
 
   const notionUrl = `https://notion.so/${page.id.replace(/-/g, '')}`;
   console.log(`\nDone.`);
   console.log(`Notion:  ${notionUrl}`);
   console.log(`Slug:    ${slug}`);
+  if (localCoverPath) console.log(`Cover:   ${localCoverPath}`);
   console.log(`\nTo save as a local .md file, run:`);
   console.log(`  node --env-file=.env .claude/skills/convert-notion-blog/scripts/migrate.js --ids=${slug}`);
 }

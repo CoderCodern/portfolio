@@ -7,6 +7,7 @@ export const load: PageServerLoad = async () => {
 	const paths = import.meta.glob('/src/contents/articles/*.md', { eager: true });
 	const items: Article[] = [];
 	let allCategories: string[] = [];
+	let allSeries: string[] = [];
 
 	for (const path in paths) {
 		const file = paths[path];
@@ -16,12 +17,14 @@ export const load: PageServerLoad = async () => {
 			const metadata = file.metadata as Omit<Article, 'slug'>;
 			items.push({ ...metadata, slug });
 			if (metadata.category) allCategories.push(metadata.category);
+			if (metadata.series) allSeries.push(metadata.series);
 		}
 	}
 
 	items.sort((a, b) => new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime());
 
 	const categories = ['All Articles', ...new Set(allCategories)];
+	const playlists = [...new Set(allSeries)];
 
-	return { items, categories };
+	return { items, categories, playlists };
 };

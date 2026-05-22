@@ -164,6 +164,7 @@ Wrap the most evocative phrase in `<em>` — not a proper noun, not a filename, 
 | Wrong accent color                 | Check episode table above                |
 | CSS in a separate file             | All styles inline — single file output   |
 | Italicising file names in `<h1>`   | Wrap evocative phrases only              |
+| No `htmlFile:` in md frontmatter   | Site falls back to raw markdown — always add it after assembly |
 
 ---
 
@@ -200,7 +201,7 @@ Write `src/contents/articles/html/<slug>.data` in this exact format:
 PAGE_TITLE: Article title here
 ACCENT_COLOR: #e8a84c
 ACCENT_DIM: #3d2c12
-SERIES_LABEL: Learning in Public
+SERIES_LABEL: Claude Code
 EPISODE_NUM: 01
 H1_WITH_EM_WRAPPED_KEYWORD: Title: The <em>Key Phrase</em> Goes Here
 DATE: May 2026
@@ -238,7 +239,31 @@ This reads the `.data` file, fills all `{{VARIABLES}}` into `templates/base.html
 
 ---
 
-### Step 7 — Report token cost
+### Step 7 — Wire up the markdown frontmatter
+
+**This step is required — without it the site renders markdown instead of HTML.**
+
+The article route (`src/routes/articles/[slug]/+page.ts`) only loads the HTML file when the markdown frontmatter has an `htmlFile` key. Add it now:
+
+```
+htmlFile: <slug-of-the-html-file-without-extension>
+```
+
+Example — if the HTML was written to `src/contents/articles/html/my-article.html`:
+
+```yaml
+---
+title: My Article
+publishedDate: 2024-01-15
+htmlFile: my-article
+---
+```
+
+The value must exactly match the HTML filename (no `.html` extension). When this key is present the page renders the iframe with the styled HTML; when it's absent the page falls back to the unstyled markdown view.
+
+---
+
+### Step 8 — Report token cost
 
 The assembler prints data file size automatically. Read it from the last line of assembler output — it looks like:
 

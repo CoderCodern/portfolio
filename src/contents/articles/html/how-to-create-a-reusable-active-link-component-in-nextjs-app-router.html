@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Create a Reusable Active Link Component in Next.js App Router</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #e8e4dc;
+    --muted: #7a7570;
+    --accent: #e8a84c;       /* episode accent */
+    --accent-dim: #3d2c12;     /* tinted background for callouts */
+    --code-bg: #111;
+    --green: #4caf7d;
+    --green-dim: #122a1e;
+    --red: #ff7b72;
+    --red-dim: #2a1212;
+    --blue: #79c0ff;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    font-size: 17px;
+  }
+
+  /* ── HERO ─────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 25%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 70%, rgba(232,168,76,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 800px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+
+  .series-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    padding: 6px 14px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  .series-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    max-width: 720px;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-wrap: wrap;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta span::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+  }
+  .hero-meta span:first-child::before { display: none; }
+
+  /* ── LAYOUT ───────────────────────────── */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  article { padding: 5rem 0; }
+
+  .lead {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: #c5c0b5;
+    margin-bottom: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin: 3.5rem 0 1rem;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 2.5rem 0 0.75rem;
+  }
+  p { margin-bottom: 1.4rem; }
+  strong { font-weight: 500; color: var(--text); }
+  em { font-style: italic; color: #c5c0b5; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p.aside { font-size: 14px; color: var(--muted); font-style: italic; margin: -0.5rem 0 1.4rem; }
+
+  /* ── CODE ─────────────────────────────── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 1.75rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #0e0e0e;
+  }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  pre {
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    color: #c9d1d9;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.83em;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  /* Syntax highlight helpers — use as <span class="X"> inside <pre> */
+  .kw  { color: var(--accent); }               /* keywords, headings */
+  .cm  { color: #4a5060; font-style: italic; } /* comments */
+  .st  { color: #a5d6ff; }                     /* strings */
+  .bad { color: var(--red); }                  /* bad examples */
+  .good{ color: var(--green); }                /* good examples */
+  .num { color: #c9b1f5; }                     /* numbers */
+
+  /* ── CALLOUTS ─────────────────────────── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-dim);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 6px 6px 0;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+  }
+  .callout.green { border-left-color: var(--green); background: var(--green-dim); }
+  .callout.red   { border-left-color: var(--red);   background: var(--red-dim);   }
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red   .callout-label { color: var(--red);   }
+
+  /* ── BLOCKQUOTE ───────────────────────── */
+  blockquote {
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    margin: 2.5rem 0;
+  }
+  blockquote::before {
+    content: '"';
+    font-family: 'Lora', serif;
+    font-size: 6rem;
+    color: var(--border);
+    position: absolute;
+    top: -1rem; left: 50%;
+    transform: translateX(-50%);
+    line-height: 1;
+  }
+  blockquote p {
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #c5c0b5;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+
+  /* ── TABLES ───────────────────────────── */
+  .table-wrap { overflow-x: auto; margin: 1.75rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #0f0f0f;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid #1c1c1c; vertical-align: top; line-height: 1.6; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+
+  /* ── DIVIDER ──────────────────────────── */
+  .divider { display: flex; align-items: center; gap: 1rem; margin: 3.5rem 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── COMPARE GRID ─────────────────────── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 6px; overflow: hidden; margin: 1.75rem 0; }
+  .compare-col { background: var(--surface); padding: 1.25rem; }
+  .compare-header { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .compare-header.bad-h  { color: var(--red); }
+  .compare-header.good-h { color: var(--green); }
+  .compare-item { font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .compare-item:last-child { border-bottom: none; }
+  .compare-item.bad-t  { color: #c9a0a0; }
+  .compare-item.good-t { color: #a0c9a8; }
+
+  /* ── CHECKLIST ────────────────────────── */
+  .check-list { list-style: none; margin: 1.5rem 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .check-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before { content: '[ ]'; flex-shrink: 0; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  /* ── WEEK GRID ────────────────────────── */
+  .week-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .week-day { background: var(--surface); padding: 1.25rem; }
+  .week-day-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .week-day-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .week-day-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── NEXT POST ────────────────────────── */
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
+  .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
+
+  /* ── COPY BUTTON ─────────────────────── */
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+  /* ── FOOTER ───────────────────────────── */
+  footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── RESPONSIVE ───────────────────────── */
+  @media (max-width: 640px) {
+    .hero { padding: 3rem 1.5rem; }
+    .container { padding: 0 1.5rem; }
+    h1 { font-size: 2rem; }
+    article { padding: 3rem 0; }
+    .compare { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="series-tag">Frontend · Episode —</div>
+    <h1>How to Create a <em>Reusable Active Link</em> Component in Next.js App Router</h1>
+    <div class="hero-meta">
+      <span>March 2024</span>
+      <span>5 min read</span>
+      <span>Next.js · TypeScript · Frontend</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ARTICLE ═══════════════ -->
+<div class="container">
+<article>
+
+  <!-- First paragraph becomes the .lead -->
+  <p class="lead">Providing a seamless navigation experience is crucial for building engaging web applications. One way to achieve this is by implementing an active link component that visually highlights the current page — helping users effortlessly track their location. In this tutorial, we'll build a reusable <code>ActiveLink</code> component for Next.js App Router using <code>usePathname</code>, <code>clsx</code>, and <code>tailwind-merge</code>.</p>
+
+  <!-- ── All content sections go here ── -->
+  <div class="divider"><span>prerequisites</span></div>
+<h2>Prerequisites</h2>
+
+<p>Before we begin, you'll need a basic understanding of Next.js and React, plus Node.js installed on your machine.</p>
+
+<p class="aside"><em>"Basic understanding" is doing a lot of work here. If you've never touched Next.js before, that's fine — but this tutorial won't stop to explain what a component is.</em></p>
+
+<div class="divider"><span>getting started</span></div>
+<h2>Getting Started</h2>
+
+<h3>Step 1: Create a New Next.js Project</h3>
+
+<p>Create a new project, navigate into it, then install the two dependencies we'll need:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">bash</span>
+  </div>
+  <pre><code>npx create-next-app@latest nextjs-active-link</code></pre>
+</div>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">bash</span>
+  </div>
+  <pre><code>cd nextjs-active-link</code></pre>
+</div>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">bash</span>
+  </div>
+  <pre><code>npm install tailwind-merge clsx</code></pre>
+</div>
+
+<div class="callout"><div class="callout-label">💡 Tip</div><p><code>clsx</code> handles conditional class merging. <code>tailwind-merge</code> resolves Tailwind class conflicts so overrides actually override. Together they're the standard pairing for dynamic class logic in Tailwind projects — you'll see this duo in most production Next.js codebases.</p></div>
+
+<h3>Step 2: Set Up the Components Folder</h3>
+
+<p>Create a <code>components/</code> folder inside <code>src/</code> and add a file named <code>active-link.tsx</code>. Also create a <code>utils/</code> folder with a <code>cn.ts</code> file for the class name utility.</p>
+
+<p class="aside"><em>Yes, a folder and a file inside it. Groundbreaking — but getting the structure right now saves the "where does this live?" conversation during code review.</em></p>
+
+<h3>Step 3: Implement the Classnames Utility</h3>
+
+<p>The <code>cn</code> function wraps both libraries into a single import. Any component that needs conditional classes will use this instead of manual string concatenation:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">ts</span>
+  </div>
+  <pre><code>import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+export function cn(...inputs: ClassValue[]) {
+	return twMerge(clsx(inputs));
+}</code></pre>
+</div>
+
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">❌ Manual concatenation</div>
+    <div class="compare-item bad-t">`className={\`link \${isActive ? 'active' : ''}\`}`</div>
+    <div class="compare-item bad-t">Breaks on Tailwind conflicts</div>
+    <div class="compare-item bad-t">Hard to compose multiple conditions</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">✅ cn() utility</div>
+    <div class="compare-item good-t">`className={cn('link', isActive && 'active')}`</div>
+    <div class="compare-item good-t">Merges Tailwind classes safely</div>
+    <div class="compare-item good-t">Composes cleanly across any number of conditions</div>
+  </div>
+</div>
+
+<h3>Step 4: Develop the Active Link Component</h3>
+
+<p>The component wraps Next.js's built-in <code>Link</code>, reads the current path via <code>usePathname</code>, and conditionally applies <code>activeClassName</code> when the route matches:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">tsx</span>
+  </div>
+  <pre><code>'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+import { cn } from '~/utils/cn';
+
+interface Props extends React.ComponentPropsWithoutRef&lt;typeof Link&gt; {
+	className?: string;
+	activeClassName?: string;
+}
+
+export const ActiveLink = (props: Props) =&gt; {
+	const pathname = usePathname();
+	const isActive = pathname === props.href;
+	const activeClassName = props.activeClassName ?? 'text-red-500';
+
+	return &lt;Link {...props} className={cn(props.className, isActive &amp;&amp; activeClassName)} /&gt;;
+};</code></pre>
+</div>
+
+<blockquote><p>"The magic isn't in the component itself — it's that <code>usePathname</code> makes active state automatic. No prop-passing, no context, no global state. Just the URL."</p></blockquote>
+
+<p>The <code>'use client'</code> directive is required because <code>usePathname</code> is a client-side hook. The rest of your layout can stay server-rendered — only this component needs to hydrate on the client.</p>
+
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>If you forget <code>'use client'</code>, Next.js throws at runtime, not at build time. The error message is clear enough, but it's the kind of thing you only want to learn once.</p></div>
+
+<h3>Step 5: Integrate Active Link in the Layout</h3>
+
+<p>Import <code>ActiveLink</code> into your root layout and use it like any other <code>Link</code> — but with an extra <code>activeClassName</code> prop for the highlighted state:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">tsx</span>
+  </div>
+  <pre><code>import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+
+import { ActiveLink } from '~/components/active-link'; // Import the ActiveLink component
+
+const inter = Inter({ subsets: ['latin'] });
+
+export const metadata: Metadata = {
+	title: 'Create Next App',
+	description: 'Generated by create next app'
+};
+
+export default function RootLayout({
+	children
+}: Readonly&lt;{
+	children: React.ReactNode;
+}&gt;) {
+	return (
+		&lt;html lang="en"&gt;
+			&lt;body className={inter.className}&gt;
+				&lt;nav className="container mx-auto flex items-center justify-center gap-10 py-10"&gt;
+					{/* Use the ActiveLink component */}
+					{[...Array(10)].map((_, i) =&gt; (
+						&lt;ActiveLink key={i} href={`/${i}`} className="px-2 py-1" activeClassName="bg-blue-500 !text-white"&gt;
+							Link {i}
+						&lt;/ActiveLink&gt;
+					))}
+				&lt;/nav&gt;
+				{children}
+			&lt;/body&gt;
+		&lt;/html&gt;
+	);
+}</code></pre>
+</div>
+
+<p>When the current path matches <code>href</code>, <code>activeClassName</code> merges in alongside <code>className</code>. In this example, the active link gets a blue background and white text — swap in whatever your design system calls for.</p>
+
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>Three files, one hook, zero state management. The <code>ActiveLink</code> component is self-contained, type-safe, and composable across any layout — exactly what a utility component should be.</p></div>
+
+<div class="divider"><span>conclusion</span></div>
+<h2>Conclusion</h2>
+
+<p>Active link highlighting is a small UX detail with a disproportionate impact on how navigable your app feels. Users shouldn't need to glance at the URL bar to know where they are — the nav should tell them.</p>
+
+<p>With <code>usePathname</code> handling path-matching and <code>cn()</code> managing the class logic, this component stays under 15 lines and handles every edge case cleanly. Extend it as needed: prefix matching, disabled states, mobile-specific active styles.</p>
+
+<blockquote><p>"The best UI components are the ones you stop thinking about. Build them right once, and they disappear into the background — letting users focus on your content instead of your chrome."</p></blockquote>
+
+  <!-- ── Series navigation ── -->
+  <div class="next-post">
+    <div>
+      <div class="next-label">Next in the series</div>
+      <div class="next-title"></div>
+    </div>
+    <div class="next-arrow">→</div>
+  </div>
+
+</article>
+</div>
+
+<footer>
+  <div>Next.js App Router docs — nextjs.org/docs/app/building-your-application/routing/linking-and-navigating. tailwind-merge — github.com/dcastil/tailwind-merge. clsx — github.com/lukeed/clsx.</div>
+  <div style="margin-top: 8px; color: #3d3a35;">claude-code-journey.md · episode —</div>
+</footer>
+
+<script>
+  document.querySelectorAll('.code-block').forEach(block => {
+    const header = block.querySelector('.code-header');
+    const pre = block.querySelector('pre');
+    if (!header || !pre) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText.trim()).then(() => {
+        btn.textContent = '✓ copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    });
+
+    header.appendChild(btn);
+  });
+</script>
+</body>
+</html>

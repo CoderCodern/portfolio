@@ -4,6 +4,7 @@ description: Enhance your Next.js application's navigation experience with a reu
 publishedDate: March 17, 2024
 category: Frontend
 poster: /articles/activelink-nextjs/preview.gif
+htmlFile: how-to-create-a-reusable-active-link-component-in-nextjs-app-router
 ---
 
 Providing a seamless and intuitive navigation experience is crucial for building engaging web applications. One way to achieve this is by implementing an active link component that visually highlights the current page, helping users effortlessly track their location within the application. In this tutorial, we'll dive into creating a reusable active link component for a Next.js application, enhancing overall usability and user experience.
