@@ -4,6 +4,7 @@ description: "Seven approaches to bulk-updating rows in PostgreSQL from .NET usi
 publishedDate: March 14, 2026
 category: Backend
 poster: https://www.milanjovanovic.tech/blog-covers/mnw_185.png
+htmlFile: optimizing-bulk-database-updates-in-net-from-naive-to-lightning-fast
 ---
 Every outbox processor, job queue, and batch pipeline eventually encounters the same challenge: marking a set of rows as completed in bulk.
 

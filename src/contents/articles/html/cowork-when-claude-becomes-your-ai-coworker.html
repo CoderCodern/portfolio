@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cowork: When Claude Stops Being a Chatbot and Starts Being a Coworker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #e8e4dc;
+    --muted: #7a7570;
+    --accent: #f0856a;       /* episode accent */
+    --accent-dim: #2d1510;     /* tinted background for callouts */
+    --code-bg: #111;
+    --green: #4caf7d;
+    --green-dim: #122a1e;
+    --red: #ff7b72;
+    --red-dim: #2a1212;
+    --blue: #79c0ff;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scrollbar-width: none; /* Firefox */
+  }
+  html::-webkit-scrollbar { display: none; } /* Chrome, Safari, Edge */
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    font-size: 17px;
+  }
+
+  /* ── HERO ─────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 25%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 70%, rgba(232,168,76,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 800px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+
+  .series-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    padding: 6px 14px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  .series-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    max-width: 720px;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-wrap: wrap;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta span::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+  }
+  .hero-meta span:first-child::before { display: none; }
+
+  /* ── LAYOUT ───────────────────────────── */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  article { padding: 5rem 0; }
+
+  .lead {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: #c5c0b5;
+    margin-bottom: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin: 3.5rem 0 1rem;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 2.5rem 0 0.75rem;
+  }
+  p { margin-bottom: 1.4rem; }
+  strong { font-weight: 500; color: var(--text); }
+  em { font-style: italic; color: #c5c0b5; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p.aside { font-size: 14px; color: var(--muted); font-style: italic; margin: -0.5rem 0 1.4rem; }
+
+  /* ── CODE ─────────────────────────────── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 1.75rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #0e0e0e;
+  }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  pre {
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    color: #c9d1d9;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.83em;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: #88c0d0;
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  /* Reset inline-code styles inside code blocks — Shiki handles all colouring */
+  pre code { background: transparent; border: none; padding: 0; color: inherit; border-radius: 0; }
+  /* Syntax highlight helpers — use as <span class="X"> inside <pre> (Nord palette) */
+  .kw  { color: #81a1c1; }                     /* keywords — Nord blue */
+  .cm  { color: #616e88; font-style: italic; } /* comments — Nord muted */
+  .st  { color: #a3be8c; }                     /* strings — Nord green */
+  .bad { color: var(--red); }                  /* bad examples */
+  .good{ color: var(--green); }                /* good examples */
+  .num { color: #b48ead; }                     /* numbers — Nord purple */
+
+  /* ── CALLOUTS ─────────────────────────── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-dim);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 6px 6px 0;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+  }
+  .callout.green { border-left-color: var(--green); background: var(--green-dim); }
+  .callout.red   { border-left-color: var(--red);   background: var(--red-dim);   }
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red   .callout-label { color: var(--red);   }
+
+  /* ── BLOCKQUOTE ───────────────────────── */
+  blockquote {
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    margin: 2.5rem 0;
+  }
+  blockquote::before {
+    content: '"';
+    font-family: 'Lora', serif;
+    font-size: 6rem;
+    color: var(--border);
+    position: absolute;
+    top: -1rem; left: 50%;
+    transform: translateX(-50%);
+    line-height: 1;
+  }
+  blockquote p {
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #c5c0b5;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+
+  /* ── TABLES ───────────────────────────── */
+  .table-wrap { overflow-x: auto; margin: 1.75rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #0f0f0f;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid #1c1c1c; vertical-align: top; line-height: 1.6; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+
+  /* ── DIVIDER ──────────────────────────── */
+  .divider { display: flex; align-items: center; gap: 1rem; margin: 3.5rem 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── COMPARE GRID ─────────────────────── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 6px; overflow: hidden; margin: 1.75rem 0; }
+  .compare-col { background: var(--surface); padding: 1.25rem; }
+  .compare-header { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .compare-header.bad-h  { color: var(--red); }
+  .compare-header.good-h { color: var(--green); }
+  .compare-item { font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .compare-item:last-child { border-bottom: none; }
+  .compare-item.bad-t  { color: #c9a0a0; }
+  .compare-item.good-t { color: #a0c9a8; }
+
+  /* ── CHECKLIST ────────────────────────── */
+  .check-list { list-style: none; margin: 1.5rem 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .check-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before { content: '[ ]'; flex-shrink: 0; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  /* ── WEEK GRID ────────────────────────── */
+  .week-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .week-day { background: var(--surface); padding: 1.25rem; }
+  .week-day-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .week-day-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .week-day-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── NEXT POST ────────────────────────── */
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; text-decoration: none; transition: border-color 0.2s, background 0.2s; }
+  .next-post:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
+  .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
+  .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
+
+  /* ── COPY BUTTON ─────────────────────── */
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+  /* ── FOOTER ───────────────────────────── */
+  footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── RESPONSIVE ───────────────────────── */
+  @media (max-width: 640px) {
+    .hero { padding: 3rem 1.5rem; }
+    .container { padding: 0 1.5rem; }
+    h1 { font-size: 2rem; }
+    article { padding: 3rem 0; }
+    .compare { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="series-tag">Claude Code · Episode 05</div>
+    <h1>Cowork: When Claude Stops Being a Chatbot and Starts Being <em>a Coworker</em></h1>
+    <div class="hero-meta">
+      <span>May 2026</span>
+      <span>22 min read</span>
+      <span>Claude Code · AI · Automation</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ARTICLE ═══════════════ -->
+<div class="container">
+<article>
+
+  <!-- First paragraph becomes the .lead -->
+  <p class="lead">There's a moment, the first time you use Cowork properly, when something clicks: <em>this is not the same Claude</em>. The Chat tab gives you answers. The Code tab edits your repo. The Cowork tab — the new one — opens your files, drafts the email, navigates your browser, builds the spreadsheet, saves the report to your desktop, and pings you when it's done. While you're getting coffee.</p>
+
+  <!-- ── All content sections go here ── -->
+  <p>You're not chatting with an assistant anymore. You're delegating to a coworker.</p>
+<p>This is the post I wish someone had handed me when I first opened that third tab. The honest handbook — what Cowork does, what it doesn't, the workflows that actually pay rent, and the famous footguns to avoid.</p>
+
+<div class="divider"><span>what it is</span></div>
+<h2>What Cowork Actually Is</h2>
+<p>Anthropic launched Cowork in January 2026 as a research preview, promoted it to general availability in April 2026, and wrapped it in Claude Desktop with a UI anyone can use. No terminal required.</p>
+<p>The origin story is funny: developers were already using Claude Code for all sorts of non-coding tasks — organizing tax receipts, drafting briefs, building slide decks. So Anthropic built Cowork to bring those agentic abilities to non-developers in a form that didn't require a terminal.</p>
+<p>And here's the kicker — the Anthropic team built Cowork using Claude Code itself, in two weeks. Which tells you everything about who this is for: Claude Code is for developers building tools. Cowork is for everyone else who just wants the tool to do the work.</p>
+<p class="aside"><em>Two weeks. Built with the tool it was replacing. Either very inspiring or slightly terrifying, depending on what you thought was difficult.</em></p>
+
+<div class="divider"><span>the three tabs</span></div>
+<h2>The Three Tabs</h2>
+<p>Open Claude Desktop and you see three tabs across the top: <strong>Chat</strong>, <strong>Cowork</strong>, <strong>Code</strong>. Same app, three completely different products underneath.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Tab</th><th>What it does</th><th>When to use it</th></tr></thead>
+<tbody>
+<tr><td><strong>Chat</strong></td><td>Conversational responses, no file access</td><td>Quick questions, brainstorming, drafting in the chat window</td></tr>
+<tr><td><strong>Cowork</strong></td><td>Agentic execution on your files and apps</td><td>Multi-step tasks where Claude actually does the work</td></tr>
+<tr><td><strong>Code</strong></td><td>Claude Code, terminal-grade coding agent</td><td>Building software, editing repos, dev workflows</td></tr>
+</tbody>
+</table></div>
+<p>The mental shift is real. Chat <em>talks about</em> the work. Cowork <em>does</em> the work. Claude delivers finished work instead of step-by-step updates: a formatted spreadsheet, a memo, a briefing doc. You review, refine, and decide what's next.</p>
+<p class="aside"><em>Three tabs. Three completely different modes of existing in your workflow. The same Claude, just finally allowed to actually touch things.</em></p>
+<blockquote><p>"The dirty secret of conversational AI was that it made you do all the work of executing on its advice. Cowork is what happens when the model stops giving you the recipe and just makes dinner."</p></blockquote>
+
+<div class="divider"><span>pricing & setup</span></div>
+<h2>How to Get Cowork (And What It Costs)</h2>
+<p>Before getting excited, the cold reality: <strong>Cowork is paid only.</strong> No free tier. It requires an Anthropic Pro subscription ($20/month) or higher, on macOS or Windows through Claude Desktop.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Plan</th><th>Price</th><th>What you get</th></tr></thead>
+<tbody>
+<tr><td><strong>Pro</strong></td><td>$20/month</td><td>Cowork access, standard usage limits</td></tr>
+<tr><td><strong>Max 5x</strong></td><td>~$100/month</td><td>5x higher usage limits, faster context</td></tr>
+<tr><td><strong>Max 20x</strong></td><td>~$200/month</td><td>20x usage, for intensive multi-hour workflows</td></tr>
+<tr><td><strong>Team / Enterprise</strong></td><td>Custom</td><td>Admin controls, team plugin sharing, SSO</td></tr>
+</tbody>
+</table></div>
+<p><strong>Setup is roughly 90 seconds:</strong></p>
+<ul class="check-list">
+<li>Download Claude Desktop from <code>claude.com/download</code></li>
+<li>Sign in with your Anthropic account</li>
+<li>Click the <strong>Cowork</strong> tab at the top</li>
+<li>Click "Customize" in the sidebar — Plugins, Skills, and Connectors live here</li>
+<li>Grant folder permission to a working directory (start with a sandbox folder, <strong>NOT</strong> your Documents)</li>
+</ul>
+<div class="callout"><div class="callout-label">💡 Tip</div><p>Create a folder called <code>~/cowork-sandbox</code> and use <em>only that</em> for your first week. Cowork's enthusiasm exceeds its judgment by about a factor of ten. Keep the blast radius small until you trust it.</p></div>
+<blockquote><p>"Pro tip from someone who has watched too many people learn the hard way: create a sandbox folder and use only that for your first week."</p></blockquote>
+
+<div class="divider"><span>mental model</span></div>
+<h2>The Mental Model: Goal, Not Recipe</h2>
+<p>In regular chat, Claude responds to your messages but can't access your files directly. In Cowork, Claude has permission to read, edit, and create files in folders you specify — so it can actually complete tasks rather than just describe how to do them.</p>
+<p>The instinct most people bring from ChatGPT is to write step-by-step instructions. Don't. That's the Chat tab approach. In Cowork, you describe the <strong>goal</strong>, and Claude figures out the <strong>steps</strong>.</p>
+<div class="compare">
+<div class="compare-col">
+<div class="compare-header bad-h">❌ ChatGPT mode (wrong)</div>
+<div class="compare-item bad-t">Write every step explicitly</div>
+<div class="compare-item bad-t">You plan, Claude executes one step</div>
+<div class="compare-item bad-t">Re-explain the context every time</div>
+</div>
+<div class="compare-col">
+<div class="compare-header good-h">✅ Cowork mode (right)</div>
+<div class="compare-item good-t">Describe the goal and output</div>
+<div class="compare-item good-t">Claude plans and executes the whole thing</div>
+<div class="compare-item good-t">Projects remember the context for you</div>
+</div>
+</div>
+<p><strong>Wrong way (still in ChatGPT mode):</strong></p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span>First, open the Downloads folder. Then look for PDFs. Then create a new</span></span>
+<span class="line"><span>folder called "Receipts." Then move all the PDFs that look like receipts</span></span>
+<span class="line"><span>into it. Then create a CSV with the vendor names. Then...</span></span></code></pre>
+</div>
+<p><strong>Right way (Cowork mode):</strong></p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span>Organize my Downloads folder. Group files by type and content.</span></span>
+<span class="line"><span>Pull anything that looks like a receipt into a Receipts subfolder</span></span>
+<span class="line"><span>and build me a CSV with vendor, date, amount. Don't delete anything.</span></span></code></pre>
+</div>
+<p>Claude picks the fastest path: a connector for Slack, Chrome for web research, or your screen to open apps when there's no direct integration. Watch in real time or walk away.</p>
+<p class="aside"><em>The counterintuitive part: the less you micromanage the steps, the better the output. Which is probably also true of managing actual people, now that I think about it.</em></p>
+
+<div class="divider"><span>building blocks</span></div>
+<h2>The Four Building Blocks</h2>
+<p>Cowork has four user-facing concepts. Once you understand all four, the whole product clicks.</p>
+<h3>1. Skills — Your Domain Knowledge</h3>
+<p>Same idea as Claude Code Skills (<a href="/articles/claude-code-skills-build-passive-knowledge-modules-for-ai-workflows">Blog 3</a>), but in a UI. Skills apply automatically to relevant work — brand voice, report templates, review frameworks. Use the built-in Skill Creator to define custom standards.</p>
+<p>A skill is just markdown describing how <em>you</em> do something. Examples: how you format weekly status reports, your voice and tone for customer-facing emails, your contract review checklist.</p>
+<p>Not all skills are equal — two fundamentally different types. <em>Task-specific skills</em> describe how you do a particular thing. <em>Identity skills</em> describe how you sound everywhere.</p>
+<p><strong>Brand voice is the prime example.</strong> Build a <code>VOICE PROFILE</code> from your real writing — actual posts, emails that worked, launch notes — and store it once. Every content task references the same profile. Without it, Claude's "write in my voice" behavior drifts across sessions. With it, the voice stays consistent whether you're drafting investor outreach or a Friday recap.</p>
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>Set up your brand voice skill before any other content workflow. That's the foundation everything else builds on. One good identity skill beats twenty task-specific ones.</p></div>
+<p class="aside"><em>I know this because I ran it the wrong way first. Turns out "write in my voice" means very different things to Claude depending on what examples it's seen recently.</em></p>
+<h3>2. Connectors — Bridges to Your Other Tools</h3>
+<p>Connectors link to external services — Gmail, Slack, Notion, Jira, Salesforce, and hundreds more. In Cowork, connectors gain filesystem access — fetched data can be saved locally, and local files can serve as input.</p>
+<p>Here's what makes Cowork feel different from everything before it: connectors don't just let Claude <em>read</em> from Gmail — they let Claude pull emails, save attachments to your Desktop, summarize them in a Doc, and post a Slack update, all in one task.</p>
+<p class="aside"><em>Read-and-save-and-summarize-and-post, one prompt, fully automated. The first time it works end-to-end you'll feel genuinely uncomfortable about how much time you'd been wasting.</em></p>
+<h3>3. Plugins — Bundled Job-Specific Power-Ups</h3>
+<p>Plugins are bundled packages combining skills, connectors, slash commands, and sub-agents for specific job functions. Anthropic open-sourced 11 starter plugins covering sales, finance, legal, marketing, HR, and more.</p>
+<p>Think of a plugin as a specialist already trained for your domain — you don't have to teach Claude how to be a finance analyst; you install the Finance plugin and Claude already knows.</p>
+<h3>4. Projects — Persistent Specialist Contexts</h3>
+<p>Introduced in March 2026, Projects solved Cowork's biggest early pain point: losing context between sessions.</p>
+<p>The common framing is "separate desks for separate jobs." Better mental model: <strong>each Project is a specialist who's already been onboarded.</strong></p>
+<p>A "Client: Acme" project already has their brand guide, your email history, and notes from the last three meetings loaded. You open it and say "draft the Q3 status update" — Cowork already knows everything about Acme. You don't re-explain anything.</p>
+<p>One project for your client work, another for personal admin, another for the side hustle. Each remembers its own context, files, and history. Each is a different coworker with a different briefing folder.</p>
+<p class="aside"><em>If you've ever had to re-brief the same person about the same client three times in a week, you understand exactly why Projects exist.</em></p>
+
+<div class="divider"><span>the 11 plugins</span></div>
+<h2>The 11 Official Plugins</h2>
+<p>Anthropic released 11 open-source plugins on GitHub, each designed for a specific business function. You can install all of them in about 30 seconds — and you probably shouldn't.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Plugin</th><th>What it's for</th></tr></thead>
+<tbody>
+<tr><td><strong>Productivity</strong></td><td>Tasks, calendars, daily workflows; <code>/update</code> scans email + Slack to refresh your task list</td></tr>
+<tr><td><strong>Sales</strong></td><td>Pipeline management, account research, CRM updates</td></tr>
+<tr><td><strong>Marketing</strong></td><td>Content briefs, competitive analysis, campaign drafts</td></tr>
+<tr><td><strong>Finance</strong></td><td>Variance analysis, expense categorization, financial models</td></tr>
+<tr><td><strong>Legal</strong></td><td>Contract review, plain-English summaries, key date extraction</td></tr>
+<tr><td><strong>Customer Support</strong></td><td>Ticket triage, response drafting, escalation routing</td></tr>
+<tr><td><strong>Product</strong></td><td>PRDs, strategy canvas, user research synthesis</td></tr>
+<tr><td><strong>Data Analysis</strong></td><td>Spreadsheet wrangling, chart generation, trend reports</td></tr>
+<tr><td><strong>Enterprise Search</strong></td><td>Cross-tool knowledge retrieval (Slack + Notion + Drive in one query)</td></tr>
+<tr><td><strong>Bio Research</strong></td><td>Scientific literature search and summary</td></tr>
+<tr><td><strong>Plugin Manager</strong></td><td>The meta-plugin: helps you build your own plugins</td></tr>
+</tbody>
+</table></div>
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>Plugins are currently in research preview. Anthropic explicitly advises against use for regulated workloads. Don't run the Legal or Finance plugins on anything real without understanding that caveat first.</p></div>
+<div class="callout"><div class="callout-label">💡 Tip</div><p>Start with one plugin — the one most relevant to your actual job. Run it for a week before installing more. Plugin overload makes Claude's behavior noticeably less predictable.</p></div>
+
+<div class="divider"><span>real workflows</span></div>
+<h2>Real Workflows That Actually Pay Rent</h2>
+<p>Enough theory. Seven workflows people are actually running today.</p>
+<h3>Workflow 1 — The Chaotic Downloads Folder</h3>
+<p>The classic. Everyone has a Downloads folder that looks like a digital landfill.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span>Prompt:</span></span>
+<span class="line"><span>Look at my Downloads folder. Organize by type and content.</span></span>
+<span class="line"><span>Receipts go into a Receipts/ subfolder with a vendors.csv summarizing</span></span>
+<span class="line"><span>vendor, date, and amount. Screenshots from work go into Work-Screenshots/.</span></span>
+<span class="line"><span>Anything older than 6 months goes to Archive/. Don't delete anything.</span></span></code></pre>
+</div>
+<p>Real users report Claude successfully organizing hundreds of files in minutes — a task that would take hours manually.</p>
+<h3>Workflow 2 — Multi-Document Research Synthesis</h3>
+<p>You have eight PDFs. You need a synthesis.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span>Prompt:</span></span>
+<span class="line"><span>Read all PDFs in this folder. They're research papers on [topic].</span></span>
+<span class="line"><span>Build me a synthesis document with:</span></span>
+<span class="line"><span>- Common findings across papers</span></span>
+<span class="line"><span>- Disagreements / contradictions</span></span>
+<span class="line"><span>- Methodological strengths and weaknesses</span></span>
+<span class="line"><span>- A 1-page executive summary at the top</span></span>
+<span class="line"><span>Save as research-synthesis.md.</span></span></code></pre>
+</div>
+<p>One note on depth: explicitly tell Claude to read the key documents in full — not just the first page. The output difference is significant.</p>
+<h3>Workflow 3 — The Investor / Client Briefing</h3>
+<p>This is where Cowork starts feeling like cheating.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span>Prompt:</span></span>
+<span class="line"><span>I have a meeting tomorrow at 2pm with [Company]. Build me a briefing doc:</span></span>
+<span class="line"><span>- Their last 3 funding rounds (use Chrome to search)</span></span>
+<span class="line"><span>- Recent product launches and press</span></span>
+<span class="line"><span>- Key people at the meeting (LinkedIn search)</span></span>
+<span class="line"><span>- Three sharp questions I should ask</span></span>
+<span class="line"><span>- Anything from my Gmail in the last 90 days mentioning them</span></span>
+<span class="line"><span>Save as briefing-[company].md to my Desktop.</span></span></code></pre>
+</div>
+<p>Structure the research ask by depth. Background facts (funding, headcount) are quick lookups. Competitive positioning needs real synthesis. Prompt them separately if quality matters.</p>
+<h3>Workflow 4 — Recurring Reports (the Routines Pattern)</h3>
+<p>Write a prompt once, set a cadence (daily, weekly, monthly), and Claude runs it automatically.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span>Routine: Every Friday at 4pm</span></span>
+<span class="line"><span>Prompt:</span></span>
+<span class="line"><span>Scan my calendar from this week. Build a weekly recap doc with:</span></span>
+<span class="line"><span>- Meetings I had and key decisions from each</span></span>
+<span class="line"><span>- Anyone I owe a follow-up to</span></span>
+<span class="line"><span>- What's blocking forward progress</span></span>
+<span class="line"><span>- 3 priorities for next week based on what's slipping</span></span>
+<span class="line"><span>Save as weekly-recap-[YYYY-MM-DD].md</span></span></code></pre>
+</div>
+<p class="aside"><em>Tasks only run while your computer is awake and Claude Desktop is open. Laptop closed at 4pm Friday = no weekly recap. The app admits this freely, which is refreshing honesty for software.</em></p>
+<h3>Workflow 5 — Sub-Agent Coordination (the Cracked Use Case)</h3>
+<p>Power users keep posting about this one for a reason.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span>Prompt:</span></span>
+<span class="line"><span>Run three sub-agents in parallel:</span></span>
+<span class="line"><span>- Agent 1: research [competitor] and write a 1-page competitive brief</span></span>
+<span class="line"><span>- Agent 2: scan my CRM exports in /sales/ and identify the top 5</span></span>
+<span class="line"><span>  accounts at risk this quarter</span></span>
+<span class="line"><span>- Agent 3: build me a Q3 retrospective slide deck using my notes</span></span>
+<span class="line"><span>  in /q3-notes/ — match the visual style of last quarter's deck</span></span>
+<span class="line"><span>Save all outputs to /friday-prep/. Ping me when all three are done.</span></span></code></pre>
+</div>
+<p>Sub-agents in Cowork work the same way as in Claude Code (<a href="/articles/claude-agents-sub-agents-complete-delegation-guide">Blog 4</a>) — separate context windows, parallel execution, no context bleed. For long loops: give each agent a shared notes file to read and write back to. That file becomes the working memory across fresh context windows.</p>
+<h3>Workflow 6 — Inbox Triage (the Chief-of-Staff Pattern)</h3>
+<p>Missing from most Cowork guides, but it's where a lot of real daily time goes.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span>Prompt:</span></span>
+<span class="line"><span>Triage my inbox. Classify each unread email into one of four buckets:</span></span>
+<span class="line"><span>- skip: bots, notifications, automated alerts → archive silently</span></span>
+<span class="line"><span>- info_only: newsletters, CC'd threads → one-line summary only</span></span>
+<span class="line"><span>- meeting_info: emails with Zoom links or proposed dates →</span></span>
+<span class="line"><span>  cross-check my calendar, flag conflicts</span></span>
+<span class="line"><span>- action_required: direct questions and asks → draft a reply</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>For anything action_required, draft a reply that matches how I write.</span></span>
+<span class="line"><span>Show me all drafts before sending anything. Don't send automatically.</span></span></code></pre>
+</div>
+<p>What makes this work over time: pair it with a <code>relationships.md</code> file — one paragraph per frequent contact. Who they are, your working relationship, the right tone. Claude reads it before drafting. The difference between a generic reply and one that sounds like you actually know the person is almost entirely in that file.</p>
+<h3>Workflow 7 — Outreach Pipeline</h3>
+<p>Cowork isn't only for internal tasks. It's equally strong for external ones — finding the right people and drafting messages that don't read like automated sales copy.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span>Prompt:</span></span>
+<span class="line"><span>I want to reach out to five people in [space] about [topic].</span></span>
+<span class="line"><span>For each person:</span></span>
+<span class="line"><span>- Search for recent posts or articles they've written in the last 30 days</span></span>
+<span class="line"><span>- Identify one specific thing I can reference authentically</span></span>
+<span class="line"><span>- Draft a short message (email or LinkedIn) that opens with</span></span>
+<span class="line"><span>  that specific reference and makes one clear ask</span></span>
+<span class="line"><span>- Keep it under 120 words</span></span>
+<span class="line"><span>- Don't send anything — show me all five drafts first</span></span></code></pre>
+</div>
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>The constraint that makes this not feel spammy: <strong>one specific reference, one clear ask, nothing generic.</strong> If Claude can't find a real specific thing to reference, the outreach isn't ready — that's a signal, not a reason to invent something. Run your brand voice skill before this prompt. The tone difference is audible.</p></div>
+
+<div class="divider"><span>honest limits</span></div>
+<h2>Honest Limitations (The Part Most Reviews Skip)</h2>
+<p>Cowork is good. It's not magic. Here are the things that will bite you.</p>
+<h3>It's cloud-based, not local</h3>
+<p>All document content, instructions, and outputs pass through Anthropic's cloud. For knowledge workers with sensitive or confidential documents, that's an important limitation to understand before you start.</p>
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>If your work involves privileged, confidential, or regulated data — legal, medical, financial — Cowork is not a local tool. Everything you feed it goes to Anthropic's servers.</p></div>
+<h3>Quotas burn fast on intensive work</h3>
+<p>Complex tasks burn through your quota quickly. Power users on even the $200/month Max 20x plan report hitting limits during intensive work periods.</p>
+<h3>Connectors are still uneven</h3>
+<p>Multiple users report that external connectors (Gmail, Google Drive, third-party apps) don't work reliably. Chrome extension integration works better but isn't perfect either.</p>
+<h3>Context doesn't persist across sessions (use Projects)</h3>
+<p>Cowork starts fresh each session. Your accumulated knowledge and preferences don't carry over. Projects are exactly for this — but they only help if you've set them up intentionally.</p>
+<h3>The desktop app must stay open</h3>
+<p>For scheduled tasks. Laptop closed at 4pm Friday = no weekly recap. No exceptions.</p>
+<h3>"Non-technical user" is aspirational</h3>
+<p>Marketed as accessible to non-developers, but getting consistently good results still requires learning to prompt well. Casual descriptions underperform specific, detailed instructions by a lot. Worth knowing upfront rather than wondering why the output keeps disappointing you.</p>
+
+<div class="divider"><span>footguns</span></div>
+<h2>The Footgun Section (Read This Twice)</h2>
+<p>The most important section in this post.</p>
+<p>Claude Cowork accidentally deleted 11GB of files for one user. In December 2025, a user granted Claude Code access to their Home directory, and the AI executed <code>rm -rf</code>, deleting the entire user directory.</p>
+<p>These aren't bugs. They're the consequence of giving an agent execution rights without a tight permission scope.</p>
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p><strong>Never grant Home directory access. Ever.</strong> Create a dedicated working folder like <code>~/cowork-projects/</code> and mount only that. This is not a preference — it's a hard rule learned from real incidents that cost real people real data.</p></div>
+<p><strong>The mandatory rules:</strong></p>
+<ul class="check-list">
+<li>Never grant Home directory access. Ever. Not even temporarily.</li>
+<li>Create a dedicated working folder like <code>~/cowork-projects/</code> and mount only that.</li>
+<li>One folder per project. Don't let projects bleed into each other.</li>
+<li>Review the plan before approval. Before Claude acts, it shows you the plan. Read it. Every time. Especially when tired.</li>
+<li>Treat "delete" requests with extra suspicion. "Clean up old files" is fine. "Delete duplicates" is risky. "Empty the trash" is begging for trouble.</li>
+<li>For communication workflows: draft-first, always. No automatic sends. One misrouted client email is worse than no automation at all.</li>
+</ul>
+<blockquote><p>"The good news: Cowork uses Apple's VZVirtualMachine framework to create a hard-isolated Linux sandbox. It can only access folders you explicitly mount. The bad news: humans are the weakest link in any sandbox."</p></blockquote>
+
+<div class="divider"><span>best practices</span></div>
+<h2>The Cowork Handbook — Best Practices</h2>
+<p>After going through DataCamp guides, Substack reviews, Anthropic's own docs, and the Everything Claude Code (ECC) project, here's what consistently produces good results.</p>
+<h3>Prompting Principles</h3>
+<ul class="check-list">
+<li><strong>State the goal, not the steps.</strong> Let Claude plan.</li>
+<li><strong>Specify the output format.</strong> "Save as a markdown file" not "let me know when done."</li>
+<li><strong>Be specific about edge cases.</strong> "Don't delete anything," "Skip files older than X," "Ignore the Archive folder."</li>
+<li><strong>Name the deliverable.</strong> "Save as <code>client-brief-acme.md</code>" beats "save it somewhere."</li>
+<li><strong>For research: specify depth, not just topic.</strong> "Quick background" and "full synthesis from multiple sources" are different prompts. Treat them differently.</li>
+</ul>
+<h3>Session Hygiene</h3>
+<ul class="check-list">
+<li><strong>One project per session.</strong> Keep sessions focused. Need to switch contexts? Start a new session with a fresh folder mount.</li>
+<li><strong>Use Projects for ongoing work.</strong> Don't try to make one giant session do everything.</li>
+<li><strong>Save outputs to predictable paths.</strong> Future-you will thank present-you.</li>
+</ul>
+<h3>Plugin Discipline</h3>
+<ul class="check-list">
+<li><strong>Don't install all 11 plugins on day one.</strong> Start with one or two relevant to your job. Plugin overload makes Claude's behavior less predictable.</li>
+<li><strong>Customize before using.</strong> Drop your terminology, org structure, and processes into skill files. Modify skill instructions to match how your team actually does things, not how a textbook says to.</li>
+</ul>
+<h3>The Reliability Rule</h3>
+<p>For non-negotiable steps: wire them as conditions, not sentences. If there's a step you absolutely cannot skip — archive after sending, always save a copy, never delete without showing you first — don't just put it in the prompt.</p>
+<p>Prompts are instructions. Conditions are enforcement. An instruction can be forgotten; a condition cannot. This is the architectural insight behind ECC's hook system, and it applies directly to Cowork workflows too.</p>
+<h3>The Escalation Rule</h3>
+<p>When Cowork gets stuck, give it less context, not more. Counterintuitive but true. Loading more files often makes things worse. Trim the scope, try again.</p>
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>Prompts are instructions. Conditions are enforcement. If you can't afford to skip a step, don't leave it in a sentence in the prompt — wire it as a hard condition in your workflow setup. That's the difference between "mostly works" and "always works."</p></div>
+
+<div class="divider"><span>where to start</span></div>
+<h2>Where to Actually Start</h2>
+<p>Don't try to automate your entire job in week one. Pick one workflow.</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">vb</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span>Week 1: Pick your most-repeated, lowest-stakes task.</span></span>
+<span class="line"><span>        (Mine was Friday weekly recaps.)</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Week 2: Build it as a Routine. Run it weekly. Refine the prompt</span></span>
+<span class="line"><span>        each time until it produces something you barely need to edit.</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Week 3: Add one plugin relevant to your job function.</span></span>
+<span class="line"><span>        Customize it with your real terminology and processes.</span></span>
+<span class="line"><span>        Set up your brand voice skill — this unlocks every content</span></span>
+<span class="line"><span>        and communication workflow downstream.</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Week 4: Build your first sub-agent workflow. Three parallel agents</span></span>
+<span class="line"><span>        for an end-of-week multi-tool task.</span></span></code></pre>
+</div>
+<p>By the end of the month you'll have one workflow you'd genuinely fight to keep. That's the bar. Not "Cowork did something cool" — "I no longer want to do this without it."</p>
+
+<div class="divider"><span>bigger picture</span></div>
+<h2>The Bigger Picture</h2>
+<p>When Anthropic unveiled AI tools automating legal and financial research in early 2026, legacy software stocks dropped $285 billion in a single day. Investors saw AI agents moving into the application layer — legal, sales, marketing, finance — and repriced the entire software sector.</p>
+<p>That repricing wasn't because Cowork is the best tool that will ever exist. It's because Cowork is the <em>clearest preview</em> yet of what agentic knowledge work looks like — and once you've seen it, you can't unsee where this is heading.</p>
+<p>Chat was Claude as an advisor. Cowork is Claude as a coworker. The difference isn't just capability — it's accountability. A coworker doesn't just tell you what to do. They do it, come back with the result, and wait for your sign-off.</p>
+<blockquote><p>"Chat was the prologue. Cowork is the first chapter."</p></blockquote>
+
+  <!-- ── Series navigation ── -->
+  <div class="next-post">
+    <div>
+      <div class="next-label">Coming up next</div>
+      <div class="next-title">Ep 6: Claude Code — Hooks, Routines &amp; The Glue That Holds an AI Workflow Together</div>
+    </div>
+    <div class="next-arrow">→</div>
+  </div>
+
+</article>
+</div>
+
+<footer>
+  <div>Anthropic Cowork docs · DataCamp tutorial · Product Compass · Claude Help Center · ComputeLeap · findskill.ai 2026 guide · Everything Claude Code (ECC) project</div>
+  <div style="margin-top: 8px; color: #3d3a35;">claude-code-journey.md · episode 05</div>
+</footer>
+
+<script>
+  document.querySelectorAll('.code-block').forEach(block => {
+    const header = block.querySelector('.code-header');
+    const pre = block.querySelector('pre');
+    if (!header || !pre) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText.trim()).then(() => {
+        btn.textContent = '✓ copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    });
+
+    header.appendChild(btn);
+  });
+</script>
+</body>
+</html>

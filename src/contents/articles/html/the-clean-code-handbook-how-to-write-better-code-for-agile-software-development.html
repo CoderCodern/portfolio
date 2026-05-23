@@ -406,11 +406,11 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">javascript</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// Weak and vague</span></span>
-<span class="line"><span style="color:#F47067">let</span><span style="color:#ADBAC7"> b </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 5</span><span style="color:#ADBAC7">;</span></span>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#616E88">// Weak and vague</span></span>
+<span class="line"><span style="color:#81A1C1">let</span><span style="color:#D8DEE9"> b</span><span style="color:#81A1C1"> =</span><span style="color:#B48EAD"> 5</span><span style="color:#81A1C1">;</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#768390">// Strong and clear</span></span>
-<span class="line"><span style="color:#F47067">let</span><span style="color:#ADBAC7"> numberOfUsers </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 5</span><span style="color:#ADBAC7">;</span></span></code></pre>
+<span class="line"><span style="color:#616E88">// Strong and clear</span></span>
+<span class="line"><span style="color:#81A1C1">let</span><span style="color:#D8DEE9"> numberOfUsers</span><span style="color:#81A1C1"> =</span><span style="color:#B48EAD"> 5</span><span style="color:#81A1C1">;</span></span></code></pre>
 </div>
 <p class="aside"><em>"Writers of unclear names often avoid taking responsibility for their mistakes." The author of this tip probably named a few things <code>x</code> early in their career. We all did. We all paid for it.</em></p>
 
@@ -421,20 +421,20 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">javascript</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// Clean: One job, one focus</span></span>
-<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> calculateTotal</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">a</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">b</span><span style="color:#ADBAC7">) {</span></span>
-<span class="line"><span style="color:#F47067">    return</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">+</span><span style="color:#ADBAC7"> b;</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#616E88">// Clean: One job, one focus</span></span>
+<span class="line"><span style="color:#81A1C1">function</span><span style="color:#88C0D0"> calculateTotal</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">a</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> b</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#81A1C1">    return</span><span style="color:#D8DEE9"> a</span><span style="color:#81A1C1"> +</span><span style="color:#D8DEE9"> b</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> logTotal</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">user</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">total</span><span style="color:#ADBAC7">) {</span></span>
-<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`User: ${</span><span style="color:#ADBAC7">user</span><span style="color:#96D0FF">}, Total: ${</span><span style="color:#ADBAC7">total</span><span style="color:#96D0FF">}`</span><span style="color:#ADBAC7">);</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#81A1C1">function</span><span style="color:#88C0D0"> logTotal</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">user</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> total</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#D8DEE9">    console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">log</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">`</span><span style="color:#A3BE8C">User: </span><span style="color:#81A1C1">${</span><span style="color:#D8DEE9">user</span><span style="color:#81A1C1">}</span><span style="color:#A3BE8C">, Total: </span><span style="color:#81A1C1">${</span><span style="color:#D8DEE9">total</span><span style="color:#81A1C1">}</span><span style="color:#ECEFF4">`</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#768390">// Messy: Trying to do EVERYTHING</span></span>
-<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> calculateAndLogTotal</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">a</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">b</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">user</span><span style="color:#ADBAC7">) {</span></span>
-<span class="line"><span style="color:#F47067">    let</span><span style="color:#ADBAC7"> total </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">+</span><span style="color:#ADBAC7"> b;</span></span>
-<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`User: ${</span><span style="color:#ADBAC7">user</span><span style="color:#96D0FF">}, Total: ${</span><span style="color:#ADBAC7">total</span><span style="color:#96D0FF">}`</span><span style="color:#ADBAC7">);</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+<span class="line"><span style="color:#616E88">// Messy: Trying to do EVERYTHING</span></span>
+<span class="line"><span style="color:#81A1C1">function</span><span style="color:#88C0D0"> calculateAndLogTotal</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">a</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> b</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> user</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#81A1C1">    let</span><span style="color:#D8DEE9"> total</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> a</span><span style="color:#81A1C1"> +</span><span style="color:#D8DEE9"> b</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#D8DEE9">    console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">log</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">`</span><span style="color:#A3BE8C">User: </span><span style="color:#81A1C1">${</span><span style="color:#D8DEE9">user</span><span style="color:#81A1C1">}</span><span style="color:#A3BE8C">, Total: </span><span style="color:#81A1C1">${</span><span style="color:#D8DEE9">total</span><span style="color:#81A1C1">}</span><span style="color:#ECEFF4">`</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
 </div>
 <div class="compare">
   <div class="compare-col">
@@ -458,10 +458,10 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">javascript</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// The user is authenticated before accessing protected resources</span></span>
-<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> isUserLoggedIn</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">session</span><span style="color:#ADBAC7">) {</span></span>
-<span class="line"><span style="color:#F47067">    return</span><span style="color:#F47067"> !!</span><span style="color:#ADBAC7">session.user;</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#616E88">// The user is authenticated before accessing protected resources</span></span>
+<span class="line"><span style="color:#81A1C1">function</span><span style="color:#88C0D0"> isUserLoggedIn</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">session</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#81A1C1">    return</span><span style="color:#81A1C1"> !!</span><span style="color:#D8DEE9">session</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">user</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
 </div>
 <p>Here's a real-world shipping cost function that demonstrates good comment discipline in action:</p>
 <div class="code-block">
@@ -469,35 +469,35 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">javascript</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// Shipping rules:</span></span>
-<span class="line"><span style="color:#768390">// - Free shipping for orders over $100</span></span>
-<span class="line"><span style="color:#768390">// - Standard shipping ($10) for orders below $100</span></span>
-<span class="line"><span style="color:#768390">// - Additional $5 for international orders</span></span>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#616E88">// Shipping rules:</span></span>
+<span class="line"><span style="color:#616E88">// - Free shipping for orders over $100</span></span>
+<span class="line"><span style="color:#616E88">// - Standard shipping ($10) for orders below $100</span></span>
+<span class="line"><span style="color:#616E88">// - Additional $5 for international orders</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> calculateShipping</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">order</span><span style="color:#ADBAC7">) {</span></span>
-<span class="line"><span style="color:#F47067">    let</span><span style="color:#ADBAC7"> shippingCost </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 0</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#81A1C1">function</span><span style="color:#88C0D0"> calculateShipping</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">order</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#81A1C1">    let</span><span style="color:#D8DEE9"> shippingCost</span><span style="color:#81A1C1"> =</span><span style="color:#B48EAD"> 0</span><span style="color:#81A1C1">;</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#768390">    // Check if the order qualifies for free shipping</span></span>
-<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (order.total </span><span style="color:#F47067">>=</span><span style="color:#6CB6FF"> 100</span><span style="color:#ADBAC7">) {</span></span>
-<span class="line"><span style="color:#ADBAC7">        shippingCost </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 0</span><span style="color:#ADBAC7">; </span><span style="color:#768390">// Free shipping</span></span>
-<span class="line"><span style="color:#ADBAC7">    } </span><span style="color:#F47067">else</span><span style="color:#ADBAC7"> {</span></span>
-<span class="line"><span style="color:#ADBAC7">        shippingCost </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 10</span><span style="color:#ADBAC7">; </span><span style="color:#768390">// Standard shipping cost</span></span>
-<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#616E88">    // Check if the order qualifies for free shipping</span></span>
+<span class="line"><span style="color:#81A1C1">    if</span><span style="color:#D8DEE9FF"> (</span><span style="color:#D8DEE9">order</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">total</span><span style="color:#81A1C1"> >=</span><span style="color:#B48EAD"> 100</span><span style="color:#D8DEE9FF">) </span><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#D8DEE9">        shippingCost</span><span style="color:#81A1C1"> =</span><span style="color:#B48EAD"> 0</span><span style="color:#81A1C1">;</span><span style="color:#616E88"> // Free shipping</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span><span style="color:#81A1C1"> else</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#D8DEE9">        shippingCost</span><span style="color:#81A1C1"> =</span><span style="color:#B48EAD"> 10</span><span style="color:#81A1C1">;</span><span style="color:#616E88"> // Standard shipping cost</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#768390">    // Add additional cost for international orders</span></span>
-<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (order.isInternational) {</span></span>
-<span class="line"><span style="color:#ADBAC7">        shippingCost </span><span style="color:#F47067">+=</span><span style="color:#6CB6FF"> 5</span><span style="color:#ADBAC7">;</span></span>
-<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#616E88">    // Add additional cost for international orders</span></span>
+<span class="line"><span style="color:#81A1C1">    if</span><span style="color:#D8DEE9FF"> (</span><span style="color:#D8DEE9">order</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">isInternational</span><span style="color:#D8DEE9FF">) </span><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#D8DEE9">        shippingCost</span><span style="color:#81A1C1"> +=</span><span style="color:#B48EAD"> 5</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F47067">    return</span><span style="color:#ADBAC7"> shippingCost;</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#81A1C1">    return</span><span style="color:#D8DEE9"> shippingCost</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#768390">// Example usage</span></span>
-<span class="line"><span style="color:#F47067">const</span><span style="color:#6CB6FF"> order1</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> { total: </span><span style="color:#6CB6FF">120</span><span style="color:#ADBAC7">, isInternational: </span><span style="color:#6CB6FF">false</span><span style="color:#ADBAC7"> };</span></span>
-<span class="line"><span style="color:#F47067">const</span><span style="color:#6CB6FF"> order2</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> { total: </span><span style="color:#6CB6FF">80</span><span style="color:#ADBAC7">, isInternational: </span><span style="color:#6CB6FF">true</span><span style="color:#ADBAC7"> };</span></span>
+<span class="line"><span style="color:#616E88">// Example usage</span></span>
+<span class="line"><span style="color:#81A1C1">const</span><span style="color:#D8DEE9"> order1</span><span style="color:#81A1C1"> =</span><span style="color:#ECEFF4"> {</span><span style="color:#88C0D0"> total</span><span style="color:#ECEFF4">:</span><span style="color:#B48EAD"> 120</span><span style="color:#ECEFF4">,</span><span style="color:#88C0D0"> isInternational</span><span style="color:#ECEFF4">:</span><span style="color:#81A1C1"> false</span><span style="color:#ECEFF4"> }</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">const</span><span style="color:#D8DEE9"> order2</span><span style="color:#81A1C1"> =</span><span style="color:#ECEFF4"> {</span><span style="color:#88C0D0"> total</span><span style="color:#ECEFF4">:</span><span style="color:#B48EAD"> 80</span><span style="color:#ECEFF4">,</span><span style="color:#88C0D0"> isInternational</span><span style="color:#ECEFF4">:</span><span style="color:#81A1C1"> true</span><span style="color:#ECEFF4"> }</span><span style="color:#81A1C1">;</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#ADBAC7">console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#DCBDFB">calculateShipping</span><span style="color:#ADBAC7">(order1)); </span><span style="color:#768390">// Output: 0</span></span>
-<span class="line"><span style="color:#ADBAC7">console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#DCBDFB">calculateShipping</span><span style="color:#ADBAC7">(order2)); </span><span style="color:#768390">// Output: 15</span></span></code></pre>
+<span class="line"><span style="color:#D8DEE9">console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">log</span><span style="color:#D8DEE9FF">(</span><span style="color:#88C0D0">calculateShipping</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">order1</span><span style="color:#D8DEE9FF">))</span><span style="color:#81A1C1">;</span><span style="color:#616E88"> // Output: 0</span></span>
+<span class="line"><span style="color:#D8DEE9">console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">log</span><span style="color:#D8DEE9FF">(</span><span style="color:#88C0D0">calculateShipping</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">order2</span><span style="color:#D8DEE9FF">))</span><span style="color:#81A1C1">;</span><span style="color:#616E88"> // Output: 15</span></span></code></pre>
 </div>
 <div class="callout"><div class="callout-label">💡 Tip</div><p>Ask yourself: does this comment explain <em>why</em> the code exists, or does it just restate what the code already shows? If it's the latter — delete it. The code speaks for itself. A good comment adds context the code can't.</p></div>
 
@@ -508,15 +508,15 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">javascript</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// Clean: Reads like a story</span></span>
-<span class="line"><span style="color:#F47067">if</span><span style="color:#ADBAC7"> (isLoggedIn) {</span></span>
-<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Welcome!"</span><span style="color:#ADBAC7">);</span></span>
-<span class="line"><span style="color:#ADBAC7">} </span><span style="color:#F47067">else</span><span style="color:#ADBAC7"> {</span></span>
-<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Please log in."</span><span style="color:#ADBAC7">);</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#616E88">// Clean: Reads like a story</span></span>
+<span class="line"><span style="color:#81A1C1">if</span><span style="color:#D8DEE9FF"> (</span><span style="color:#D8DEE9">isLoggedIn</span><span style="color:#D8DEE9FF">) </span><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#D8DEE9">    console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">log</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">Welcome!</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span><span style="color:#81A1C1"> else</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#D8DEE9">    console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">log</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">Please log in.</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#768390">// Messy: Feels like chaos</span></span>
-<span class="line"><span style="color:#F47067">if</span><span style="color:#ADBAC7">(isLoggedIn){console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Welcome!"</span><span style="color:#ADBAC7">);}</span><span style="color:#F47067">else</span><span style="color:#ADBAC7">{console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Please log in."</span><span style="color:#ADBAC7">);}</span></span></code></pre>
+<span class="line"><span style="color:#616E88">// Messy: Feels like chaos</span></span>
+<span class="line"><span style="color:#81A1C1">if</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">isLoggedIn</span><span style="color:#D8DEE9FF">)</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9">console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">log</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">Welcome!</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span><span style="color:#ECEFF4">}</span><span style="color:#81A1C1">else</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9">console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">log</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">Please log in.</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span><span style="color:#ECEFF4">}</span></span></code></pre>
 </div>
 <p class="aside"><em>The second version is technically valid JavaScript. It also looks like someone's cat walked across the keyboard at 2am during a production incident. Don't be the cat-keyboard developer.</em></p>
 
@@ -527,15 +527,15 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">javascript</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Calculator</span><span style="color:#ADBAC7"> {</span></span>
-<span class="line"><span style="color:#DCBDFB">    add</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">a</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">b</span><span style="color:#ADBAC7">) { </span><span style="color:#F47067">return</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">+</span><span style="color:#ADBAC7"> b; }</span></span>
-<span class="line"><span style="color:#DCBDFB">    subtract</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">a</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">b</span><span style="color:#ADBAC7">) { </span><span style="color:#F47067">return</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">-</span><span style="color:#ADBAC7"> b; }</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">class</span><span style="color:#8FBCBB"> Calculator</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#88C0D0">    add</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">a</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> b</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span><span style="color:#81A1C1"> return</span><span style="color:#D8DEE9"> a</span><span style="color:#81A1C1"> +</span><span style="color:#D8DEE9"> b</span><span style="color:#81A1C1">;</span><span style="color:#ECEFF4"> }</span></span>
+<span class="line"><span style="color:#88C0D0">    subtract</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">a</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> b</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span><span style="color:#81A1C1"> return</span><span style="color:#D8DEE9"> a</span><span style="color:#81A1C1"> -</span><span style="color:#D8DEE9"> b</span><span style="color:#81A1C1">;</span><span style="color:#ECEFF4"> }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#768390">// Test it (Unit Test)</span></span>
-<span class="line"><span style="color:#F47067">const</span><span style="color:#6CB6FF"> calculator</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#DCBDFB"> Calculator</span><span style="color:#ADBAC7">();</span></span>
-<span class="line"><span style="color:#ADBAC7">console.</span><span style="color:#DCBDFB">assert</span><span style="color:#ADBAC7">(calculator.</span><span style="color:#DCBDFB">add</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">2</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">3</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">===</span><span style="color:#6CB6FF"> 5</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"Addition failed"</span><span style="color:#ADBAC7">);</span></span>
-<span class="line"><span style="color:#ADBAC7">console.</span><span style="color:#DCBDFB">assert</span><span style="color:#ADBAC7">(calculator.</span><span style="color:#DCBDFB">subtract</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">5</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">3</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">===</span><span style="color:#6CB6FF"> 2</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"Subtraction failed"</span><span style="color:#ADBAC7">);</span></span></code></pre>
+<span class="line"><span style="color:#616E88">// Test it (Unit Test)</span></span>
+<span class="line"><span style="color:#81A1C1">const</span><span style="color:#D8DEE9"> calculator</span><span style="color:#81A1C1"> =</span><span style="color:#81A1C1"> new</span><span style="color:#88C0D0"> Calculator</span><span style="color:#D8DEE9FF">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#D8DEE9">console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">assert</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">calculator</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">add</span><span style="color:#D8DEE9FF">(</span><span style="color:#B48EAD">2</span><span style="color:#ECEFF4">,</span><span style="color:#B48EAD"> 3</span><span style="color:#D8DEE9FF">) </span><span style="color:#81A1C1">===</span><span style="color:#B48EAD"> 5</span><span style="color:#ECEFF4">,</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">Addition failed</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#D8DEE9">console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">assert</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">calculator</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">subtract</span><span style="color:#D8DEE9FF">(</span><span style="color:#B48EAD">5</span><span style="color:#ECEFF4">,</span><span style="color:#B48EAD"> 3</span><span style="color:#D8DEE9FF">) </span><span style="color:#81A1C1">===</span><span style="color:#B48EAD"> 2</span><span style="color:#ECEFF4">,</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">Subtraction failed</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span></code></pre>
 </div>
 <p>For real-world auth logic, where correctness actually matters:</p>
 <div class="code-block">
@@ -543,16 +543,16 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">javascript</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Auth</span><span style="color:#ADBAC7"> {</span></span>
-<span class="line"><span style="color:#DCBDFB">    login</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">username</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">password</span><span style="color:#ADBAC7">) {</span></span>
-<span class="line"><span style="color:#F47067">        return</span><span style="color:#ADBAC7"> username </span><span style="color:#F47067">===</span><span style="color:#96D0FF"> "admin"</span><span style="color:#F47067"> &#x26;&#x26;</span><span style="color:#ADBAC7"> password </span><span style="color:#F47067">===</span><span style="color:#96D0FF"> "1234"</span><span style="color:#ADBAC7">;</span></span>
-<span class="line"><span style="color:#ADBAC7">    }</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">class</span><span style="color:#8FBCBB"> Auth</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#88C0D0">    login</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">username</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> password</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#81A1C1">        return</span><span style="color:#D8DEE9"> username</span><span style="color:#81A1C1"> ===</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">admin</span><span style="color:#ECEFF4">"</span><span style="color:#81A1C1"> &#x26;</span><span style="color:#D8DEE9FF">#</span><span style="color:#D8DEE9">x26</span><span style="color:#81A1C1">;&#x26;</span><span style="color:#D8DEE9FF">#</span><span style="color:#D8DEE9">x26</span><span style="color:#81A1C1">;</span><span style="color:#D8DEE9"> password</span><span style="color:#81A1C1"> ===</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">1234</span><span style="color:#ECEFF4">"</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#768390">// Test the Auth class</span></span>
-<span class="line"><span style="color:#F47067">const</span><span style="color:#6CB6FF"> auth</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#DCBDFB"> Auth</span><span style="color:#ADBAC7">();</span></span>
-<span class="line"><span style="color:#ADBAC7">console.</span><span style="color:#DCBDFB">assert</span><span style="color:#ADBAC7">(auth.</span><span style="color:#DCBDFB">login</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"admin"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"et5t45#@"</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">===</span><span style="color:#6CB6FF"> true</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"Login failed for valid credentials"</span><span style="color:#ADBAC7">);</span></span>
-<span class="line"><span style="color:#ADBAC7">console.</span><span style="color:#DCBDFB">assert</span><span style="color:#ADBAC7">(auth.</span><span style="color:#DCBDFB">login</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"user"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"wrongpassword"</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">===</span><span style="color:#6CB6FF"> false</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"Login succeeded for invalid credentials"</span><span style="color:#ADBAC7">);</span></span></code></pre>
+<span class="line"><span style="color:#616E88">// Test the Auth class</span></span>
+<span class="line"><span style="color:#81A1C1">const</span><span style="color:#D8DEE9"> auth</span><span style="color:#81A1C1"> =</span><span style="color:#81A1C1"> new</span><span style="color:#88C0D0"> Auth</span><span style="color:#D8DEE9FF">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#D8DEE9">console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">assert</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">auth</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">login</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">admin</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">et5t45#@</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">) </span><span style="color:#81A1C1">===</span><span style="color:#81A1C1"> true</span><span style="color:#ECEFF4">,</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">Login failed for valid credentials</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#D8DEE9">console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">assert</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">auth</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">login</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">user</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">wrongpassword</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">) </span><span style="color:#81A1C1">===</span><span style="color:#81A1C1"> false</span><span style="color:#ECEFF4">,</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">Login succeeded for invalid credentials</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span></code></pre>
 </div>
 <div class="callout green"><div class="callout-label">✓ Verdict</div><p>Write tests <em>before</em> you're sure the code works. Write them especially <em>before</em> you're sure. That confidence is exactly when bugs hide. TDD isn't ceremony — it's precision.</p></div>
 
@@ -581,12 +581,12 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">javascript</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// Dependency: Sending emails with Nodemailer</span></span>
-<span class="line"><span style="color:#F47067">const</span><span style="color:#6CB6FF"> nodemailer</span><span style="color:#F47067"> =</span><span style="color:#DCBDFB"> require</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">'nodemailer'</span><span style="color:#ADBAC7">);</span></span>
-<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> sendEmail</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">to</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">subject</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">message</span><span style="color:#ADBAC7">) {</span></span>
-<span class="line"><span style="color:#F47067">    const</span><span style="color:#6CB6FF"> transporter</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> nodemailer.</span><span style="color:#DCBDFB">createTransport</span><span style="color:#ADBAC7">({ </span><span style="color:#768390">/* config */</span><span style="color:#ADBAC7"> });</span></span>
-<span class="line"><span style="color:#F47067">    return</span><span style="color:#ADBAC7"> transporter.</span><span style="color:#DCBDFB">sendMail</span><span style="color:#ADBAC7">({ from: </span><span style="color:#96D0FF">"programmingwithshahan@gmail.com"</span><span style="color:#ADBAC7">, to, subject, text: message });</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#616E88">// Dependency: Sending emails with Nodemailer</span></span>
+<span class="line"><span style="color:#81A1C1">const</span><span style="color:#D8DEE9"> nodemailer</span><span style="color:#81A1C1"> =</span><span style="color:#88C0D0"> require</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">'</span><span style="color:#A3BE8C">nodemailer</span><span style="color:#ECEFF4">'</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">function</span><span style="color:#88C0D0"> sendEmail</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">to</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> subject</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> message</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#81A1C1">    const</span><span style="color:#D8DEE9"> transporter</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> nodemailer</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">createTransport</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">{</span><span style="color:#616E88"> /* config */</span><span style="color:#ECEFF4"> }</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">    return</span><span style="color:#D8DEE9"> transporter</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">sendMail</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">{</span><span style="color:#88C0D0"> from</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">programmingwithshahan@gmail.com</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> to</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> subject</span><span style="color:#ECEFF4">,</span><span style="color:#88C0D0"> text</span><span style="color:#ECEFF4">:</span><span style="color:#D8DEE9"> message</span><span style="color:#ECEFF4"> }</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
 </div>
 <p>Keep <code>src/</code> for production code and <code>tests/</code> separate at the root level. Don't put all tests in one file — as the project grows, locating a specific test becomes its own debugging problem.</p>
 <p class="aside"><em>One massive test file that "tests everything" is technically a test suite. It's also a lie. Split tests by domain, or your green checkmarks will tell you nothing useful about what actually works.</em></p>
@@ -598,17 +598,17 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">bash</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">myProject/</span></span>
-<span class="line"><span style="color:#F69D50">├──</span><span style="color:#96D0FF"> src/</span><span style="color:#768390">              # Production code</span></span>
-<span class="line"><span style="color:#F69D50">│</span><span style="color:#96D0FF">   ├──</span><span style="color:#96D0FF"> components/</span></span>
-<span class="line"><span style="color:#F69D50">│</span><span style="color:#96D0FF">   ├──</span><span style="color:#96D0FF"> services/</span></span>
-<span class="line"><span style="color:#F69D50">│</span><span style="color:#96D0FF">   └──</span><span style="color:#96D0FF"> utils/</span></span>
-<span class="line"><span style="color:#F69D50">├──</span><span style="color:#96D0FF"> tests/</span><span style="color:#768390">            # Test files</span></span>
-<span class="line"><span style="color:#F69D50">│</span><span style="color:#96D0FF">   ├──</span><span style="color:#96D0FF"> components/</span></span>
-<span class="line"><span style="color:#F69D50">│</span><span style="color:#96D0FF">   ├──</span><span style="color:#96D0FF"> services/</span></span>
-<span class="line"><span style="color:#F69D50">│</span><span style="color:#96D0FF">   └──</span><span style="color:#96D0FF"> utils/</span></span>
-<span class="line"><span style="color:#F69D50">├──</span><span style="color:#96D0FF"> package.json</span><span style="color:#768390">      # Project configuration</span></span>
-<span class="line"><span style="color:#F69D50">└──</span><span style="color:#96D0FF"> README.md</span><span style="color:#768390">         # Documentation</span></span></code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#88C0D0">myProject/</span></span>
+<span class="line"><span style="color:#88C0D0">├──</span><span style="color:#A3BE8C"> src/</span><span style="color:#616E88">              # Production code</span></span>
+<span class="line"><span style="color:#88C0D0">│</span><span style="color:#A3BE8C">   ├──</span><span style="color:#A3BE8C"> components/</span></span>
+<span class="line"><span style="color:#88C0D0">│</span><span style="color:#A3BE8C">   ├──</span><span style="color:#A3BE8C"> services/</span></span>
+<span class="line"><span style="color:#88C0D0">│</span><span style="color:#A3BE8C">   └──</span><span style="color:#A3BE8C"> utils/</span></span>
+<span class="line"><span style="color:#88C0D0">├──</span><span style="color:#A3BE8C"> tests/</span><span style="color:#616E88">            # Test files</span></span>
+<span class="line"><span style="color:#88C0D0">│</span><span style="color:#A3BE8C">   ├──</span><span style="color:#A3BE8C"> components/</span></span>
+<span class="line"><span style="color:#88C0D0">│</span><span style="color:#A3BE8C">   ├──</span><span style="color:#A3BE8C"> services/</span></span>
+<span class="line"><span style="color:#88C0D0">│</span><span style="color:#A3BE8C">   └──</span><span style="color:#A3BE8C"> utils/</span></span>
+<span class="line"><span style="color:#88C0D0">├──</span><span style="color:#A3BE8C"> package.json</span><span style="color:#616E88">      # Project configuration</span></span>
+<span class="line"><span style="color:#88C0D0">└──</span><span style="color:#A3BE8C"> README.md</span><span style="color:#616E88">         # Documentation</span></span></code></pre>
 </div>
 <div class="callout"><div class="callout-label">💡 Tip</div><p>Set up Prettier and ESLint. Enforce them in CI. Never argue about formatting in a code review again. The tool wins every argument, and it doesn't have feelings about it.</p></div>
 
@@ -619,7 +619,7 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">javascript</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">throw</span><span style="color:#F47067"> new</span><span style="color:#DCBDFB"> Error</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Dimensions must be positive numbers."</span><span style="color:#ADBAC7">);</span></span></code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">throw</span><span style="color:#81A1C1"> new</span><span style="color:#88C0D0"> Error</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">Dimensions must be positive numbers.</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span></code></pre>
 </div>
 <p>Store fixed values in a configuration or constants file. When the value changes, you change it in one place. Your future self will write you a thank-you note.</p>
 
@@ -630,17 +630,17 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">javascript</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// Bad: Hardcoded and rigid</span></span>
-<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> createUser</span><span style="color:#ADBAC7">() {</span></span>
-<span class="line"><span style="color:#F47067">    const</span><span style="color:#6CB6FF"> maxUsers</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> 100</span><span style="color:#ADBAC7">;</span></span>
-<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (currentUsers </span><span style="color:#F47067">>=</span><span style="color:#ADBAC7"> maxUsers) </span><span style="color:#F47067">throw</span><span style="color:#96D0FF"> "Too many users!"</span><span style="color:#ADBAC7">;</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#616E88">// Bad: Hardcoded and rigid</span></span>
+<span class="line"><span style="color:#81A1C1">function</span><span style="color:#88C0D0"> createUser</span><span style="color:#ECEFF4">()</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#81A1C1">    const</span><span style="color:#D8DEE9"> maxUsers</span><span style="color:#81A1C1"> =</span><span style="color:#B48EAD"> 100</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">    if</span><span style="color:#D8DEE9FF"> (</span><span style="color:#D8DEE9">currentUsers</span><span style="color:#81A1C1"> >=</span><span style="color:#D8DEE9"> maxUsers</span><span style="color:#D8DEE9FF">) </span><span style="color:#81A1C1">throw</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">Too many users!</span><span style="color:#ECEFF4">"</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#768390">// Clean: Dynamic and flexible</span></span>
-<span class="line"><span style="color:#F47067">const</span><span style="color:#6CB6FF"> MAX_USERS</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> 100</span><span style="color:#ADBAC7">;</span></span>
-<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> createUser</span><span style="color:#ADBAC7">() {</span></span>
-<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (currentUsers </span><span style="color:#F47067">>=</span><span style="color:#6CB6FF"> MAX_USERS</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">throw</span><span style="color:#96D0FF"> "Too many users!"</span><span style="color:#ADBAC7">;</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+<span class="line"><span style="color:#616E88">// Clean: Dynamic and flexible</span></span>
+<span class="line"><span style="color:#81A1C1">const</span><span style="color:#D8DEE9"> MAX_USERS</span><span style="color:#81A1C1"> =</span><span style="color:#B48EAD"> 100</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">function</span><span style="color:#88C0D0"> createUser</span><span style="color:#ECEFF4">()</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#81A1C1">    if</span><span style="color:#D8DEE9FF"> (</span><span style="color:#D8DEE9">currentUsers</span><span style="color:#81A1C1"> >=</span><span style="color:#D8DEE9"> MAX_USERS</span><span style="color:#D8DEE9FF">) </span><span style="color:#81A1C1">throw</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">Too many users!</span><span style="color:#ECEFF4">"</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
 </div>
 <p class="aside"><em>The 20-line rule isn't scripture. The principle is: if you have to scroll to understand a function, the function is trying to tell you something. It's asking to be broken up. Listen to it.</em></p>
 
@@ -651,19 +651,19 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">javascript</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// Original code: Hard to read, poorly named variables</span></span>
-<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> calc</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">a</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">b</span><span style="color:#ADBAC7">) {</span></span>
-<span class="line"><span style="color:#F47067">  let</span><span style="color:#ADBAC7"> x </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">+</span><span style="color:#ADBAC7"> b;</span></span>
-<span class="line"><span style="color:#F47067">  let</span><span style="color:#ADBAC7"> y </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> x </span><span style="color:#F47067">*</span><span style="color:#6CB6FF"> 0.2</span><span style="color:#ADBAC7">;</span></span>
-<span class="line"><span style="color:#F47067">  return</span><span style="color:#ADBAC7"> y;</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#616E88">// Original code: Hard to read, poorly named variables</span></span>
+<span class="line"><span style="color:#81A1C1">function</span><span style="color:#88C0D0"> calc</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">a</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> b</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#81A1C1">  let</span><span style="color:#D8DEE9"> x</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> a</span><span style="color:#81A1C1"> +</span><span style="color:#D8DEE9"> b</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">  let</span><span style="color:#D8DEE9"> y</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> x</span><span style="color:#81A1C1"> *</span><span style="color:#B48EAD"> 0.2</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">  return</span><span style="color:#D8DEE9"> y</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#768390">// We're adding to it but not cleaning it up</span></span>
-<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> calcDiscount</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">a</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">b</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">discountRate</span><span style="color:#ADBAC7">) {</span></span>
-<span class="line"><span style="color:#F47067">  let</span><span style="color:#ADBAC7"> total </span><span style="color:#F47067">=</span><span style="color:#DCBDFB"> calc</span><span style="color:#ADBAC7">(a, b);</span></span>
-<span class="line"><span style="color:#F47067">  let</span><span style="color:#ADBAC7"> final </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> total </span><span style="color:#F47067">-</span><span style="color:#ADBAC7"> discountRate;</span></span>
-<span class="line"><span style="color:#F47067">  return</span><span style="color:#ADBAC7"> final;</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+<span class="line"><span style="color:#616E88">// We're adding to it but not cleaning it up</span></span>
+<span class="line"><span style="color:#81A1C1">function</span><span style="color:#88C0D0"> calcDiscount</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">a</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> b</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> discountRate</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#81A1C1">  let</span><span style="color:#D8DEE9"> total</span><span style="color:#81A1C1"> =</span><span style="color:#88C0D0"> calc</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">a</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> b</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">  let</span><span style="color:#D8DEE9"> final</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> total</span><span style="color:#81A1C1"> -</span><span style="color:#D8DEE9"> discountRate</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">  return</span><span style="color:#D8DEE9"> final</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
 </div>
 <div class="callout green"><div class="callout-label">✓ Verdict</div><p>Refactoring isn't a sprint you plan — it's a habit you build. The Boy Scout Rule turns every commit into a small improvement. After a year, the codebase is unrecognizably better, and you never had a "refactoring week."</p></div>
 
@@ -674,21 +674,21 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">javascript</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> PaymentProcessor</span><span style="color:#ADBAC7"> {</span></span>
-<span class="line"><span style="color:#DCBDFB">  processPayment</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">paymentType</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">amount</span><span style="color:#ADBAC7">) {</span></span>
-<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (paymentType </span><span style="color:#F47067">===</span><span style="color:#96D0FF"> "creditCard"</span><span style="color:#ADBAC7">) {</span></span>
-<span class="line"><span style="color:#ADBAC7">      console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`Processing credit card payment of $${</span><span style="color:#ADBAC7">amount</span><span style="color:#96D0FF">}`</span><span style="color:#ADBAC7">);</span></span>
-<span class="line"><span style="color:#ADBAC7">    } </span><span style="color:#F47067">else</span><span style="color:#F47067"> if</span><span style="color:#ADBAC7"> (paymentType </span><span style="color:#F47067">===</span><span style="color:#96D0FF"> "paypal"</span><span style="color:#ADBAC7">) {</span></span>
-<span class="line"><span style="color:#ADBAC7">      console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`Processing PayPal payment of $${</span><span style="color:#ADBAC7">amount</span><span style="color:#96D0FF">}`</span><span style="color:#ADBAC7">);</span></span>
-<span class="line"><span style="color:#ADBAC7">    } </span><span style="color:#F47067">else</span><span style="color:#ADBAC7"> {</span></span>
-<span class="line"><span style="color:#F47067">      throw</span><span style="color:#F47067"> new</span><span style="color:#DCBDFB"> Error</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Unsupported payment type"</span><span style="color:#ADBAC7">);</span></span>
-<span class="line"><span style="color:#ADBAC7">    }</span></span>
-<span class="line"><span style="color:#ADBAC7">  }</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">class</span><span style="color:#8FBCBB"> PaymentProcessor</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#88C0D0">  processPayment</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">paymentType</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> amount</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#81A1C1">    if</span><span style="color:#D8DEE9FF"> (</span><span style="color:#D8DEE9">paymentType</span><span style="color:#81A1C1"> ===</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">creditCard</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">) </span><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#D8DEE9">      console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">log</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">`</span><span style="color:#A3BE8C">Processing credit card payment of $</span><span style="color:#81A1C1">${</span><span style="color:#D8DEE9">amount</span><span style="color:#81A1C1">}</span><span style="color:#ECEFF4">`</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span><span style="color:#81A1C1"> else</span><span style="color:#81A1C1"> if</span><span style="color:#D8DEE9FF"> (</span><span style="color:#D8DEE9">paymentType</span><span style="color:#81A1C1"> ===</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">paypal</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">) </span><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#D8DEE9">      console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">log</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">`</span><span style="color:#A3BE8C">Processing PayPal payment of $</span><span style="color:#81A1C1">${</span><span style="color:#D8DEE9">amount</span><span style="color:#81A1C1">}</span><span style="color:#ECEFF4">`</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span><span style="color:#81A1C1"> else</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#81A1C1">      throw</span><span style="color:#81A1C1"> new</span><span style="color:#88C0D0"> Error</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">Unsupported payment type</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span></span>
+<span class="line"><span style="color:#ECEFF4">  }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F47067">const</span><span style="color:#6CB6FF"> paymentProcessor</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#DCBDFB"> PaymentProcessor</span><span style="color:#ADBAC7">();</span></span>
-<span class="line"><span style="color:#ADBAC7">paymentProcessor.</span><span style="color:#DCBDFB">processPayment</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"creditCard"</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">100</span><span style="color:#ADBAC7">);</span></span>
-<span class="line"><span style="color:#ADBAC7">paymentProcessor.</span><span style="color:#DCBDFB">processPayment</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"paypal"</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">200</span><span style="color:#ADBAC7">);</span></span></code></pre>
+<span class="line"><span style="color:#81A1C1">const</span><span style="color:#D8DEE9"> paymentProcessor</span><span style="color:#81A1C1"> =</span><span style="color:#81A1C1"> new</span><span style="color:#88C0D0"> PaymentProcessor</span><span style="color:#D8DEE9FF">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#D8DEE9">paymentProcessor</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">processPayment</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">creditCard</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#B48EAD"> 100</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#D8DEE9">paymentProcessor</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">processPayment</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">paypal</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#B48EAD"> 200</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span></code></pre>
 </div>
 <p class="aside"><em>Every time you reach for <code>else if</code> to handle a new case, ask: should I be extending a class instead? If yes — extend. If you're modifying a class that already works, you're introducing risk for free.</em></p>
 
@@ -703,42 +703,42 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">javascript</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// Base class</span></span>
-<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> PaymentProcessor</span><span style="color:#ADBAC7"> {</span></span>
-<span class="line"><span style="color:#DCBDFB">  processPayment</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">amount</span><span style="color:#ADBAC7">) {</span></span>
-<span class="line"><span style="color:#F47067">    throw</span><span style="color:#F47067"> new</span><span style="color:#DCBDFB"> Error</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"processPayment() must be implemented"</span><span style="color:#ADBAC7">);</span></span>
-<span class="line"><span style="color:#ADBAC7">  }</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#616E88">// Base class</span></span>
+<span class="line"><span style="color:#81A1C1">class</span><span style="color:#8FBCBB"> PaymentProcessor</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#88C0D0">  processPayment</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">amount</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#81A1C1">    throw</span><span style="color:#81A1C1"> new</span><span style="color:#88C0D0"> Error</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">processPayment() must be implemented</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">  }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#768390">// Credit card payment</span></span>
-<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> CreditCardPayment</span><span style="color:#F47067"> extends</span><span style="color:#6CB6FF"> PaymentProcessor</span><span style="color:#ADBAC7"> {</span></span>
-<span class="line"><span style="color:#DCBDFB">  processPayment</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">amount</span><span style="color:#ADBAC7">) {</span></span>
-<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`Processing credit card payment of $${</span><span style="color:#ADBAC7">amount</span><span style="color:#96D0FF">}`</span><span style="color:#ADBAC7">);</span></span>
-<span class="line"><span style="color:#ADBAC7">  }</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#616E88">// Credit card payment</span></span>
+<span class="line"><span style="color:#81A1C1">class</span><span style="color:#8FBCBB"> CreditCardPayment</span><span style="color:#81A1C1"> extends</span><span style="color:#8FBCBB;font-weight:bold"> PaymentProcessor</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#88C0D0">  processPayment</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">amount</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#D8DEE9">    console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">log</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">`</span><span style="color:#A3BE8C">Processing credit card payment of $</span><span style="color:#81A1C1">${</span><span style="color:#D8DEE9">amount</span><span style="color:#81A1C1">}</span><span style="color:#ECEFF4">`</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">  }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#768390">// PayPal payment</span></span>
-<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> PayPalPayment</span><span style="color:#F47067"> extends</span><span style="color:#6CB6FF"> PaymentProcessor</span><span style="color:#ADBAC7"> {</span></span>
-<span class="line"><span style="color:#DCBDFB">  processPayment</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">amount</span><span style="color:#ADBAC7">) {</span></span>
-<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`Processing PayPal payment of $${</span><span style="color:#ADBAC7">amount</span><span style="color:#96D0FF">}`</span><span style="color:#ADBAC7">);</span></span>
-<span class="line"><span style="color:#ADBAC7">  }</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#616E88">// PayPal payment</span></span>
+<span class="line"><span style="color:#81A1C1">class</span><span style="color:#8FBCBB"> PayPalPayment</span><span style="color:#81A1C1"> extends</span><span style="color:#8FBCBB;font-weight:bold"> PaymentProcessor</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#88C0D0">  processPayment</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">amount</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#D8DEE9">    console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">log</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">`</span><span style="color:#A3BE8C">Processing PayPal payment of $</span><span style="color:#81A1C1">${</span><span style="color:#D8DEE9">amount</span><span style="color:#81A1C1">}</span><span style="color:#ECEFF4">`</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">  }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#768390">// Adding a new payment type? Just extend the class!</span></span>
-<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> ApplePayPayment</span><span style="color:#F47067"> extends</span><span style="color:#6CB6FF"> PaymentProcessor</span><span style="color:#ADBAC7"> {</span></span>
-<span class="line"><span style="color:#DCBDFB">  processPayment</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">amount</span><span style="color:#ADBAC7">) {</span></span>
-<span class="line"><span style="color:#ADBAC7">    console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`Processing Apple Pay payment of $${</span><span style="color:#ADBAC7">amount</span><span style="color:#96D0FF">}`</span><span style="color:#ADBAC7">);</span></span>
-<span class="line"><span style="color:#ADBAC7">  }</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#616E88">// Adding a new payment type? Just extend the class!</span></span>
+<span class="line"><span style="color:#81A1C1">class</span><span style="color:#8FBCBB"> ApplePayPayment</span><span style="color:#81A1C1"> extends</span><span style="color:#8FBCBB;font-weight:bold"> PaymentProcessor</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#88C0D0">  processPayment</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">amount</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#D8DEE9">    console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">log</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">`</span><span style="color:#A3BE8C">Processing Apple Pay payment of $</span><span style="color:#81A1C1">${</span><span style="color:#D8DEE9">amount</span><span style="color:#81A1C1">}</span><span style="color:#ECEFF4">`</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">  }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#768390">// Usage</span></span>
-<span class="line"><span style="color:#F47067">const</span><span style="color:#6CB6FF"> payments</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> [</span></span>
-<span class="line"><span style="color:#F47067">  new</span><span style="color:#DCBDFB"> CreditCardPayment</span><span style="color:#ADBAC7">(),</span></span>
-<span class="line"><span style="color:#F47067">  new</span><span style="color:#DCBDFB"> PayPalPayment</span><span style="color:#ADBAC7">(),</span></span>
-<span class="line"><span style="color:#F47067">  new</span><span style="color:#DCBDFB"> ApplePayPayment</span><span style="color:#ADBAC7">(),</span></span>
-<span class="line"><span style="color:#ADBAC7">];</span></span>
+<span class="line"><span style="color:#616E88">// Usage</span></span>
+<span class="line"><span style="color:#81A1C1">const</span><span style="color:#D8DEE9"> payments</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9FF"> [</span></span>
+<span class="line"><span style="color:#81A1C1">  new</span><span style="color:#88C0D0"> CreditCardPayment</span><span style="color:#D8DEE9FF">()</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#81A1C1">  new</span><span style="color:#88C0D0"> PayPalPayment</span><span style="color:#D8DEE9FF">()</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#81A1C1">  new</span><span style="color:#88C0D0"> ApplePayPayment</span><span style="color:#D8DEE9FF">()</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">]</span><span style="color:#81A1C1">;</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#ADBAC7">payments.</span><span style="color:#DCBDFB">forEach</span><span style="color:#ADBAC7">((</span><span style="color:#F69D50">payment</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">=></span><span style="color:#ADBAC7"> payment.</span><span style="color:#DCBDFB">processPayment</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">100</span><span style="color:#ADBAC7">));</span></span></code></pre>
+<span class="line"><span style="color:#D8DEE9">payments</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">forEach</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">payment</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1"> =></span><span style="color:#D8DEE9"> payment</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">processPayment</span><span style="color:#D8DEE9FF">(</span><span style="color:#B48EAD">100</span><span style="color:#D8DEE9FF">))</span><span style="color:#81A1C1">;</span></span></code></pre>
 </div>
 <p>ESLint immediately flags the undefined reference: <code>codeError: 'sume' is not defined.</code> Caught before the function ever executes. That's the trade: a small setup cost in exchange for never shipping that class of bug.</p>
 
@@ -749,8 +749,8 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">javascript</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> calculate</span><span style="color:#ADBAC7"> ( </span><span style="color:#F69D50">x</span><span style="color:#ADBAC7"> , </span><span style="color:#F69D50">y</span><span style="color:#ADBAC7"> ){ </span><span style="color:#F47067">return</span><span style="color:#ADBAC7"> x</span><span style="color:#F47067">+</span><span style="color:#ADBAC7"> y;}</span></span>
-<span class="line"><span style="color:#ADBAC7">console.</span><span style="color:#DCBDFB">log</span><span style="color:#ADBAC7">( </span><span style="color:#DCBDFB">calculate</span><span style="color:#ADBAC7"> (</span><span style="color:#6CB6FF">2</span><span style="color:#ADBAC7">,</span><span style="color:#6CB6FF">3</span><span style="color:#ADBAC7"> ) )</span></span></code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">function</span><span style="color:#88C0D0"> calculate</span><span style="color:#ECEFF4"> (</span><span style="color:#D8DEE9"> x</span><span style="color:#ECEFF4"> ,</span><span style="color:#D8DEE9"> y</span><span style="color:#ECEFF4"> ){</span><span style="color:#81A1C1"> return</span><span style="color:#D8DEE9"> x</span><span style="color:#81A1C1">+</span><span style="color:#D8DEE9"> y</span><span style="color:#81A1C1">;</span><span style="color:#ECEFF4">}</span></span>
+<span class="line"><span style="color:#D8DEE9">console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">log</span><span style="color:#D8DEE9FF">( </span><span style="color:#88C0D0">calculate</span><span style="color:#D8DEE9FF"> (</span><span style="color:#B48EAD">2</span><span style="color:#ECEFF4">,</span><span style="color:#B48EAD">3</span><span style="color:#D8DEE9FF"> ) )</span></span></code></pre>
 </div>
 <div class="callout"><div class="callout-label">💡 Tip</div><p>Prettier is opinionated. That's the feature, not the bug. The entire point is to end the debate permanently. Configure it once, enforce it in CI, and never think about formatting again.</p></div>
 

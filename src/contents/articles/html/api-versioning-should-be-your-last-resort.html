@@ -412,11 +412,11 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">json</span>
   </div>
-  <pre><code><span class="cm">// Before — every client expects a number</span>
-{ "total": 100 }
-
-<span class="cm">// After — field changed from number to object</span>
-{ "total": { "amount": 100, "currency": "USD" } }</code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#616E88">// Before — every client expects a number</span></span>
+<span class="line"><span style="color:#ECEFF4">{</span><span style="color:#ECEFF4"> "</span><span style="color:#8FBCBB">total</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#B48EAD"> 100</span><span style="color:#ECEFF4"> }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#616E88">// After — field changed from number to object</span></span>
+<span class="line"><span style="color:#ECEFF4">{</span><span style="color:#ECEFF4"> "</span><span style="color:#8FBCBB">total</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> {</span><span style="color:#ECEFF4"> "</span><span style="color:#8FBCBB">amount</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#B48EAD"> 100</span><span style="color:#ECEFF4">,</span><span style="color:#ECEFF4"> "</span><span style="color:#8FBCBB">currency</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">USD</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4"> }</span><span style="color:#ECEFF4"> }</span></span></code></pre>
 </div>
 
 <p>No path changed. No endpoint renamed. Still broke every client parsing that field.</p>
@@ -460,11 +460,11 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">json</span>
   </div>
-  <pre><code>{
-  "id": "ord_123",
-  "status": "paid",
-  "total": 100
-}</code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">id</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">ord_123</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">status</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">paid</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">total</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#B48EAD"> 100</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
 </div>
 
 <p>Instead of replacing <code>total</code> with a richer structure, introduce a new field alongside the existing one:</p>
@@ -474,15 +474,15 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">json</span>
   </div>
-  <pre><code>{
-  "id": "ord_123",
-  "status": "paid",
-  "total": 100,
-  "totalMoney": {
-    "amount": 100,
-    "currency": "USD"
-  }
-}</code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">id</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">ord_123</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">status</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">paid</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">total</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#B48EAD"> 100</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">totalMoney</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#ECEFF4">    "</span><span style="color:#8FBCBB">amount</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#B48EAD"> 100</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">    "</span><span style="color:#8FBCBB">currency</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">USD</span><span style="color:#ECEFF4">"</span></span>
+<span class="line"><span style="color:#ECEFF4">  }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
 </div>
 
 <p>Existing clients keep using <code>total</code>. New clients adopt <code>totalMoney</code>. Mark the old field deprecated, track its usage, and remove it only after a genuine migration window — not because you <em>think</em> no one is using it.</p>
@@ -499,7 +499,7 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">json</span>
   </div>
-  <pre><code>{ "id": "ord_123", "status": "paid" }</code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#ECEFF4">{</span><span style="color:#ECEFF4"> "</span><span style="color:#8FBCBB">id</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">ord_123</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#ECEFF4"> "</span><span style="color:#8FBCBB">status</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">paid</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4"> }</span></span></code></pre>
 </div>
 
 <p>To:</p>
@@ -509,7 +509,7 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">json</span>
   </div>
-  <pre><code>{ "id": "ord_123", "status": "paid", "estimatedDeliveryDate": "2026-05-29" }</code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#ECEFF4">{</span><span style="color:#ECEFF4"> "</span><span style="color:#8FBCBB">id</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">ord_123</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#ECEFF4"> "</span><span style="color:#8FBCBB">status</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">paid</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#ECEFF4"> "</span><span style="color:#8FBCBB">estimatedDeliveryDate</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">2026-05-29</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4"> }</span></span></code></pre>
 </div>
 
 <p>Older clients should ignore the new field and continue functioning. In .NET, <code>System.Text.Json</code> does this by default. The real challenge is teams that want backward compatibility while generating client models that reject any unexpected field in the response.</p>
@@ -539,8 +539,8 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">text</span>
   </div>
-  <pre><code>DELETE /orders/{id}             <span class="cm"># soft-delete — unchanged</span>
-DELETE /orders/{id}?purge=true  <span class="cm"># new, opt-in hard delete</span></code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span>DELETE /orders/{id}             # soft-delete — unchanged</span></span>
+<span class="line"><span>DELETE /orders/{id}?purge=true  # new, opt-in hard delete</span></span></code></pre>
 </div>
 
 <p class="aside"><em>Or introduce a proper resource: <code>DELETE /orders/{id}/purge</code>. Then the destructive path has its own name, its own permissions, and can't be accidentally triggered by someone calling a familiar endpoint.</em></p>
@@ -557,10 +557,10 @@ DELETE /orders/{id}?purge=true  <span class="cm"># new, opt-in hard delete</span
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">json</span>
   </div>
-  <pre><code>{
-  "customerId": "cus_123",
-  "currency": "USD"
-}</code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">customerId</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">cus_123</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">currency</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">USD</span><span style="color:#ECEFF4">"</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
 </div>
 
 <p>Today the API requires <code>country</code> for tax calculations:</p>
@@ -570,11 +570,11 @@ DELETE /orders/{id}?purge=true  <span class="cm"># new, opt-in hard delete</span
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">json</span>
   </div>
-  <pre><code>{
-  "customerId": "cus_123",
-  "currency": "USD",
-  "country": "US"  <span class="cm">// new required field — breaks every existing integration</span>
-}</code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">customerId</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">cus_123</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">currency</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">USD</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">country</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">US</span><span style="color:#ECEFF4">"</span><span style="color:#616E88">  // new required field — breaks every existing integration</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
 </div>
 
 <p>Whether <code>country</code> was previously optional or nonexistent, every existing integration starts failing at runtime. Safer approaches:</p>
@@ -597,7 +597,7 @@ DELETE /orders/{id}?purge=true  <span class="cm"># new, opt-in hard delete</span
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">text</span>
   </div>
-  <pre><code>POST /orders?validateOnly=true&amp;includeTaxEstimate=true&amp;reserveInventory=true</code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span>POST /orders?validateOnly=true&#x26;includeTaxEstimate=true&#x26;reserveInventory=true</span></span></code></pre>
 </div>
 
 <p>That's not one operation — that's three workflows sharing a URL and a prayer.</p>
@@ -620,9 +620,9 @@ DELETE /orders/{id}?purge=true  <span class="cm"># new, opt-in hard delete</span
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">text</span>
   </div>
-  <pre><code>POST /orders              <span class="cm"># place an order — unchanged</span>
-POST /orders/quote        <span class="cm"># cost estimate only</span>
-POST /checkout-sessions   <span class="cm"># full guided flow with stricter model</span></code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span>POST /orders              # place an order — unchanged</span></span>
+<span class="line"><span>POST /orders/quote        # cost estimate only</span></span>
+<span class="line"><span>POST /checkout-sessions   # full guided flow with stricter model</span></span></code></pre>
 </div>
 
 <p><code>POST /orders</code> stays stable. New behavior gets a clear home. No existing client is dragged into a version migration they didn't ask for.</p>
@@ -648,9 +648,9 @@ POST /checkout-sessions   <span class="cm"># full guided flow with stricter mode
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">http</span>
   </div>
-  <pre><code>Deprecation: true
-Sunset: Wed, 31 Dec 2026 23:59:59 GMT
-Link: &lt;https://docs.example.com/migrations/orders-total&gt;; rel="deprecation"</code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span>Deprecation: true</span></span>
+<span class="line"><span>Sunset: Wed, 31 Dec 2026 23:59:59 GMT</span></span>
+<span class="line"><span>Link: &#x3C;https://docs.example.com/migrations/orders-total>; rel="deprecation"</span></span></code></pre>
 </div>
 
 <p>Visible in documentation. Apparent in live traffic. Linked to a migration guide that actually exists.</p>

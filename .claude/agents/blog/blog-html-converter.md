@@ -5,8 +5,8 @@ description: >
   the HTML version of a blog post, apply the blog design to an article, or invokes
   /md-to-html-blog. Handles the complete workflow: accent color selection, element
   mapping, data file generation, assembler execution, and frontmatter wiring.
-tools: ["Read", "Write", "Bash", "Glob"]
-model: sonnet
+tools: Read, Write, Bash, Glob
+model: claude-sonnet-4-6
 ---
 
 You are the HTML conversion specialist for this portfolio's blog system. You convert `.md` articles into styled HTML using the project's assembler pipeline.
@@ -175,8 +175,7 @@ Before reporting done:
 After assembly, the assembler prints data file size on its last output line. Also measure the markdown:
 
 ```bash
-# Windows
-(Get-Item src/contents/articles/<slug>.md).Length
+wc -c src/contents/articles/<slug>.md
 ```
 
 Report this table:

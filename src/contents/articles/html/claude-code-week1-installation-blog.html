@@ -313,7 +313,8 @@
   .week-day-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
 
   /* ── NEXT POST ────────────────────────── */
-  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; text-decoration: none; transition: border-color 0.2s, background 0.2s; }
+  .next-post:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
   .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
   .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
   .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
@@ -377,7 +378,7 @@
   <div class="divider"><span>the switch</span></div>
   <h2>Why I Made the Switch</h2>
 
-  <p>The repetitive cycle of copying code from a chat window to my editor, pasting error messages back, and re-explaining relevant files was becoming tedious. Claude Code, people kept saying, is fundamentally different—it operates more like a junior developer that can directly access and modify your codebase.</p>
+  <p>The copy-paste cycle — code out, error in, re-explain the context, repeat — was getting old. Everyone kept saying Claude Code is different: it actually reads your files instead of waiting for you to paste them.</p>
 
   <p class="aside"><em>The copy-paste loop gets old fast. Especially when Claude needs context from five different files and you're playing carrier pigeon between two windows.</em></p>
 
@@ -540,9 +541,9 @@ in the codebase and apply it everywhere.</pre>
   <div class="divider"><span>bonus</span></div>
   <h2>Bonus: Teaching Claude About Yourself</h2>
 
-  <p>Switching from ChatGPT after years of use felt like starting from scratch. GPT had accumulated context about my coding style, my preferences, how I ask questions. I was worried about losing that rapport.</p>
+  <p>Switching from ChatGPT after years of use felt like starting over. GPT had picked up my coding style, my preferences, how I phrase questions. I genuinely worried about losing all of that.</p>
 
-  <p>Claude's memory system works differently — it's intentional and transparent. You control what it knows. Here's how I rebuilt that context from zero:</p>
+  <p>Claude's memory works differently — it's explicit and transparent. You decide what it knows. Here's how I rebuilt that context from scratch:</p>
 
   <h3>Step 1 — Export Your ChatGPT History (optional)</h3>
 
@@ -646,13 +647,13 @@ in the codebase and apply it everywhere.</pre>
   <p>If you're on the fence about installing it: just run the npm command. Worst case, it takes three minutes and you never open it again.</p>
 
   <!-- ── Series navigation ── -->
-  <div class="next-post">
+  <a class="next-post" href="/articles/claudemd-give-claude-memory-context-between-sessions" target="_parent">
     <div>
       <div class="next-label">Next in the series</div>
-      <div class="next-title">Week 2 — CLAUDE.md, Memory &amp; Building My First Skills</div>
+      <div class="next-title">Ep 2: Claude Code — CLAUDE.md, Memory &amp; Context Between Sessions</div>
     </div>
     <div class="next-arrow">→</div>
-  </div>
+  </a>
 
 </article>
 </div>

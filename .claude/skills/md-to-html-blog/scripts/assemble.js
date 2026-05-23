@@ -114,12 +114,12 @@ const neededLangs = [...new Set([
   'text',
 ])].filter(l => KNOWN_LANGS.has(l));
 
-const highlighter = await createHighlighter({ themes: ['github-dark-dimmed'], langs: neededLangs });
+const highlighter = await createHighlighter({ themes: ['nord'], langs: neededLangs });
 
 function highlight(lang, rawContent) {
   const safeLang = KNOWN_LANGS.has(lang) ? lang : 'text';
   try {
-    return stripBg(highlighter.codeToHtml(rawContent.trim(), { lang: safeLang, theme: 'github-dark-dimmed' }));
+    return stripBg(highlighter.codeToHtml(rawContent.trim(), { lang: safeLang, theme: 'nord' }));
   } catch {
     return `<pre><code>${escapeHtml(rawContent.trim())}</code></pre>`;
   }

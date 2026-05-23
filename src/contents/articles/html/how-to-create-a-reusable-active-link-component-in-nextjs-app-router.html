@@ -394,7 +394,7 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">bash</span>
   </div>
-  <pre><code>npx create-next-app@latest nextjs-active-link</code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#88C0D0">npx</span><span style="color:#A3BE8C"> create-next-app@latest</span><span style="color:#A3BE8C"> nextjs-active-link</span></span></code></pre>
 </div>
 
 <div class="code-block">
@@ -402,7 +402,7 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">bash</span>
   </div>
-  <pre><code>cd nextjs-active-link</code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#88C0D0">cd</span><span style="color:#A3BE8C"> nextjs-active-link</span></span></code></pre>
 </div>
 
 <div class="code-block">
@@ -410,7 +410,7 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">bash</span>
   </div>
-  <pre><code>npm install tailwind-merge clsx</code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#88C0D0">npm</span><span style="color:#A3BE8C"> install</span><span style="color:#A3BE8C"> tailwind-merge</span><span style="color:#A3BE8C"> clsx</span></span></code></pre>
 </div>
 
 <div class="callout"><div class="callout-label">💡 Tip</div><p><code>clsx</code> handles conditional class merging. <code>tailwind-merge</code> resolves Tailwind class conflicts so overrides actually override. Together they're the standard pairing for dynamic class logic in Tailwind projects — you'll see this duo in most production Next.js codebases.</p></div>
@@ -430,12 +430,12 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">ts</span>
   </div>
-  <pre><code>import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-export function cn(...inputs: ClassValue[]) {
-	return twMerge(clsx(inputs));
-}</code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">import</span><span style="color:#ECEFF4"> {</span><span style="color:#81A1C1"> type</span><span style="color:#D8DEE9"> ClassValue</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> clsx</span><span style="color:#ECEFF4"> }</span><span style="color:#81A1C1"> from</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">clsx</span><span style="color:#ECEFF4">'</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">import</span><span style="color:#ECEFF4"> {</span><span style="color:#D8DEE9"> twMerge</span><span style="color:#ECEFF4"> }</span><span style="color:#81A1C1"> from</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">tailwind-merge</span><span style="color:#ECEFF4">'</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">export</span><span style="color:#81A1C1"> function</span><span style="color:#88C0D0"> cn</span><span style="color:#ECEFF4">(</span><span style="color:#81A1C1">...</span><span style="color:#D8DEE9">inputs</span><span style="color:#81A1C1">:</span><span style="color:#8FBCBB"> ClassValue</span><span style="color:#D8DEE9FF">[]</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#81A1C1">	return</span><span style="color:#88C0D0"> twMerge</span><span style="color:#D8DEE9FF">(</span><span style="color:#88C0D0">clsx</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">inputs</span><span style="color:#D8DEE9FF">))</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
 </div>
 
 <div class="compare">
@@ -462,25 +462,25 @@ export function cn(...inputs: ClassValue[]) {
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">tsx</span>
   </div>
-  <pre><code>'use client';
-
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-
-import { cn } from '~/utils/cn';
-
-interface Props extends React.ComponentPropsWithoutRef&lt;typeof Link&gt; {
-	className?: string;
-	activeClassName?: string;
-}
-
-export const ActiveLink = (props: Props) =&gt; {
-	const pathname = usePathname();
-	const isActive = pathname === props.href;
-	const activeClassName = props.activeClassName ?? 'text-red-500';
-
-	return &lt;Link {...props} className={cn(props.className, isActive &amp;&amp; activeClassName)} /&gt;;
-};</code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#ECEFF4">'</span><span style="color:#A3BE8C">use client</span><span style="color:#ECEFF4">'</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">import</span><span style="color:#D8DEE9"> Link</span><span style="color:#81A1C1"> from</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">next/link</span><span style="color:#ECEFF4">'</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">import</span><span style="color:#ECEFF4"> {</span><span style="color:#D8DEE9"> usePathname</span><span style="color:#ECEFF4"> }</span><span style="color:#81A1C1"> from</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">next/navigation</span><span style="color:#ECEFF4">'</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">import</span><span style="color:#ECEFF4"> {</span><span style="color:#D8DEE9"> cn</span><span style="color:#ECEFF4"> }</span><span style="color:#81A1C1"> from</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">~/utils/cn</span><span style="color:#ECEFF4">'</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">interface</span><span style="color:#8FBCBB"> Props</span><span style="color:#81A1C1"> extends</span><span style="color:#8FBCBB"> React</span><span style="color:#ECEFF4">.</span><span style="color:#8FBCBB;font-weight:bold">ComponentPropsWithoutRef</span><span style="color:#ECEFF4">&#x3C;</span><span style="color:#81A1C1">typeof</span><span style="color:#D8DEE9"> Link</span><span style="color:#ECEFF4">></span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#D8DEE9FF">	className</span><span style="color:#81A1C1">?:</span><span style="color:#8FBCBB"> string</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#D8DEE9FF">	activeClassName</span><span style="color:#81A1C1">?:</span><span style="color:#8FBCBB"> string</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">export</span><span style="color:#81A1C1"> const</span><span style="color:#88C0D0"> ActiveLink</span><span style="color:#81A1C1"> =</span><span style="color:#ECEFF4"> (</span><span style="color:#D8DEE9">props</span><span style="color:#81A1C1">:</span><span style="color:#8FBCBB"> Props</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1"> =></span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#81A1C1">	const</span><span style="color:#D8DEE9"> pathname</span><span style="color:#81A1C1"> =</span><span style="color:#88C0D0"> usePathname</span><span style="color:#D8DEE9FF">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">	const</span><span style="color:#D8DEE9"> isActive</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> pathname</span><span style="color:#81A1C1"> ===</span><span style="color:#D8DEE9"> props</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">href</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">	const</span><span style="color:#D8DEE9"> activeClassName</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> props</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">activeClassName</span><span style="color:#81A1C1"> ??</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">text-red-500</span><span style="color:#ECEFF4">'</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">	return</span><span style="color:#81A1C1"> &#x3C;</span><span style="color:#8FBCBB">Link</span><span style="color:#81A1C1"> {...</span><span style="color:#D8DEE9">props</span><span style="color:#81A1C1">}</span><span style="color:#8FBCBB"> className</span><span style="color:#81A1C1">={</span><span style="color:#88C0D0">cn</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">props</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">className</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> isActive</span><span style="color:#81A1C1"> &#x26;&#x26;</span><span style="color:#D8DEE9"> activeClassName</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">}</span><span style="color:#81A1C1"> />;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span><span style="color:#81A1C1">;</span></span></code></pre>
 </div>
 
 <blockquote><p>"The magic isn't in the component itself — it's that <code>usePathname</code> makes active state automatic. No prop-passing, no context, no global state. Just the URL."</p></blockquote>
@@ -498,40 +498,40 @@ export const ActiveLink = (props: Props) =&gt; {
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">tsx</span>
   </div>
-  <pre><code>import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-
-import { ActiveLink } from '~/components/active-link'; // Import the ActiveLink component
-
-const inter = Inter({ subsets: ['latin'] });
-
-export const metadata: Metadata = {
-	title: 'Create Next App',
-	description: 'Generated by create next app'
-};
-
-export default function RootLayout({
-	children
-}: Readonly&lt;{
-	children: React.ReactNode;
-}&gt;) {
-	return (
-		&lt;html lang="en"&gt;
-			&lt;body className={inter.className}&gt;
-				&lt;nav className="container mx-auto flex items-center justify-center gap-10 py-10"&gt;
-					{/* Use the ActiveLink component */}
-					{[...Array(10)].map((_, i) =&gt; (
-						&lt;ActiveLink key={i} href={`/${i}`} className="px-2 py-1" activeClassName="bg-blue-500 !text-white"&gt;
-							Link {i}
-						&lt;/ActiveLink&gt;
-					))}
-				&lt;/nav&gt;
-				{children}
-			&lt;/body&gt;
-		&lt;/html&gt;
-	);
-}</code></pre>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">import</span><span style="color:#81A1C1"> type</span><span style="color:#ECEFF4"> {</span><span style="color:#D8DEE9"> Metadata</span><span style="color:#ECEFF4"> }</span><span style="color:#81A1C1"> from</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">next</span><span style="color:#ECEFF4">'</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">import</span><span style="color:#ECEFF4"> {</span><span style="color:#D8DEE9"> Inter</span><span style="color:#ECEFF4"> }</span><span style="color:#81A1C1"> from</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">next/font/google</span><span style="color:#ECEFF4">'</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">import</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">./globals.css</span><span style="color:#ECEFF4">'</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">import</span><span style="color:#ECEFF4"> {</span><span style="color:#D8DEE9"> ActiveLink</span><span style="color:#ECEFF4"> }</span><span style="color:#81A1C1"> from</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">~/components/active-link</span><span style="color:#ECEFF4">'</span><span style="color:#81A1C1">;</span><span style="color:#616E88"> // Import the ActiveLink component</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">const</span><span style="color:#D8DEE9"> inter</span><span style="color:#81A1C1"> =</span><span style="color:#88C0D0"> Inter</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9"> subsets</span><span style="color:#ECEFF4">:</span><span style="color:#D8DEE9FF"> [</span><span style="color:#ECEFF4">'</span><span style="color:#A3BE8C">latin</span><span style="color:#ECEFF4">'</span><span style="color:#D8DEE9FF">] </span><span style="color:#ECEFF4">}</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">export</span><span style="color:#81A1C1"> const</span><span style="color:#D8DEE9"> metadata</span><span style="color:#81A1C1">:</span><span style="color:#8FBCBB"> Metadata</span><span style="color:#81A1C1"> =</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#D8DEE9">	title</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">Create Next App</span><span style="color:#ECEFF4">'</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9">	description</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">Generated by create next app</span><span style="color:#ECEFF4">'</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">export</span><span style="color:#81A1C1"> default</span><span style="color:#81A1C1"> function</span><span style="color:#88C0D0"> RootLayout</span><span style="color:#ECEFF4">({</span></span>
+<span class="line"><span style="color:#D8DEE9">	children</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span><span style="color:#81A1C1">:</span><span style="color:#8FBCBB"> Readonly</span><span style="color:#ECEFF4">&#x3C;{</span></span>
+<span class="line"><span style="color:#D8DEE9FF">	children</span><span style="color:#81A1C1">:</span><span style="color:#8FBCBB"> React</span><span style="color:#ECEFF4">.</span><span style="color:#8FBCBB">ReactNode</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}>)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#81A1C1">	return</span><span style="color:#D8DEE9FF"> (</span></span>
+<span class="line"><span style="color:#81A1C1">		&#x3C;html</span><span style="color:#8FBCBB"> lang</span><span style="color:#81A1C1">=</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">en</span><span style="color:#ECEFF4">"</span><span style="color:#81A1C1">></span></span>
+<span class="line"><span style="color:#81A1C1">			&#x3C;body</span><span style="color:#8FBCBB"> className</span><span style="color:#81A1C1">={</span><span style="color:#D8DEE9">inter</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">className</span><span style="color:#81A1C1">}></span></span>
+<span class="line"><span style="color:#81A1C1">				&#x3C;nav</span><span style="color:#8FBCBB"> className</span><span style="color:#81A1C1">=</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">container mx-auto flex items-center justify-center gap-10 py-10</span><span style="color:#ECEFF4">"</span><span style="color:#81A1C1">></span></span>
+<span class="line"><span style="color:#81A1C1">					{</span><span style="color:#616E88">/* Use the ActiveLink component */</span><span style="color:#81A1C1">}</span></span>
+<span class="line"><span style="color:#81A1C1">					{</span><span style="color:#D8DEE9FF">[</span><span style="color:#81A1C1">...</span><span style="color:#88C0D0">Array</span><span style="color:#D8DEE9FF">(</span><span style="color:#B48EAD">10</span><span style="color:#D8DEE9FF">)]</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">map</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">_</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> i</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1"> =></span><span style="color:#D8DEE9FF"> (</span></span>
+<span class="line"><span style="color:#81A1C1">						&#x3C;</span><span style="color:#8FBCBB">ActiveLink</span><span style="color:#8FBCBB"> key</span><span style="color:#81A1C1">={</span><span style="color:#D8DEE9">i</span><span style="color:#81A1C1">}</span><span style="color:#8FBCBB"> href</span><span style="color:#81A1C1">={</span><span style="color:#ECEFF4">`</span><span style="color:#A3BE8C">/</span><span style="color:#ECEFF4">${</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">}`</span><span style="color:#81A1C1">}</span><span style="color:#8FBCBB"> className</span><span style="color:#81A1C1">=</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">px-2 py-1</span><span style="color:#ECEFF4">"</span><span style="color:#8FBCBB"> activeClassName</span><span style="color:#81A1C1">=</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">bg-blue-500 !text-white</span><span style="color:#ECEFF4">"</span><span style="color:#81A1C1">></span></span>
+<span class="line"><span style="color:#D8DEE9FF">							Link </span><span style="color:#81A1C1">{</span><span style="color:#D8DEE9">i</span><span style="color:#81A1C1">}</span></span>
+<span class="line"><span style="color:#81A1C1">						&#x3C;/</span><span style="color:#8FBCBB">ActiveLink</span><span style="color:#81A1C1">></span></span>
+<span class="line"><span style="color:#D8DEE9FF">					))</span><span style="color:#81A1C1">}</span></span>
+<span class="line"><span style="color:#81A1C1">				&#x3C;/nav></span></span>
+<span class="line"><span style="color:#81A1C1">				{</span><span style="color:#D8DEE9">children</span><span style="color:#81A1C1">}</span></span>
+<span class="line"><span style="color:#81A1C1">			&#x3C;/body></span></span>
+<span class="line"><span style="color:#81A1C1">		&#x3C;/html></span></span>
+<span class="line"><span style="color:#D8DEE9FF">	)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
 </div>
 
 <p>When the current path matches <code>href</code>, <code>activeClassName</code> merges in alongside <code>className</code>. In this example, the active link gets a blue background and white text — swap in whatever your design system calls for.</p>

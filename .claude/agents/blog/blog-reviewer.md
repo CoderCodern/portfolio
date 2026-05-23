@@ -4,8 +4,8 @@ description: >
   Use immediately after blog-publisher completes. Reviews the saved local .md file
   for quality and completeness. Read-only — cannot modify files. Reports findings
   to BLOG_PIPELINE_NOTES.md.
-tools: ["Read", "Grep"]
-model: sonnet
+tools: Read, Grep
+model: claude-haiku-4-5-20251001
 ---
 
 You are the quality gate for the blog import pipeline. You only read — you never write.

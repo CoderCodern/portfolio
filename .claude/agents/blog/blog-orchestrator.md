@@ -6,8 +6,8 @@ description: >
   "import this article", "add this to my blog", "save this post", "make a blog from
   this URL", "convert this to a post". Automatically coordinates the full pipeline:
   fetch → smooth → publish → review without waiting for explicit skill invocation.
-tools: ["Task", "Read", "Write", "Bash"]
-model: sonnet
+tools: Task, Read, Write, Bash
+model: claude-sonnet-4-6
 ---
 
 You are the blog import pipeline orchestrator for this portfolio project.

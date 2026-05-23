@@ -143,7 +143,8 @@
   blockquote { padding: 1.75rem 2rem; margin: 2.5rem 0; border-left: 3px solid var(--border); }
   blockquote p { font-family: 'Lora', serif; font-size: 1.15rem; font-style: italic; color: #c5c0b5; line-height: 1.7; margin: 0; }
 
-  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; text-decoration: none; transition: border-color 0.2s, background 0.2s; }
+  .next-post:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
   .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
   .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
   .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
@@ -369,9 +370,7 @@ origin: user              <span class="cm"># user | community | ECC</span>
   <h2>The "When to Activate" Section Is Load-Bearing</h2>
 
   <p>
-    This is not just documentation. It's the primary signal the runtime uses to decide whether
-    to load this skill into context at all. A vague section means the skill fires late,
-    inconsistently, or never. Write at least 4 specific, concrete scenarios.
+    This isn't just documentation — it's the signal Claude uses to decide whether to load the skill at all. A vague section means the skill fires late, inconsistently, or never. Write at least 4 specific, concrete scenarios.
   </p>
 
   <div class="act-compare">
@@ -397,9 +396,7 @@ origin: user              <span class="cm"># user | community | ECC</span>
   <h2>The Four Design Patterns</h2>
 
   <p>
-    After studying the ECC project (Everything Claude Code) — 200+ skills shipped to production —
-    real skills fall into exactly four patterns. Knowing which one to use before you start
-    prevents full rewrites.
+    After digging through the ECC project — 200+ skills in production — I found that real skills fall into exactly four patterns. Pick the right one upfront and you won't need a full rewrite later.
   </p>
 
   <div class="pattern-cards">
@@ -675,7 +672,7 @@ The three voice dimensions:
 
   <h2>Anti-Patterns Worth Memorizing</h2>
 
-  <p>From the ECC project's contributing guide and skill validation policy — the failures that appear most often in skill reviews:</p>
+  <p>From the ECC contributing guide and skill validation policy — these are the failures that show up most in skill reviews:</p>
 
   <div class="table-wrap">
     <table>
@@ -721,7 +718,7 @@ The three voice dimensions:
 
   <h2>How Skills Fit the Full System</h2>
 
-  <p>Skills, CLAUDE.md, and SOUL.md aren't competing — they're layered. Each handles a different kind of context:</p>
+  <p>Skills, CLAUDE.md, and SOUL.md aren't competing — they're layers. Each one handles a different kind of context:</p>
 
   <div class="layer-stack">
     <div class="layer-item">
@@ -751,13 +748,13 @@ The three voice dimensions:
     too vague, too long, or too broad — neither will Claude."</p>
   </blockquote>
 
-  <div class="next-post">
+  <a class="next-post" href="/articles/claude-agents-sub-agents-complete-delegation-guide" target="_parent">
     <div>
       <div class="next-label">Next in the series</div>
-      <div class="next-title">Week 4 — Subagents: Context Isolation and Delegating Complex Work</div>
+      <div class="next-title">Ep 4: Claude Code — Agents &amp; Sub-Agents: Complete Delegation Guide</div>
     </div>
     <div class="next-arrow">→</div>
-  </div>
+  </a>
 
 </article>
 </div>

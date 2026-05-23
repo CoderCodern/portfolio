@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optimizing Bulk Database Updates in .NET: From Naive to Lightning-Fast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #e8e4dc;
+    --muted: #7a7570;
+    --accent: #e8a84c;       /* episode accent */
+    --accent-dim: #3d2c12;     /* tinted background for callouts */
+    --code-bg: #111;
+    --green: #4caf7d;
+    --green-dim: #122a1e;
+    --red: #ff7b72;
+    --red-dim: #2a1212;
+    --blue: #79c0ff;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scrollbar-width: none; /* Firefox */
+  }
+  html::-webkit-scrollbar { display: none; } /* Chrome, Safari, Edge */
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    font-size: 17px;
+  }
+
+  /* ── HERO ─────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 25%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 70%, rgba(232,168,76,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 800px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+
+  .series-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    padding: 6px 14px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  .series-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    max-width: 720px;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-wrap: wrap;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta span::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+  }
+  .hero-meta span:first-child::before { display: none; }
+
+  /* ── LAYOUT ───────────────────────────── */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  article { padding: 5rem 0; }
+
+  .lead {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: #c5c0b5;
+    margin-bottom: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin: 3.5rem 0 1rem;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 2.5rem 0 0.75rem;
+  }
+  p { margin-bottom: 1.4rem; }
+  strong { font-weight: 500; color: var(--text); }
+  em { font-style: italic; color: #c5c0b5; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p.aside { font-size: 14px; color: var(--muted); font-style: italic; margin: -0.5rem 0 1.4rem; }
+
+  /* ── CODE ─────────────────────────────── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 1.75rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #0e0e0e;
+  }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  pre {
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    color: #c9d1d9;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.83em;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  /* Reset inline-code styles inside code blocks — Shiki handles all colouring */
+  pre code { background: transparent; border: none; padding: 0; color: inherit; border-radius: 0; }
+  /* Syntax highlight helpers — use as <span class="X"> inside <pre> */
+  .kw  { color: var(--accent); }               /* keywords, headings */
+  .cm  { color: #4a5060; font-style: italic; } /* comments */
+  .st  { color: #a5d6ff; }                     /* strings */
+  .bad { color: var(--red); }                  /* bad examples */
+  .good{ color: var(--green); }                /* good examples */
+  .num { color: #c9b1f5; }                     /* numbers */
+
+  /* ── CALLOUTS ─────────────────────────── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-dim);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 6px 6px 0;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+  }
+  .callout.green { border-left-color: var(--green); background: var(--green-dim); }
+  .callout.red   { border-left-color: var(--red);   background: var(--red-dim);   }
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red   .callout-label { color: var(--red);   }
+
+  /* ── BLOCKQUOTE ───────────────────────── */
+  blockquote {
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    margin: 2.5rem 0;
+  }
+  blockquote::before {
+    content: '"';
+    font-family: 'Lora', serif;
+    font-size: 6rem;
+    color: var(--border);
+    position: absolute;
+    top: -1rem; left: 50%;
+    transform: translateX(-50%);
+    line-height: 1;
+  }
+  blockquote p {
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #c5c0b5;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+
+  /* ── TABLES ───────────────────────────── */
+  .table-wrap { overflow-x: auto; margin: 1.75rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #0f0f0f;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid #1c1c1c; vertical-align: top; line-height: 1.6; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+
+  /* ── DIVIDER ──────────────────────────── */
+  .divider { display: flex; align-items: center; gap: 1rem; margin: 3.5rem 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── COMPARE GRID ─────────────────────── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 6px; overflow: hidden; margin: 1.75rem 0; }
+  .compare-col { background: var(--surface); padding: 1.25rem; }
+  .compare-header { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .compare-header.bad-h  { color: var(--red); }
+  .compare-header.good-h { color: var(--green); }
+  .compare-item { font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .compare-item:last-child { border-bottom: none; }
+  .compare-item.bad-t  { color: #c9a0a0; }
+  .compare-item.good-t { color: #a0c9a8; }
+
+  /* ── CHECKLIST ────────────────────────── */
+  .check-list { list-style: none; margin: 1.5rem 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .check-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before { content: '[ ]'; flex-shrink: 0; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  /* ── WEEK GRID ────────────────────────── */
+  .week-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .week-day { background: var(--surface); padding: 1.25rem; }
+  .week-day-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .week-day-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .week-day-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── NEXT POST ────────────────────────── */
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
+  .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
+
+  /* ── COPY BUTTON ─────────────────────── */
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+  /* ── FOOTER ───────────────────────────── */
+  footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── RESPONSIVE ───────────────────────── */
+  @media (max-width: 640px) {
+    .hero { padding: 3rem 1.5rem; }
+    .container { padding: 0 1.5rem; }
+    h1 { font-size: 2rem; }
+    article { padding: 3rem 0; }
+    .compare { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="series-tag">Backend · Episode —</div>
+    <h1>Optimizing Bulk Database Updates in .NET: From <em>Naive to Lightning-Fast</em></h1>
+    <div class="hero-meta">
+      <span>March 2026</span>
+      <span>10 min read</span>
+      <span>.NET · PostgreSQL · Performance</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ARTICLE ═══════════════ -->
+<div class="container">
+<article>
+
+  <!-- First paragraph becomes the .lead -->
+  <p class="lead">Every outbox processor, job queue, and batch pipeline eventually hits the same wall: marking a set of rows as completed in bulk. I benchmarked seven different approaches against 1,000, 10,000, and 25,000 rows in PostgreSQL using Dapper and EF Core. For 10,000 rows, the slowest took <strong>2,414ms</strong>. The fastest: <strong>41ms</strong>. The bottleneck was rarely the SQL — it was the frequency of database interactions.</p>
+
+  <!-- ── All content sections go here ── -->
+  <div class="divider"><span>the setup</span></div>
+<h2>The Setup</h2>
+
+<p>Consider a table of orders, each requiring two updates: a change in <code>status</code> to <code>"Processed"</code> and a unique <code>processed_at</code> timestamp per row.</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">sql</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">CREATE</span><span style="color:#81A1C1"> TABLE</span><span style="color:#88C0D0"> orders</span><span style="color:#D8DEE9FF"> (</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    id            UUID         </span><span style="color:#81A1C1">NOT NULL</span><span style="color:#81A1C1"> PRIMARY KEY</span><span style="color:#D8DEE9FF">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    customer_name </span><span style="color:#81A1C1">TEXT</span><span style="color:#81A1C1">         NOT NULL</span><span style="color:#D8DEE9FF">,</span></span>
+<span class="line"><span style="color:#81A1C1">    status</span><span style="color:#81A1C1">        TEXT</span><span style="color:#81A1C1">         NOT NULL</span><span style="color:#81A1C1"> DEFAULT</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">Pending</span><span style="color:#ECEFF4">'</span><span style="color:#D8DEE9FF">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    processed_at  </span><span style="color:#81A1C1">TIMESTAMPTZ</span></span>
+<span class="line"><span style="color:#D8DEE9FF">);</span></span></code></pre>
+</div>
+
+<p>The update payload is a simple record pairing each order ID with its timestamp:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">record</span><span style="color:#8FBCBB"> OrderUpdate</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">Guid Id</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> DateTime ProcessedAt</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span></code></pre>
+</div>
+
+<p class="aside"><em>Ten lines of schema and a one-liner record — and the next 25 minutes of your architecture review will somehow be about how you update those rows at scale.</em></p>
+
+<div class="divider"><span>seven approaches</span></div>
+<h2>Seven Approaches, One Clear Winner</h2>
+
+<h3>Approach 1: Naive Dapper — One UPDATE Per Row</h3>
+
+<p>The intuitive starting point: loop through the list and fire one <code>UPDATE</code> per row inside a transaction.</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">await</span><span style="color:#81A1C1"> using</span><span style="color:#81A1C1"> var</span><span style="color:#D8DEE9FF"> connection </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> new</span><span style="color:#D8DEE9FF"> NpgsqlConnection</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">connectionString</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">OpenAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#81A1C1"> using</span><span style="color:#81A1C1"> var</span><span style="color:#D8DEE9FF"> transaction </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">BeginTransactionAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">foreach</span><span style="color:#ECEFF4"> (</span><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> update </span><span style="color:#81A1C1">in</span><span style="color:#D8DEE9"> updates</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#81A1C1">    await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">ExecuteAsync</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#ECEFF4">        """</span></span>
+<span class="line"><span style="color:#A3BE8C">        UPDATE orders</span></span>
+<span class="line"><span style="color:#A3BE8C">        SET processed_at = @ProcessedAt,</span></span>
+<span class="line"><span style="color:#A3BE8C">            status       = 'Processed'</span></span>
+<span class="line"><span style="color:#A3BE8C">        WHERE id = @Id</span></span>
+<span class="line"><span style="color:#ECEFF4">        """</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#81A1C1">        new</span><span style="color:#ECEFF4"> {</span><span style="color:#D8DEE9"> update</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Id</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> update</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">ProcessedAt</span><span style="color:#ECEFF4"> },</span></span>
+<span class="line"><span style="color:#D8DEE9FF">        transaction</span><span style="color:#ECEFF4">:</span><span style="color:#D8DEE9"> transaction</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> transaction</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">CommitAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span></code></pre>
+</div>
+
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>This is how every outbox processor starts. With 10,000 rows it makes 10,000 separate round-trips. Each <code>ExecuteAsync</code> sends SQL, waits for PostgreSQL to acknowledge, then moves on. Result: <strong>2,414ms</strong> for 10k rows, over <strong>6 seconds</strong> for 25k. Your database is fast. This code just refuses to let it prove that.</p></div>
+
+<h3>Approach 2: EF Core SaveChanges — Batched Round-Trips</h3>
+
+<p>EF Core batches generated SQL, grouping multiple statements into fewer round-trips. Setting <code>MaxBatchSize</code> high enough sends all 10,000 updates in a handful of network calls instead of thousands.</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> options </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9"> new</span><span style="color:#D8DEE9"> DbContextOptionsBuilder</span><span style="color:#81A1C1">&#x26;</span><span style="color:#D8DEE9FF">#</span><span style="color:#D8DEE9">x3C</span><span style="color:#81A1C1">;</span><span style="color:#D8DEE9">AppDbContext</span><span style="color:#81A1C1">></span><span style="color:#ECEFF4">()</span></span>
+<span class="line"><span style="color:#ECEFF4">    .</span><span style="color:#88C0D0">UseNpgsql</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">connectionString</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> o </span><span style="color:#81A1C1">=></span><span style="color:#D8DEE9"> o</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">MinBatchSize</span><span style="color:#ECEFF4">(</span><span style="color:#B48EAD">5000</span><span style="color:#ECEFF4">).</span><span style="color:#88C0D0">MaxBatchSize</span><span style="color:#ECEFF4">(</span><span style="color:#B48EAD">10000</span><span style="color:#ECEFF4">))</span></span>
+<span class="line"><span style="color:#ECEFF4">    .</span><span style="color:#D8DEE9">Options</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#81A1C1"> using</span><span style="color:#81A1C1"> var</span><span style="color:#D8DEE9FF"> db </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> new</span><span style="color:#D8DEE9FF"> AppDbContext</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">options</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> ids </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9"> updates</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Select</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">u </span><span style="color:#81A1C1">=></span><span style="color:#D8DEE9"> u</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Id</span><span style="color:#ECEFF4">).</span><span style="color:#88C0D0">ToHashSet</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> orders </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> await</span><span style="color:#D8DEE9"> db</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Orders</span></span>
+<span class="line"><span style="color:#ECEFF4">    .</span><span style="color:#88C0D0">Where</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">o </span><span style="color:#81A1C1">=></span><span style="color:#D8DEE9"> ids</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Contains</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">o</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Id</span><span style="color:#ECEFF4">))</span></span>
+<span class="line"><span style="color:#ECEFF4">    .</span><span style="color:#88C0D0">ToListAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> updateMap </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9"> updates</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">ToDictionary</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">u </span><span style="color:#81A1C1">=></span><span style="color:#D8DEE9"> u</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Id</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">foreach</span><span style="color:#ECEFF4"> (</span><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> order </span><span style="color:#81A1C1">in</span><span style="color:#D8DEE9"> orders</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#D8DEE9">    order</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Status</span><span style="color:#81A1C1"> =</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">Processed</span><span style="color:#ECEFF4">"</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#D8DEE9">    order</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">ProcessedAt</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> updateMap</span><span style="color:#ECEFF4">[</span><span style="color:#D8DEE9">order</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Id</span><span style="color:#ECEFF4">].</span><span style="color:#D8DEE9">ProcessedAt</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> db</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">SaveChangesAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span></code></pre>
+</div>
+
+<div class="callout"><div class="callout-label">💡 Tip</div><p>EF Core's default batch size is 42. Raising <code>MaxBatchSize</code> to match your batch is the single biggest knob available if you're stuck with <code>SaveChanges</code> — but it still generates 10,000 individual <code>UPDATE</code> statements and requires an upfront <code>SELECT</code> to load the change tracker. You're reducing round-trips, not eliminating them.</p></div>
+
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">❌ Row-by-row approaches</div>
+    <div class="compare-item bad-t">Approach 1 (naive Dapper): 2,414ms at 10k</div>
+    <div class="compare-item bad-t">Approach 2 (EF Core SaveChanges): 1,030ms at 10k</div>
+    <div class="compare-item bad-t">Still N individual UPDATE statements in the wire</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">✅ Single-statement approaches</div>
+    <div class="compare-item good-t">Approach 3 (VALUES table): 89ms at 10k</div>
+    <div class="compare-item good-t">Approach 6 (UNNEST): 41ms at 10k</div>
+    <div class="compare-item good-t">One execution plan, one round-trip, any batch size</div>
+  </div>
+</div>
+
+<h3>Approach 3: Dapper + VALUES Table</h3>
+
+<p>Instead of N statements, construct one <code>UPDATE</code> that embeds all new values in a derived <code>VALUES</code> table. PostgreSQL receives a single statement, builds one execution plan, and updates every row in one pass.</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">sql</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">UPDATE</span><span style="color:#D8DEE9FF"> orders</span></span>
+<span class="line"><span style="color:#81A1C1">SET</span><span style="color:#D8DEE9FF"> processed_at </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9FF"> v.processed_at,</span></span>
+<span class="line"><span style="color:#81A1C1">    status</span><span style="color:#81A1C1">       =</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">Processed</span><span style="color:#ECEFF4">'</span></span>
+<span class="line"><span style="color:#81A1C1">FROM</span><span style="color:#D8DEE9FF"> (</span><span style="color:#81A1C1">VALUES</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    (@Id0, @ProcessedAt0),</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    (@Id1, @ProcessedAt1),</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    ...</span></span>
+<span class="line"><span style="color:#D8DEE9FF">) </span><span style="color:#81A1C1">AS</span><span style="color:#D8DEE9FF"> v(id, processed_at)</span></span>
+<span class="line"><span style="color:#81A1C1">WHERE</span><span style="color:#D8DEE9FF"> orders.id </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9FF"> v.id::uuid</span></span></code></pre>
+</div>
+
+<p>Here's the C# to build and execute that statement dynamically:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">await</span><span style="color:#81A1C1"> using</span><span style="color:#81A1C1"> var</span><span style="color:#D8DEE9FF"> connection </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> new</span><span style="color:#D8DEE9FF"> NpgsqlConnection</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">connectionString</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">OpenAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#81A1C1"> using</span><span style="color:#81A1C1"> var</span><span style="color:#D8DEE9FF"> transaction </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">BeginTransactionAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">const</span><span style="color:#81A1C1"> string</span><span style="color:#D8DEE9FF"> updateTemplate </span><span style="color:#81A1C1">=</span></span>
+<span class="line"><span style="color:#ECEFF4">    @"</span><span style="color:#EBCB8B">""</span></span>
+<span class="line"><span style="color:#A3BE8C">    UPDATE orders</span></span>
+<span class="line"><span style="color:#A3BE8C">    SET processed_at = v.processed_at,</span></span>
+<span class="line"><span style="color:#A3BE8C">        status       = 'Processed'</span></span>
+<span class="line"><span style="color:#A3BE8C">    FROM (VALUES</span></span>
+<span class="line"><span style="color:#A3BE8C">        {0}</span></span>
+<span class="line"><span style="color:#A3BE8C">    ) AS v(id, processed_at)</span></span>
+<span class="line"><span style="color:#A3BE8C">    WHERE orders.id = v.id::uuid</span></span>
+<span class="line"><span style="color:#EBCB8B">    ""</span><span style="color:#ECEFF4">"</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> paramNames </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> string</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Join</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#ECEFF4">    "</span><span style="color:#A3BE8C">,</span><span style="color:#EBCB8B">\n</span><span style="color:#ECEFF4">    "</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9">    updates</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Select</span><span style="color:#ECEFF4">((</span><span style="color:#D8DEE9FF">_</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> i</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1"> =></span><span style="color:#ECEFF4"> $"</span><span style="color:#A3BE8C">(@Id</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">}</span><span style="color:#A3BE8C">, @ProcessedAt</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">}</span><span style="color:#A3BE8C">)</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">))</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> sql </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> string</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Format</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">updateTemplate</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> paramNames</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> parameters </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> new</span><span style="color:#D8DEE9FF"> DynamicParameters</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">for</span><span style="color:#ECEFF4"> (</span><span style="color:#81A1C1">int</span><span style="color:#D8DEE9FF"> i </span><span style="color:#81A1C1">=</span><span style="color:#B48EAD"> 0</span><span style="color:#81A1C1">;</span><span style="color:#D8DEE9"> i</span><span style="color:#81A1C1"> &#x26;</span><span style="color:#D8DEE9FF">#</span><span style="color:#D8DEE9">x3C</span><span style="color:#81A1C1">;</span><span style="color:#D8DEE9"> updates</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Count</span><span style="color:#81A1C1">;</span><span style="color:#D8DEE9"> i</span><span style="color:#81A1C1">++</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#D8DEE9">    parameters</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Add</span><span style="color:#ECEFF4">(</span><span style="color:#ECEFF4">$"</span><span style="color:#A3BE8C">Id</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">}</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> updates</span><span style="color:#ECEFF4">[</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">].</span><span style="color:#D8DEE9">Id</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">ToString</span><span style="color:#ECEFF4">())</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#D8DEE9">    parameters</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Add</span><span style="color:#ECEFF4">(</span><span style="color:#ECEFF4">$"</span><span style="color:#A3BE8C">ProcessedAt</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">}</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> updates</span><span style="color:#ECEFF4">[</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">].</span><span style="color:#D8DEE9">ProcessedAt</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">ExecuteAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">sql</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> parameters</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> transaction</span><span style="color:#ECEFF4">:</span><span style="color:#D8DEE9"> transaction</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> transaction</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">CommitAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span></code></pre>
+</div>
+
+<p class="aside"><em>The query text grows with the batch — 10,000 rows means 10,000 parameter pairs. Still well under PostgreSQL's 65,535-parameter hard limit for typical workloads, but worth knowing before you aim this at 100k rows. Approaches 6 and 7 sidestep this entirely.</em></p>
+
+<h3>Approach 4: EF Core ExecuteSqlRaw + VALUES</h3>
+
+<p>Same SQL as Approach 3, but executed through an EF Core <code>DbContext</code>. The advantage is sharing a transaction with other EF Core operations. Note that <code>ExecuteSqlRawAsync</code> requires <code>NpgsqlParameter</code> objects directly — Dapper's <code>DynamicParameters</code> won't work.</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">await</span><span style="color:#81A1C1"> using</span><span style="color:#81A1C1"> var</span><span style="color:#D8DEE9FF"> db </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> new</span><span style="color:#D8DEE9FF"> AppDbContext</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">options</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#81A1C1"> using</span><span style="color:#81A1C1"> var</span><span style="color:#D8DEE9FF"> transaction </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> await</span><span style="color:#D8DEE9"> db</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Database</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">BeginTransactionAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> paramEntries </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9"> new</span><span style="color:#D8DEE9"> List</span><span style="color:#81A1C1">&#x26;</span><span style="color:#D8DEE9FF">#</span><span style="color:#D8DEE9">x3C</span><span style="color:#81A1C1">;</span><span style="color:#D8DEE9">NpgsqlParameter</span><span style="color:#81A1C1">></span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> valueClauses </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9"> new</span><span style="color:#D8DEE9"> List</span><span style="color:#81A1C1">&#x26;</span><span style="color:#D8DEE9FF">#</span><span style="color:#D8DEE9">x3C</span><span style="color:#81A1C1">;</span><span style="color:#81A1C1">string</span><span style="color:#81A1C1">></span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">for</span><span style="color:#ECEFF4"> (</span><span style="color:#81A1C1">int</span><span style="color:#D8DEE9FF"> i </span><span style="color:#81A1C1">=</span><span style="color:#B48EAD"> 0</span><span style="color:#81A1C1">;</span><span style="color:#D8DEE9"> i</span><span style="color:#81A1C1"> &#x26;</span><span style="color:#D8DEE9FF">#</span><span style="color:#D8DEE9">x3C</span><span style="color:#81A1C1">;</span><span style="color:#D8DEE9"> updates</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Count</span><span style="color:#81A1C1">;</span><span style="color:#D8DEE9"> i</span><span style="color:#81A1C1">++</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#D8DEE9">    valueClauses</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Add</span><span style="color:#ECEFF4">(</span><span style="color:#ECEFF4">$"</span><span style="color:#A3BE8C">(@Id</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">}</span><span style="color:#A3BE8C">::uuid, @ProcessedAt</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">}</span><span style="color:#A3BE8C">)</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#D8DEE9">    paramEntries</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Add</span><span style="color:#ECEFF4">(</span><span style="color:#81A1C1">new</span><span style="color:#D8DEE9FF"> NpgsqlParameter</span><span style="color:#ECEFF4">(</span><span style="color:#ECEFF4">$"</span><span style="color:#A3BE8C">Id</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">}</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> updates</span><span style="color:#ECEFF4">[</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">].</span><span style="color:#D8DEE9">Id</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">ToString</span><span style="color:#ECEFF4">()))</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#D8DEE9">    paramEntries</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Add</span><span style="color:#ECEFF4">(</span><span style="color:#81A1C1">new</span><span style="color:#D8DEE9FF"> NpgsqlParameter</span><span style="color:#ECEFF4">(</span><span style="color:#ECEFF4">$"</span><span style="color:#A3BE8C">ProcessedAt</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">}</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> updates</span><span style="color:#ECEFF4">[</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">].</span><span style="color:#D8DEE9">ProcessedAt</span><span style="color:#ECEFF4">))</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> sql </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> string</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Format</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">updateTemplate</span><span style="color:#ECEFF4">,</span><span style="color:#81A1C1"> string</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Join</span><span style="color:#ECEFF4">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">,</span><span style="color:#EBCB8B">\n</span><span style="color:#ECEFF4">    "</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> valueClauses</span><span style="color:#ECEFF4">))</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> db</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Database</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">ExecuteSqlRawAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">sql</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> paramEntries</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> transaction</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">CommitAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span></code></pre>
+</div>
+
+<h3>Approach 5: Dapper CTE</h3>
+
+<p>A stylistic variation of Approach 3 using a named CTE instead of an inline derived table. One round-trip, same performance envelope — choose whichever syntax your team finds more readable in complex update logic.</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">sql</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">WITH</span><span style="color:#D8DEE9FF"> updates(id, processed_at) </span><span style="color:#81A1C1">AS</span><span style="color:#D8DEE9FF"> (</span></span>
+<span class="line"><span style="color:#81A1C1">    VALUES</span></span>
+<span class="line"><span style="color:#D8DEE9FF">        (@Id0::uuid, @ProcessedAt0),</span></span>
+<span class="line"><span style="color:#D8DEE9FF">        (@Id1::uuid, @ProcessedAt1),</span></span>
+<span class="line"><span style="color:#D8DEE9FF">        ...</span></span>
+<span class="line"><span style="color:#D8DEE9FF">)</span></span>
+<span class="line"><span style="color:#81A1C1">UPDATE</span><span style="color:#D8DEE9FF"> orders</span></span>
+<span class="line"><span style="color:#81A1C1">SET</span><span style="color:#D8DEE9FF"> processed_at </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9FF"> updates.processed_at,</span></span>
+<span class="line"><span style="color:#81A1C1">    status</span><span style="color:#81A1C1">       =</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">Processed</span><span style="color:#ECEFF4">'</span></span>
+<span class="line"><span style="color:#81A1C1">FROM</span><span style="color:#D8DEE9FF"> updates</span></span>
+<span class="line"><span style="color:#81A1C1">WHERE</span><span style="color:#D8DEE9FF"> orders.id </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9FF"> updates.id</span></span></code></pre>
+</div>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">await</span><span style="color:#81A1C1"> using</span><span style="color:#81A1C1"> var</span><span style="color:#D8DEE9FF"> connection </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> new</span><span style="color:#D8DEE9FF"> NpgsqlConnection</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">connectionString</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">OpenAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#81A1C1"> using</span><span style="color:#81A1C1"> var</span><span style="color:#D8DEE9FF"> transaction </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">BeginTransactionAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> valueClauses </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> string</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Join</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#ECEFF4">    "</span><span style="color:#A3BE8C">,</span><span style="color:#EBCB8B">\n</span><span style="color:#ECEFF4">        "</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9">    updates</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Select</span><span style="color:#ECEFF4">((</span><span style="color:#D8DEE9FF">_</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> i</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1"> =></span><span style="color:#ECEFF4"> $"</span><span style="color:#A3BE8C">(@Id</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">}</span><span style="color:#A3BE8C">::uuid, @ProcessedAt</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">}</span><span style="color:#A3BE8C">)</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">))</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> sql </span><span style="color:#81A1C1">=</span></span>
+<span class="line"><span style="color:#ECEFF4">    @$"</span><span style="color:#EBCB8B">""</span></span>
+<span class="line"><span style="color:#A3BE8C">    WITH updates(id, processed_at) AS (</span></span>
+<span class="line"><span style="color:#A3BE8C">        VALUES</span></span>
+<span class="line"><span style="color:#ECEFF4">            {</span><span style="color:#D8DEE9">valueClauses</span><span style="color:#ECEFF4">}</span></span>
+<span class="line"><span style="color:#A3BE8C">    )</span></span>
+<span class="line"><span style="color:#A3BE8C">    UPDATE orders</span></span>
+<span class="line"><span style="color:#A3BE8C">    SET processed_at = updates.processed_at,</span></span>
+<span class="line"><span style="color:#A3BE8C">        status       = 'Processed'</span></span>
+<span class="line"><span style="color:#A3BE8C">    FROM updates</span></span>
+<span class="line"><span style="color:#A3BE8C">    WHERE orders.id = updates.id</span></span>
+<span class="line"><span style="color:#EBCB8B">    ""</span><span style="color:#ECEFF4">"</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> parameters </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> new</span><span style="color:#D8DEE9FF"> DynamicParameters</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">for</span><span style="color:#ECEFF4"> (</span><span style="color:#81A1C1">int</span><span style="color:#D8DEE9FF"> i </span><span style="color:#81A1C1">=</span><span style="color:#B48EAD"> 0</span><span style="color:#81A1C1">;</span><span style="color:#D8DEE9"> i</span><span style="color:#81A1C1"> &#x26;</span><span style="color:#D8DEE9FF">#</span><span style="color:#D8DEE9">x3C</span><span style="color:#81A1C1">;</span><span style="color:#D8DEE9"> updates</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Count</span><span style="color:#81A1C1">;</span><span style="color:#D8DEE9"> i</span><span style="color:#81A1C1">++</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#D8DEE9">    parameters</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Add</span><span style="color:#ECEFF4">(</span><span style="color:#ECEFF4">$"</span><span style="color:#A3BE8C">Id</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">}</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> updates</span><span style="color:#ECEFF4">[</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">].</span><span style="color:#D8DEE9">Id</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">ToString</span><span style="color:#ECEFF4">())</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#D8DEE9">    parameters</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Add</span><span style="color:#ECEFF4">(</span><span style="color:#ECEFF4">$"</span><span style="color:#A3BE8C">ProcessedAt</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">}</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> updates</span><span style="color:#ECEFF4">[</span><span style="color:#D8DEE9">i</span><span style="color:#ECEFF4">].</span><span style="color:#D8DEE9">ProcessedAt</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">ExecuteAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">sql</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> parameters</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> transaction</span><span style="color:#ECEFF4">:</span><span style="color:#D8DEE9"> transaction</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> transaction</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">CommitAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span></code></pre>
+</div>
+
+<h3>Approach 6: Dapper + UNNEST</h3>
+
+<p>Pass two typed arrays as parameters and let PostgreSQL expand them with <code>UNNEST</code>. No dynamic SQL, no growing parameter list, no format strings — the query text stays identical regardless of batch size.</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">await</span><span style="color:#81A1C1"> using</span><span style="color:#81A1C1"> var</span><span style="color:#D8DEE9FF"> connection </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> new</span><span style="color:#D8DEE9FF"> NpgsqlConnection</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">connectionString</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">OpenAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#81A1C1"> using</span><span style="color:#81A1C1"> var</span><span style="color:#D8DEE9FF"> transaction </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">BeginTransactionAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> ids </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9"> updates</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Select</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">u </span><span style="color:#81A1C1">=></span><span style="color:#D8DEE9"> u</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Id</span><span style="color:#ECEFF4">).</span><span style="color:#88C0D0">ToArray</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> processedAts </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9"> updates</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Select</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">u </span><span style="color:#81A1C1">=></span><span style="color:#D8DEE9"> u</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">ProcessedAt</span><span style="color:#ECEFF4">).</span><span style="color:#88C0D0">ToArray</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">ExecuteAsync</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#ECEFF4">    @"</span><span style="color:#EBCB8B">""</span></span>
+<span class="line"><span style="color:#A3BE8C">    UPDATE orders</span></span>
+<span class="line"><span style="color:#A3BE8C">    SET processed_at = v.processed_at,</span></span>
+<span class="line"><span style="color:#A3BE8C">        status       = 'Processed'</span></span>
+<span class="line"><span style="color:#A3BE8C">    FROM UNNEST(@Ids, @ProcessedAts) AS v(id, processed_at)</span></span>
+<span class="line"><span style="color:#A3BE8C">    WHERE orders.id = v.id</span></span>
+<span class="line"><span style="color:#EBCB8B">    ""</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#81A1C1">    new</span><span style="color:#ECEFF4"> {</span><span style="color:#D8DEE9"> Ids</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> ids</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> ProcessedAts</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> processedAts</span><span style="color:#ECEFF4"> },</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    transaction</span><span style="color:#ECEFF4">:</span><span style="color:#D8DEE9"> transaction</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> transaction</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">CommitAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span></code></pre>
+</div>
+
+<blockquote><p>"The query text is constant. The execution plan is cached. The arrays arrive in compact binary format. No matter whether you're updating 100 rows or 100,000, the SQL you send is exactly the same three lines."</p></blockquote>
+
+<h3>Approach 7: Temp Table + Binary COPY</h3>
+
+<p>For extreme batch sizes, bypass SQL parameters entirely. Create a temp staging table, stream rows via Npgsql's binary COPY protocol (PostgreSQL's fastest data-load path), then execute a single <code>UPDATE ... FROM</code>.</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">await</span><span style="color:#81A1C1"> using</span><span style="color:#81A1C1"> var</span><span style="color:#D8DEE9FF"> connection </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> new</span><span style="color:#D8DEE9FF"> NpgsqlConnection</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">connectionString</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">OpenAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#81A1C1"> using</span><span style="color:#81A1C1"> var</span><span style="color:#D8DEE9FF"> transaction </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">BeginTransactionAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">ExecuteAsync</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#ECEFF4">    @"</span><span style="color:#EBCB8B">""</span></span>
+<span class="line"><span style="color:#A3BE8C">    CREATE TEMP TABLE temp_updates (</span></span>
+<span class="line"><span style="color:#A3BE8C">        id           UUID        NOT NULL,</span></span>
+<span class="line"><span style="color:#A3BE8C">        processed_at TIMESTAMPTZ NOT NULL</span></span>
+<span class="line"><span style="color:#A3BE8C">    ) ON COMMIT DROP</span></span>
+<span class="line"><span style="color:#EBCB8B">    ""</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    transaction</span><span style="color:#ECEFF4">:</span><span style="color:#D8DEE9"> transaction</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#81A1C1"> using</span><span style="color:#ECEFF4"> (</span><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> writer </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">BeginBinaryImportAsync</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#ECEFF4">    "</span><span style="color:#A3BE8C">COPY temp_updates (id, processed_at) FROM STDIN (FORMAT BINARY)</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">))</span></span>
+<span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#88C0D0">    foreach</span><span style="color:#ECEFF4"> (</span><span style="color:#D8DEE9">var</span><span style="color:#D8DEE9"> u</span><span style="color:#81A1C1"> in</span><span style="color:#D8DEE9"> updates</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">    {</span></span>
+<span class="line"><span style="color:#81A1C1">        await</span><span style="color:#D8DEE9"> writer</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">StartRowAsync</span><span style="color:#ECEFF4">()</span><span style="color:#D8DEE9FF">;</span></span>
+<span class="line"><span style="color:#81A1C1">        await</span><span style="color:#D8DEE9"> writer</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">WriteAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">u</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Id</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> NpgsqlTypes</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">NpgsqlDbType</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Uuid</span><span style="color:#ECEFF4">)</span><span style="color:#D8DEE9FF">;</span></span>
+<span class="line"><span style="color:#81A1C1">        await</span><span style="color:#D8DEE9"> writer</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">WriteAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">u</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">ProcessedAt</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> NpgsqlTypes</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">NpgsqlDbType</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">TimestampTz</span><span style="color:#ECEFF4">)</span><span style="color:#D8DEE9FF">;</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span></span>
+<span class="line"><span style="color:#81A1C1">    await</span><span style="color:#D8DEE9"> writer</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">CompleteAsync</span><span style="color:#ECEFF4">()</span><span style="color:#D8DEE9FF">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">ExecuteAsync</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#ECEFF4">    @"</span><span style="color:#EBCB8B">""</span></span>
+<span class="line"><span style="color:#A3BE8C">    UPDATE orders</span></span>
+<span class="line"><span style="color:#A3BE8C">    SET processed_at = t.processed_at,</span></span>
+<span class="line"><span style="color:#A3BE8C">        status       = 'Processed'</span></span>
+<span class="line"><span style="color:#A3BE8C">    FROM temp_updates t</span></span>
+<span class="line"><span style="color:#A3BE8C">    WHERE orders.id = t.id</span></span>
+<span class="line"><span style="color:#EBCB8B">    ""</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    transaction</span><span style="color:#ECEFF4">:</span><span style="color:#D8DEE9"> transaction</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> transaction</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">CommitAsync</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span></code></pre>
+</div>
+
+<p>The <code>ON COMMIT DROP</code> clause cleans up the staging table automatically at transaction end. Binary COPY transmits rows in PostgreSQL's native binary wire format — no parameter serialization, no SQL string overhead. At 10k rows it matches UNNEST at <strong>41ms</strong>; the gap widens in favour of COPY at 100k+ rows where the temp-table overhead becomes negligible compared to the data volume.</p>
+
+<div class="divider"><span>benchmark results</span></div>
+<h2>Benchmark Results</h2>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>Approach</th>
+      <th>1,000 rows</th>
+      <th>10,000 rows</th>
+      <th>25,000 rows</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>1 — Naive Dapper</td><td>317ms</td><td>2,414ms</td><td>6,283ms</td></tr>
+    <tr><td>2 — EF Core SaveChanges</td><td>575ms</td><td>1,030ms</td><td>1,767ms</td></tr>
+    <tr><td>3 — Dapper + VALUES table</td><td>19ms</td><td>89ms</td><td>233ms</td></tr>
+    <tr><td>4 — EF Core ExecuteSqlRaw + VALUES</td><td>58ms</td><td>166ms</td><td>282ms</td></tr>
+    <tr><td>5 — Dapper + CTE</td><td>13ms</td><td>103ms</td><td>251ms</td></tr>
+    <tr><td>6 — Dapper + UNNEST</td><td>12ms</td><td>41ms</td><td>92ms</td></tr>
+    <tr><td>7 — Temp table + binary COPY</td><td>11ms</td><td>41ms</td><td>93ms</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>The decisive jump is between Approach 2 and 3 — from 1,030ms to 89ms, a <strong>10× improvement</strong> that comes entirely from eliminating round-trips, not from tuning SQL. Approaches 6 and 7 push further by removing dynamic SQL and parameter limits. For PostgreSQL, <strong>UNNEST is the pragmatic default</strong>. Reach for binary COPY when batch sizes exceed 100k and the temp-table setup overhead is worth the data-transmission savings.</p></div>
+
+<div class="divider"><span>summary</span></div>
+<h2>Summary</h2>
+
+<p>The takeaway is blunt: reducing round-trips is the only lever that meaningfully moves performance. Cutting 10,000 database calls down to one is where the gains live. Everything else is secondary.</p>
+
+<ul class="check-list">
+  <li>EF Core SaveChanges is not a bulk-update tool — batching reduces round-trips but still generates N individual UPDATE statements and loads the change tracker via SELECT</li>
+  <li>For PostgreSQL, UNNEST is the pragmatic default — fixed query text, two parameters, stable execution plans, no parameter count ceiling</li>
+  <li>Binary COPY is for extreme scale — stream data in binary format, bypass the parameter system entirely, no SQL string expansion</li>
+  <li>Dapper and EF Core coexist — raw SQL bulk updates can share an EF Core transaction with change-tracked operations without conflict</li>
+</ul>
+
+<blockquote><p>"You don't need a faster database. You need fewer conversations with the one you already have."</p></blockquote>
+
+  <!-- ── Series navigation ── -->
+  <div class="next-post">
+    <div>
+      <div class="next-label">Next in the series</div>
+      <div class="next-title"></div>
+    </div>
+    <div class="next-arrow">→</div>
+  </div>
+
+</article>
+</div>
+
+<footer>
+  <div>EF Core efficient updating — learn.microsoft.com/en-us/ef/core/performance/efficient-updating. Npgsql binary COPY — npgsql.org/doc/copy.html. NpgsqlParameter API — npgsql.org/doc/api/Npgsql.NpgsqlParameter.html.</div>
+  <div style="margin-top: 8px; color: #3d3a35;">claude-code-journey.md · episode —</div>
+</footer>
+
+<script>
+  document.querySelectorAll('.code-block').forEach(block => {
+    const header = block.querySelector('.code-header');
+    const pre = block.querySelector('pre');
+    if (!header || !pre) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText.trim()).then(() => {
+        btn.textContent = '✓ copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    });
+
+    header.appendChild(btn);
+  });
+</script>
+</body>
+</html>
