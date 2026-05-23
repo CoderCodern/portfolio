@@ -417,19 +417,19 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">sql</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">CREATE</span><span style="color:#F47067"> TABLE</span><span style="color:#DCBDFB"> IF</span><span style="color:#F47067"> NOT</span><span style="color:#F47067"> EXISTS</span><span style="color:#ADBAC7"> inbox_messages (</span></span>
-<span class="line"><span style="color:#ADBAC7">    id UUID </span><span style="color:#F47067">PRIMARY KEY</span><span style="color:#ADBAC7">,</span></span>
-<span class="line"><span style="color:#F47067">    type</span><span style="color:#F47067"> VARCHAR</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">255</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">NOT NULL</span><span style="color:#ADBAC7">,</span></span>
-<span class="line"><span style="color:#ADBAC7">    content JSONB </span><span style="color:#F47067">NOT NULL</span><span style="color:#ADBAC7">,</span></span>
-<span class="line"><span style="color:#ADBAC7">    received_on_utc </span><span style="color:#F47067">TIMESTAMP WITH TIME ZONE</span><span style="color:#F47067"> NOT NULL</span><span style="color:#ADBAC7">,</span></span>
-<span class="line"><span style="color:#ADBAC7">    processed_on_utc </span><span style="color:#F47067">TIMESTAMP WITH TIME ZONE</span><span style="color:#F47067"> NULL</span><span style="color:#ADBAC7">,</span></span>
-<span class="line"><span style="color:#ADBAC7">    error </span><span style="color:#F47067">TEXT</span><span style="color:#F47067"> NULL</span></span>
-<span class="line"><span style="color:#ADBAC7">);</span></span>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">CREATE</span><span style="color:#81A1C1"> TABLE</span><span style="color:#88C0D0"> IF</span><span style="color:#81A1C1"> NOT</span><span style="color:#81A1C1"> EXISTS</span><span style="color:#D8DEE9FF"> inbox_messages (</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    id UUID </span><span style="color:#81A1C1">PRIMARY KEY</span><span style="color:#D8DEE9FF">,</span></span>
+<span class="line"><span style="color:#81A1C1">    type</span><span style="color:#81A1C1"> VARCHAR</span><span style="color:#D8DEE9FF">(</span><span style="color:#B48EAD">255</span><span style="color:#D8DEE9FF">) </span><span style="color:#81A1C1">NOT NULL</span><span style="color:#D8DEE9FF">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    content JSONB </span><span style="color:#81A1C1">NOT NULL</span><span style="color:#D8DEE9FF">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    received_on_utc </span><span style="color:#81A1C1">TIMESTAMP WITH TIME ZONE</span><span style="color:#81A1C1"> NOT NULL</span><span style="color:#D8DEE9FF">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    processed_on_utc </span><span style="color:#81A1C1">TIMESTAMP WITH TIME ZONE</span><span style="color:#81A1C1"> NULL</span><span style="color:#D8DEE9FF">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    error </span><span style="color:#81A1C1">TEXT</span><span style="color:#81A1C1"> NULL</span></span>
+<span class="line"><span style="color:#D8DEE9FF">);</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F47067">CREATE</span><span style="color:#F47067"> INDEX</span><span style="color:#DCBDFB"> IF</span><span style="color:#F47067"> NOT</span><span style="color:#F47067"> EXISTS</span><span style="color:#ADBAC7"> idx_inbox_messages_unprocessed</span></span>
-<span class="line"><span style="color:#F47067">ON</span><span style="color:#6CB6FF"> public</span><span style="color:#ADBAC7">.</span><span style="color:#6CB6FF">inbox_messages</span><span style="color:#ADBAC7"> (received_on_utc, processed_on_utc)</span></span>
-<span class="line"><span style="color:#F47067">INCLUDE</span><span style="color:#ADBAC7"> (id, </span><span style="color:#F47067">type</span><span style="color:#ADBAC7">, content)</span></span>
-<span class="line"><span style="color:#F47067">WHERE</span><span style="color:#ADBAC7"> processed_on_utc </span><span style="color:#F47067">IS</span><span style="color:#F47067"> NULL</span><span style="color:#ADBAC7">;</span></span></code></pre>
+<span class="line"><span style="color:#81A1C1">CREATE</span><span style="color:#81A1C1"> INDEX</span><span style="color:#88C0D0"> IF</span><span style="color:#81A1C1"> NOT</span><span style="color:#81A1C1"> EXISTS</span><span style="color:#D8DEE9FF"> idx_inbox_messages_unprocessed</span></span>
+<span class="line"><span style="color:#81A1C1">ON</span><span style="color:#D8DEE9FF"> public.inbox_messages (received_on_utc, processed_on_utc)</span></span>
+<span class="line"><span style="color:#81A1C1">INCLUDE</span><span style="color:#D8DEE9FF"> (id, </span><span style="color:#81A1C1">type</span><span style="color:#D8DEE9FF">, content)</span></span>
+<span class="line"><span style="color:#81A1C1">WHERE</span><span style="color:#D8DEE9FF"> processed_on_utc </span><span style="color:#81A1C1">IS</span><span style="color:#81A1C1"> NULL</span><span style="color:#D8DEE9FF">;</span></span></code></pre>
 </div>
 
 <p>Two design decisions carry most of the weight. The <code>id</code> column enables idempotent inserts via <code>ON CONFLICT DO NOTHING</code> — the entire deduplication mechanism reduces to a single SQL clause. The filtered index (<code>WHERE processed_on_utc IS NULL</code>) keeps the index lean by excluding processed rows; without it, you'd be scanning an ever-growing index for a shrinking working set.</p>
@@ -443,10 +443,10 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">csharp</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> abstract</span><span style="color:#F47067"> record</span><span style="color:#F69D50"> IntegrationEvent</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">Guid</span><span style="color:#F69D50"> MessageId</span><span style="color:#ADBAC7">);</span></span>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">public</span><span style="color:#81A1C1"> abstract</span><span style="color:#81A1C1"> record</span><span style="color:#8FBCBB"> IntegrationEvent</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">Guid MessageId</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> sealed</span><span style="color:#F47067"> record</span><span style="color:#F69D50"> OrderCreatedIntegrationEvent</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">Guid</span><span style="color:#F69D50"> OrderId</span><span style="color:#ADBAC7">)</span></span>
-<span class="line"><span style="color:#ADBAC7">    : </span><span style="color:#F69D50">IntegrationEvent</span><span style="color:#ADBAC7">(Guid.</span><span style="color:#DCBDFB">CreateVersion7</span><span style="color:#ADBAC7">());</span></span></code></pre>
+<span class="line"><span style="color:#81A1C1">public</span><span style="color:#81A1C1"> sealed</span><span style="color:#81A1C1"> record</span><span style="color:#8FBCBB"> OrderCreatedIntegrationEvent</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">Guid OrderId</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">    :</span><span style="color:#D8DEE9FF"> IntegrationEvent</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">Guid</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">CreateVersion7</span><span style="color:#ECEFF4">())</span><span style="color:#81A1C1">;</span></span></code></pre>
 </div>
 
 <p class="aside"><em><code>Guid.CreateVersion7()</code> generates time-ordered UUIDs — better index locality than random v4 GUIDs, available since .NET 9. Small detail, measurable difference at scale.</em></p>
@@ -460,30 +460,30 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">csharp</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">internal</span><span style="color:#F47067"> sealed</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> InboxConsumer</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">T</span><span style="color:#ADBAC7">>(</span><span style="color:#F69D50">NpgsqlDataSource</span><span style="color:#F69D50"> dataSource</span><span style="color:#ADBAC7">)</span></span>
-<span class="line"><span style="color:#ADBAC7">    : </span><span style="color:#F69D50">IConsumer</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">T</span><span style="color:#ADBAC7">> </span><span style="color:#F47067">where</span><span style="color:#F69D50"> T</span><span style="color:#ADBAC7"> : </span><span style="color:#F69D50">IntegrationEvent</span></span>
-<span class="line"><span style="color:#ADBAC7">{</span></span>
-<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> async</span><span style="color:#F69D50"> Task</span><span style="color:#DCBDFB"> Consume</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">ConsumeContext</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">T</span><span style="color:#ADBAC7">> </span><span style="color:#F69D50">context</span><span style="color:#ADBAC7">)</span></span>
-<span class="line"><span style="color:#ADBAC7">    {</span></span>
-<span class="line"><span style="color:#F47067">        await</span><span style="color:#F47067"> using</span><span style="color:#F47067"> var</span><span style="color:#F69D50"> connection</span><span style="color:#F47067"> =</span><span style="color:#F47067"> await</span><span style="color:#ADBAC7"> dataSource.</span><span style="color:#DCBDFB">OpenConnectionAsync</span><span style="color:#ADBAC7">(</span></span>
-<span class="line"><span style="color:#ADBAC7">            context.CancellationToken);</span></span>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">internal</span><span style="color:#81A1C1"> sealed</span><span style="color:#81A1C1"> class</span><span style="color:#8FBCBB"> InboxConsumer</span><span style="color:#D8DEE9FF">&#x26;#x3C</span><span style="color:#81A1C1">;</span><span style="color:#D8DEE9">T</span><span style="color:#81A1C1">></span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">NpgsqlDataSource</span><span style="color:#D8DEE9"> dataSource</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#81A1C1">    :</span><span style="color:#D8DEE9"> IConsumer</span><span style="color:#81A1C1">&#x26;</span><span style="color:#D8DEE9FF">#</span><span style="color:#D8DEE9">x3C</span><span style="color:#81A1C1">;</span><span style="color:#D8DEE9">T</span><span style="color:#81A1C1">></span><span style="color:#D8DEE9"> where</span><span style="color:#D8DEE9FF"> T </span><span style="color:#ECEFF4">:</span><span style="color:#D8DEE9"> IntegrationEvent</span></span>
+<span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#D8DEE9">    public</span><span style="color:#81A1C1"> async</span><span style="color:#D8DEE9FF"> Task </span><span style="color:#88C0D0">Consume</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">ConsumeContext&#x26;#x3C;T> context</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">    {</span></span>
+<span class="line"><span style="color:#81A1C1">        await</span><span style="color:#81A1C1"> using</span><span style="color:#81A1C1"> var</span><span style="color:#D8DEE9FF"> connection </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> await</span><span style="color:#D8DEE9"> dataSource</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">OpenConnectionAsync</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#D8DEE9">            context</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">CancellationToken</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F47067">        const</span><span style="color:#F47067"> string</span><span style="color:#F69D50"> sql</span><span style="color:#F47067"> =</span></span>
-<span class="line"><span style="color:#96D0FF">            @"</span><span style="color:#F47067">""</span></span>
-<span class="line"><span style="color:#96D0FF">            INSERT INTO public.inbox_messages (id, type, content, received_on_utc)</span></span>
-<span class="line"><span style="color:#96D0FF">            VALUES (@Id, @Type, @Content::jsonb, @ReceivedOnUtc)</span></span>
-<span class="line"><span style="color:#96D0FF">            ON CONFLICT (id) DO NOTHING;</span></span>
-<span class="line"><span style="color:#F47067">            ""</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#81A1C1">        const</span><span style="color:#81A1C1"> string</span><span style="color:#D8DEE9FF"> sql </span><span style="color:#81A1C1">=</span></span>
+<span class="line"><span style="color:#ECEFF4">            @"</span><span style="color:#EBCB8B">""</span></span>
+<span class="line"><span style="color:#A3BE8C">            INSERT INTO public.inbox_messages (id, type, content, received_on_utc)</span></span>
+<span class="line"><span style="color:#A3BE8C">            VALUES (@Id, @Type, @Content::jsonb, @ReceivedOnUtc)</span></span>
+<span class="line"><span style="color:#A3BE8C">            ON CONFLICT (id) DO NOTHING;</span></span>
+<span class="line"><span style="color:#EBCB8B">            ""</span><span style="color:#ECEFF4">"</span><span style="color:#81A1C1">;</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F47067">        await</span><span style="color:#ADBAC7"> connection.</span><span style="color:#DCBDFB">ExecuteAsync</span><span style="color:#ADBAC7">(sql, </span><span style="color:#F47067">new</span></span>
-<span class="line"><span style="color:#ADBAC7">        {</span></span>
-<span class="line"><span style="color:#ADBAC7">            Id </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> context.Message.MessageId,</span></span>
-<span class="line"><span style="color:#ADBAC7">            Type </span><span style="color:#F47067">=</span><span style="color:#F47067"> typeof</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">T</span><span style="color:#ADBAC7">).FullName,</span></span>
-<span class="line"><span style="color:#ADBAC7">            Content </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> JsonSerializer.</span><span style="color:#DCBDFB">Serialize</span><span style="color:#ADBAC7">(context.Message),</span></span>
-<span class="line"><span style="color:#ADBAC7">            ReceivedOnUtc </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> DateTime.UtcNow</span></span>
-<span class="line"><span style="color:#ADBAC7">        });</span></span>
-<span class="line"><span style="color:#ADBAC7">    }</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+<span class="line"><span style="color:#81A1C1">        await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">ExecuteAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">sql</span><span style="color:#ECEFF4">,</span><span style="color:#81A1C1"> new</span></span>
+<span class="line"><span style="color:#ECEFF4">        {</span></span>
+<span class="line"><span style="color:#D8DEE9">            Id</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> context</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Message</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">MessageId</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9">            Type</span><span style="color:#81A1C1"> =</span><span style="color:#81A1C1"> typeof</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">T</span><span style="color:#ECEFF4">).</span><span style="color:#D8DEE9">FullName</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9">            Content</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> JsonSerializer</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Serialize</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">context</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Message</span><span style="color:#ECEFF4">),</span></span>
+<span class="line"><span style="color:#D8DEE9">            ReceivedOnUtc</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> DateTime</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">UtcNow</span></span>
+<span class="line"><span style="color:#ECEFF4">        })</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
 </div>
 
 <p>The <code>ON CONFLICT (id) DO NOTHING</code> clause is the critical line. If the broker redelivers the same message — after a crash, a timeout, or a network blip — the second insert is silently discarded. The consumer ACKs and moves on.</p>
@@ -499,80 +499,80 @@
     <div class="code-dots"><span></span><span></span><span></span></div>
     <span class="code-lang">csharp</span>
   </div>
-  <pre class="shiki github-dark-dimmed" style="color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">internal</span><span style="color:#F47067"> sealed</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> InboxProcessor</span><span style="color:#ADBAC7">(</span></span>
-<span class="line"><span style="color:#F69D50">    NpgsqlDataSource</span><span style="color:#F69D50"> dataSource</span><span style="color:#ADBAC7">,</span></span>
-<span class="line"><span style="color:#F69D50">    IEventDispatcher</span><span style="color:#F69D50"> eventDispatcher</span><span style="color:#ADBAC7">,</span></span>
-<span class="line"><span style="color:#F69D50">    ILogger</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">InboxProcessor</span><span style="color:#ADBAC7">> </span><span style="color:#F69D50">logger</span><span style="color:#ADBAC7">)</span></span>
-<span class="line"><span style="color:#ADBAC7">{</span></span>
-<span class="line"><span style="color:#F47067">    private</span><span style="color:#F47067"> const</span><span style="color:#F47067"> int</span><span style="color:#F69D50"> BatchSize</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> 1000</span><span style="color:#ADBAC7">;</span></span>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">internal</span><span style="color:#81A1C1"> sealed</span><span style="color:#81A1C1"> class</span><span style="color:#8FBCBB"> InboxProcessor</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    NpgsqlDataSource dataSource</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    IEventDispatcher eventDispatcher</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    ILogger&#x26;#x3C;InboxProcessor> logger</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#81A1C1">    private</span><span style="color:#81A1C1"> const</span><span style="color:#81A1C1"> int</span><span style="color:#D8DEE9FF"> BatchSize </span><span style="color:#81A1C1">=</span><span style="color:#B48EAD"> 1000</span><span style="color:#81A1C1">;</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> async</span><span style="color:#F69D50"> Task</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F47067">int</span><span style="color:#ADBAC7">> </span><span style="color:#DCBDFB">Execute</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">CancellationToken</span><span style="color:#F69D50"> cancellationToken</span><span style="color:#F47067"> =</span><span style="color:#F47067"> default</span><span style="color:#ADBAC7">)</span></span>
-<span class="line"><span style="color:#ADBAC7">    {</span></span>
-<span class="line"><span style="color:#F47067">        await</span><span style="color:#F47067"> using</span><span style="color:#F47067"> var</span><span style="color:#F69D50"> connection</span><span style="color:#F47067"> =</span></span>
-<span class="line"><span style="color:#F47067">            await</span><span style="color:#ADBAC7"> dataSource.</span><span style="color:#DCBDFB">OpenConnectionAsync</span><span style="color:#ADBAC7">(cancellationToken);</span></span>
-<span class="line"><span style="color:#F47067">        await</span><span style="color:#F47067"> using</span><span style="color:#F47067"> var</span><span style="color:#F69D50"> transaction</span><span style="color:#F47067"> =</span></span>
-<span class="line"><span style="color:#F47067">            await</span><span style="color:#ADBAC7"> connection.</span><span style="color:#DCBDFB">BeginTransactionAsync</span><span style="color:#ADBAC7">(cancellationToken);</span></span>
+<span class="line"><span style="color:#81A1C1">    public</span><span style="color:#81A1C1"> async</span><span style="color:#D8DEE9FF"> Task&#x26;#x3C</span><span style="color:#81A1C1">;</span><span style="color:#D8DEE9FF">int> </span><span style="color:#88C0D0">Execute</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">CancellationToken cancellationToken </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> default</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">    {</span></span>
+<span class="line"><span style="color:#81A1C1">        await</span><span style="color:#81A1C1"> using</span><span style="color:#81A1C1"> var</span><span style="color:#D8DEE9FF"> connection </span><span style="color:#81A1C1">=</span></span>
+<span class="line"><span style="color:#81A1C1">            await</span><span style="color:#D8DEE9"> dataSource</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">OpenConnectionAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">cancellationToken</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">        await</span><span style="color:#81A1C1"> using</span><span style="color:#81A1C1"> var</span><span style="color:#D8DEE9FF"> transaction </span><span style="color:#81A1C1">=</span></span>
+<span class="line"><span style="color:#81A1C1">            await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">BeginTransactionAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">cancellationToken</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F47067">        var</span><span style="color:#F69D50"> messages</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> (</span><span style="color:#F47067">await</span><span style="color:#ADBAC7"> connection.</span><span style="color:#DCBDFB">QueryAsync</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">InboxMessage</span><span style="color:#ADBAC7">>(</span></span>
-<span class="line"><span style="color:#96D0FF">            @"</span><span style="color:#F47067">""</span></span>
-<span class="line"><span style="color:#96D0FF">            SELECT id AS Id, type AS Type, content AS Content</span></span>
-<span class="line"><span style="color:#96D0FF">            FROM inbox_messages</span></span>
-<span class="line"><span style="color:#96D0FF">            WHERE processed_on_utc IS NULL</span></span>
-<span class="line"><span style="color:#96D0FF">            ORDER BY received_on_utc</span></span>
-<span class="line"><span style="color:#96D0FF">            LIMIT @BatchSize</span></span>
-<span class="line"><span style="color:#96D0FF">            FOR UPDATE SKIP LOCKED</span></span>
-<span class="line"><span style="color:#F47067">            ""</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">,</span></span>
-<span class="line"><span style="color:#F47067">            new</span><span style="color:#ADBAC7"> { BatchSize },</span></span>
-<span class="line"><span style="color:#F69D50">            transaction</span><span style="color:#ADBAC7">: transaction)).</span><span style="color:#DCBDFB">AsList</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#81A1C1">        var</span><span style="color:#D8DEE9FF"> messages </span><span style="color:#81A1C1">=</span><span style="color:#ECEFF4"> (</span><span style="color:#81A1C1">await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">QueryAsync</span><span style="color:#81A1C1">&#x26;</span><span style="color:#D8DEE9FF">#</span><span style="color:#D8DEE9">x3C</span><span style="color:#D8DEE9FF">;</span><span style="color:#D8DEE9">InboxMessage</span><span style="color:#81A1C1">></span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#ECEFF4">            @"</span><span style="color:#EBCB8B">""</span></span>
+<span class="line"><span style="color:#A3BE8C">            SELECT id AS Id, type AS Type, content AS Content</span></span>
+<span class="line"><span style="color:#A3BE8C">            FROM inbox_messages</span></span>
+<span class="line"><span style="color:#A3BE8C">            WHERE processed_on_utc IS NULL</span></span>
+<span class="line"><span style="color:#A3BE8C">            ORDER BY received_on_utc</span></span>
+<span class="line"><span style="color:#A3BE8C">            LIMIT @BatchSize</span></span>
+<span class="line"><span style="color:#A3BE8C">            FOR UPDATE SKIP LOCKED</span></span>
+<span class="line"><span style="color:#EBCB8B">            ""</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">,</span></span>
+<span class="line"><span style="color:#81A1C1">            new</span><span style="color:#ECEFF4"> {</span><span style="color:#D8DEE9"> BatchSize</span><span style="color:#ECEFF4"> }</span><span style="color:#D8DEE9FF">,</span></span>
+<span class="line"><span style="color:#D8DEE9">            transaction</span><span style="color:#81A1C1">:</span><span style="color:#D8DEE9"> transaction</span><span style="color:#ECEFF4">)).</span><span style="color:#88C0D0">AsList</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F47067">        var</span><span style="color:#F69D50"> processedAt</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> DateTime.UtcNow;</span></span>
-<span class="line"><span style="color:#F47067">        var</span><span style="color:#F69D50"> results</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> List</span><span style="color:#ADBAC7">&#x3C;(</span><span style="color:#F69D50">Guid</span><span style="color:#F69D50"> Id</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">DateTime</span><span style="color:#F69D50"> ProcessedAt</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">string</span><span style="color:#ADBAC7">? </span><span style="color:#F69D50">Error</span><span style="color:#ADBAC7">)>(</span></span>
-<span class="line"><span style="color:#ADBAC7">            messages.Count);</span></span>
+<span class="line"><span style="color:#81A1C1">        var</span><span style="color:#D8DEE9FF"> processedAt </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9"> DateTime</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">UtcNow</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">        var</span><span style="color:#D8DEE9FF"> results </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9"> new</span><span style="color:#D8DEE9"> List</span><span style="color:#81A1C1">&#x26;</span><span style="color:#D8DEE9FF">#</span><span style="color:#D8DEE9">x3C</span><span style="color:#81A1C1">;</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">Guid</span><span style="color:#D8DEE9"> Id</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> DateTime</span><span style="color:#D8DEE9"> ProcessedAt</span><span style="color:#ECEFF4">,</span><span style="color:#81A1C1"> string</span><span style="color:#81A1C1">?</span><span style="color:#D8DEE9"> Error</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">></span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#D8DEE9">            messages</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Count</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F47067">        foreach</span><span style="color:#ADBAC7"> (</span><span style="color:#F47067">var</span><span style="color:#F69D50"> message</span><span style="color:#F47067"> in</span><span style="color:#ADBAC7"> messages)</span></span>
-<span class="line"><span style="color:#ADBAC7">        {</span></span>
-<span class="line"><span style="color:#F47067">            try</span></span>
-<span class="line"><span style="color:#ADBAC7">            {</span></span>
-<span class="line"><span style="color:#F47067">                var</span><span style="color:#F69D50"> messageType</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> Type.</span><span style="color:#DCBDFB">GetType</span><span style="color:#ADBAC7">(message.Type)</span><span style="color:#F47067">!</span><span style="color:#ADBAC7">;</span></span>
-<span class="line"><span style="color:#F47067">                var</span><span style="color:#F69D50"> deserialized</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> JsonSerializer.</span><span style="color:#DCBDFB">Deserialize</span><span style="color:#ADBAC7">(</span></span>
-<span class="line"><span style="color:#ADBAC7">                    message.Content, messageType)</span><span style="color:#F47067">!</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#81A1C1">        foreach</span><span style="color:#ECEFF4"> (</span><span style="color:#81A1C1">var</span><span style="color:#D8DEE9FF"> message </span><span style="color:#81A1C1">in</span><span style="color:#D8DEE9"> messages</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">        {</span></span>
+<span class="line"><span style="color:#81A1C1">            try</span></span>
+<span class="line"><span style="color:#ECEFF4">            {</span></span>
+<span class="line"><span style="color:#81A1C1">                var</span><span style="color:#D8DEE9FF"> messageType </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9"> Type</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">GetType</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">message</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Type</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">!;</span></span>
+<span class="line"><span style="color:#81A1C1">                var</span><span style="color:#D8DEE9FF"> deserialized </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9"> JsonSerializer</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Deserialize</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#D8DEE9">                    message</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Content</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> messageType</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">!;</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F47067">                await</span><span style="color:#ADBAC7"> eventDispatcher.</span><span style="color:#DCBDFB">DispatchAsync</span><span style="color:#ADBAC7">(deserialized, cancellationToken);</span></span>
+<span class="line"><span style="color:#81A1C1">                await</span><span style="color:#D8DEE9"> eventDispatcher</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">DispatchAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">deserialized</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> cancellationToken</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#ADBAC7">                results.</span><span style="color:#DCBDFB">Add</span><span style="color:#ADBAC7">((message.Id, processedAt, </span><span style="color:#6CB6FF">null</span><span style="color:#ADBAC7">));</span></span>
-<span class="line"><span style="color:#ADBAC7">            }</span></span>
-<span class="line"><span style="color:#F47067">            catch</span><span style="color:#ADBAC7"> (</span><span style="color:#F69D50">Exception</span><span style="color:#F69D50"> ex</span><span style="color:#ADBAC7">)</span></span>
-<span class="line"><span style="color:#ADBAC7">            {</span></span>
-<span class="line"><span style="color:#ADBAC7">                logger.</span><span style="color:#DCBDFB">LogError</span><span style="color:#ADBAC7">(ex, </span><span style="color:#96D0FF">"Failed to process inbox message {Id}"</span><span style="color:#ADBAC7">, message.Id);</span></span>
-<span class="line"><span style="color:#ADBAC7">                results.</span><span style="color:#DCBDFB">Add</span><span style="color:#ADBAC7">((message.Id, processedAt, ex.</span><span style="color:#DCBDFB">ToString</span><span style="color:#ADBAC7">()));</span></span>
-<span class="line"><span style="color:#ADBAC7">            }</span></span>
-<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#D8DEE9">                results</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Add</span><span style="color:#ECEFF4">((</span><span style="color:#D8DEE9">message</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Id</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> processedAt</span><span style="color:#ECEFF4">,</span><span style="color:#81A1C1"> null</span><span style="color:#ECEFF4">))</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">            }</span></span>
+<span class="line"><span style="color:#81A1C1">            catch</span><span style="color:#ECEFF4"> (</span><span style="color:#D8DEE9FF">Exception ex</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">            {</span></span>
+<span class="line"><span style="color:#D8DEE9">                logger</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">LogError</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">ex</span><span style="color:#ECEFF4">,</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">Failed to process inbox message {Id}</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> message</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Id</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#D8DEE9">                results</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Add</span><span style="color:#ECEFF4">((</span><span style="color:#D8DEE9">message</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Id</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> processedAt</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> ex</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">ToString</span><span style="color:#ECEFF4">()))</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">            }</span></span>
+<span class="line"><span style="color:#ECEFF4">        }</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F47067">        if</span><span style="color:#ADBAC7"> (results.Count </span><span style="color:#F47067">></span><span style="color:#6CB6FF"> 0</span><span style="color:#ADBAC7">)</span></span>
-<span class="line"><span style="color:#ADBAC7">        {</span></span>
-<span class="line"><span style="color:#F47067">            await</span><span style="color:#ADBAC7"> connection.</span><span style="color:#DCBDFB">ExecuteAsync</span><span style="color:#ADBAC7">(</span></span>
-<span class="line"><span style="color:#96D0FF">                @"</span><span style="color:#F47067">""</span></span>
-<span class="line"><span style="color:#96D0FF">                UPDATE inbox_messages</span></span>
-<span class="line"><span style="color:#96D0FF">                SET processed_on_utc = v.processed_on_utc,</span></span>
-<span class="line"><span style="color:#96D0FF">                    error = v.error</span></span>
-<span class="line"><span style="color:#96D0FF">                FROM UNNEST(@Ids, @ProcessedAts, @Errors)</span></span>
-<span class="line"><span style="color:#96D0FF">                    AS v(id, processed_on_utc, error)</span></span>
-<span class="line"><span style="color:#96D0FF">                WHERE inbox_messages.id = v.id</span></span>
-<span class="line"><span style="color:#F47067">                ""</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">,</span></span>
-<span class="line"><span style="color:#F47067">                new</span></span>
-<span class="line"><span style="color:#ADBAC7">                {</span></span>
-<span class="line"><span style="color:#ADBAC7">                    Ids </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> results.</span><span style="color:#DCBDFB">Select</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">r</span><span style="color:#F47067"> =></span><span style="color:#ADBAC7"> r.Id).</span><span style="color:#DCBDFB">ToArray</span><span style="color:#ADBAC7">(),</span></span>
-<span class="line"><span style="color:#ADBAC7">                    ProcessedAts </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> results.</span><span style="color:#DCBDFB">Select</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">r</span><span style="color:#F47067"> =></span><span style="color:#ADBAC7"> r.ProcessedAt).</span><span style="color:#DCBDFB">ToArray</span><span style="color:#ADBAC7">(),</span></span>
-<span class="line"><span style="color:#ADBAC7">                    Errors </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> results.</span><span style="color:#DCBDFB">Select</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">r</span><span style="color:#F47067"> =></span><span style="color:#ADBAC7"> r.Error).</span><span style="color:#DCBDFB">ToArray</span><span style="color:#ADBAC7">()</span></span>
-<span class="line"><span style="color:#ADBAC7">                },</span></span>
-<span class="line"><span style="color:#F69D50">                transaction</span><span style="color:#ADBAC7">: transaction);</span></span>
-<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#81A1C1">        if</span><span style="color:#ECEFF4"> (</span><span style="color:#D8DEE9">results</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Count</span><span style="color:#81A1C1"> ></span><span style="color:#B48EAD"> 0</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">        {</span></span>
+<span class="line"><span style="color:#81A1C1">            await</span><span style="color:#D8DEE9"> connection</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">ExecuteAsync</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#ECEFF4">                @"</span><span style="color:#EBCB8B">""</span></span>
+<span class="line"><span style="color:#A3BE8C">                UPDATE inbox_messages</span></span>
+<span class="line"><span style="color:#A3BE8C">                SET processed_on_utc = v.processed_on_utc,</span></span>
+<span class="line"><span style="color:#A3BE8C">                    error = v.error</span></span>
+<span class="line"><span style="color:#A3BE8C">                FROM UNNEST(@Ids, @ProcessedAts, @Errors)</span></span>
+<span class="line"><span style="color:#A3BE8C">                    AS v(id, processed_on_utc, error)</span></span>
+<span class="line"><span style="color:#A3BE8C">                WHERE inbox_messages.id = v.id</span></span>
+<span class="line"><span style="color:#EBCB8B">                ""</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#81A1C1">                new</span></span>
+<span class="line"><span style="color:#ECEFF4">                {</span></span>
+<span class="line"><span style="color:#D8DEE9">                    Ids</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> results</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Select</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">r </span><span style="color:#81A1C1">=></span><span style="color:#D8DEE9"> r</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Id</span><span style="color:#ECEFF4">).</span><span style="color:#88C0D0">ToArray</span><span style="color:#ECEFF4">(),</span></span>
+<span class="line"><span style="color:#D8DEE9">                    ProcessedAts</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> results</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Select</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">r </span><span style="color:#81A1C1">=></span><span style="color:#D8DEE9"> r</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">ProcessedAt</span><span style="color:#ECEFF4">).</span><span style="color:#88C0D0">ToArray</span><span style="color:#ECEFF4">(),</span></span>
+<span class="line"><span style="color:#D8DEE9">                    Errors</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> results</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Select</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">r </span><span style="color:#81A1C1">=></span><span style="color:#D8DEE9"> r</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Error</span><span style="color:#ECEFF4">).</span><span style="color:#88C0D0">ToArray</span><span style="color:#ECEFF4">()</span></span>
+<span class="line"><span style="color:#ECEFF4">                },</span></span>
+<span class="line"><span style="color:#D8DEE9FF">                transaction</span><span style="color:#ECEFF4">:</span><span style="color:#D8DEE9"> transaction</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">        }</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F47067">        await</span><span style="color:#ADBAC7"> transaction.</span><span style="color:#DCBDFB">CommitAsync</span><span style="color:#ADBAC7">(cancellationToken);</span></span>
+<span class="line"><span style="color:#81A1C1">        await</span><span style="color:#D8DEE9"> transaction</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">CommitAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">cancellationToken</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F47067">        return</span><span style="color:#ADBAC7"> messages.Count;</span></span>
-<span class="line"><span style="color:#ADBAC7">    }</span></span>
-<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+<span class="line"><span style="color:#81A1C1">        return</span><span style="color:#D8DEE9"> messages</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Count</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
 </div>
 
 <p>Three implementation choices here are worth calling out explicitly:</p>

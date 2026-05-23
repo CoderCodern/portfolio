@@ -201,19 +201,19 @@
     font-size: 0.83em;
     background: var(--surface2);
     border: 1px solid var(--border);
-    color: var(--accent);
+    color: #88c0d0;
     padding: 2px 7px;
     border-radius: 3px;
   }
   /* Reset inline-code styles inside code blocks — Shiki handles all colouring */
   pre code { background: transparent; border: none; padding: 0; color: inherit; border-radius: 0; }
-  /* Syntax highlight helpers — use as <span class="X"> inside <pre> */
-  .kw  { color: var(--accent); }               /* keywords, headings */
-  .cm  { color: #4a5060; font-style: italic; } /* comments */
-  .st  { color: #a5d6ff; }                     /* strings */
+  /* Syntax highlight helpers — use as <span class="X"> inside <pre> (Nord palette) */
+  .kw  { color: #81a1c1; }                     /* keywords — Nord blue */
+  .cm  { color: #616e88; font-style: italic; } /* comments — Nord muted */
+  .st  { color: #a3be8c; }                     /* strings — Nord green */
   .bad { color: var(--red); }                  /* bad examples */
   .good{ color: var(--green); }                /* good examples */
-  .num { color: #c9b1f5; }                     /* numbers */
+  .num { color: #b48ead; }                     /* numbers — Nord purple */
 
   /* ── CALLOUTS ─────────────────────────── */
   .callout {
@@ -319,7 +319,8 @@
   .week-day-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
 
   /* ── NEXT POST ────────────────────────── */
-  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; text-decoration: none; transition: border-color 0.2s, background 0.2s; }
+  .next-post:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
   .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
   .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
   .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
@@ -384,13 +385,13 @@
   {{CONVERTED_CONTENT}}
 
   <!-- ── Series navigation ── -->
-  <div class="next-post">
+  <a class="next-post" href="{{NEXT_EPISODE_URL}}" target="_parent">
     <div>
       <div class="next-label">Next in the series</div>
       <div class="next-title">{{NEXT_EPISODE_TITLE}}</div>
     </div>
     <div class="next-arrow">→</div>
-  </div>
+  </a>
 
 </article>
 </div>

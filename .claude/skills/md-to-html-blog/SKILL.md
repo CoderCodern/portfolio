@@ -128,6 +128,43 @@ Bad: forced puns, mocking the reader, breaking technical credibility.
 
 ---
 
+## Prose Tone Rules
+
+Write like a senior dev talking to a teammate — not like writing API documentation.
+
+**Kill on sight:**
+- Passive constructions: "It is important to note that...", "It should be mentioned..."
+- Academic framing: "Furthermore", "The aforementioned", "This approach provides"
+- Over-qualification: "In most cases", "Generally speaking", "It may be worth considering"
+- List-as-introduction: paragraphs that just enumerate what the post will cover instead of just covering it
+- Sentences starting with "It is" or "This is X that Y" — almost always replaceable
+
+**Use instead:**
+- Direct address: "You'll notice...", "Here's the thing:"
+- Short sentences. One idea, one period.
+- Own the opinion: "This one's better" not "This may be preferable"
+- Human connectives: "So", "Now", "The trick is", "Turns out", "Here's why"
+- First-person where genuine: "I ran this and...", "Took me a while to get this"
+
+**Before → After examples:**
+```
+❌ "This article covers the complete hierarchy, how to structure each file, and the SOUL.md pattern."
+✅ "Here's what we'll cover: the full file hierarchy, what goes in each layer, and the SOUL.md trick."
+
+❌ "It is important to note that the description field functions as a trigger condition."
+✅ "The description field is a trigger condition, not a capability list. That difference matters more than anything else in the file."
+
+❌ "Before anything else, dispel the most common misconception."
+✅ "Quick reality check first."
+
+❌ "After reviewing dozens of repositories, these are the patterns that consistently separate effective files from ineffective ones."
+✅ "After going through dozens of repos, here's what actually separates the files that work from the ones that silently stopped working."
+```
+
+**Minimum per section:** At least one direct-address or first-person sentence. No paragraph starting with "It is", "This is", or "This article/post covers".
+
+---
+
 ## Divider Rule
 
 Label = 1–3 lowercase words extracted from the `<h2>` text.
@@ -165,6 +202,8 @@ Wrap the most evocative phrase in `<em>` — not a proper noun, not a filename, 
 | CSS in a separate file             | All styles inline — single file output   |
 | Italicising file names in `<h1>`   | Wrap evocative phrases only              |
 | No `htmlFile:` in md frontmatter   | Site falls back to raw markdown — always add it after assembly |
+| `NEXT_EPISODE_URL` not set         | Next-post block is a dead div — always look up the playlist first |
+| Wrong next episode title           | Use the next article's `title:` frontmatter verbatim, not a paraphrase |
 
 ---
 
@@ -178,6 +217,37 @@ Present a numbered list. Wait for the user to pick before proceeding.
 
 ### Step 1 — Read the markdown
 Identify: episode number, sections, code blocks, tables, approximate length.
+
+**If the article has `series:` in its frontmatter**, run the playlist lookup immediately:
+
+```bash
+grep -r "^series:" src/contents/articles/*.md | grep -v "^Binary"
+```
+
+Find all articles in the same series, sort them by `episode:` frontmatter value, and determine:
+- The **next article slug** (for `NEXT_EPISODE_URL`)
+- The **exact title** of that next article (for `NEXT_EPISODE_TITLE`)
+
+Use the article's own markdown `title:` frontmatter value verbatim — do not invent or paraphrase it.
+
+If the current article is the **last in the series** (no next episode exists yet):
+- Set `NEXT_EPISODE_TITLE` to the anticipated next title (use the markdown body's "Next in the series" line if present)
+- Set `NEXT_EPISODE_URL` to `#`
+- In the HTML, keep the block as `<div class="next-post">` (not `<a>`) and set the label to `Coming up next`
+
+**Important:** The assembled HTML loads inside a SvelteKit `<iframe>`. The `<a class="next-post">` in the template already has `target="_parent"` — this is required. Without it, the link navigates the iframe itself, producing a frame-in-frame black screen. Never remove `target="_parent"` from series navigation links.
+
+### Step 1.5 — Smooth the prose
+
+Before writing the data file, mentally re-read each paragraph through the Prose Tone Rules above.
+
+Flag and rewrite any paragraph that:
+- Starts with "It is" / "This is" / "The X is a Y that Z"
+- Opens by listing what the article will cover (just cover it)
+- Uses academic framing: "Furthermore", "In most cases", "It should be noted"
+- Reads like documentation rather than a person talking
+
+Code blocks, tables, callout labels, and checklist items are exempt — only rewrite `<p>` prose.
 
 ### Step 2 — Pick accent color
 Use the table above. Note both hex values.
@@ -211,6 +281,7 @@ TAG_2: AI
 TAG_3: Tools
 FIRST_PARAGRAPH: Lead paragraph as plain HTML on one line. <strong>Bold</strong> and <em>italics</em> are fine.
 NEXT_EPISODE_TITLE: Title of the next post in the series
+NEXT_EPISODE_URL: /articles/<next-slug>
 FOOTER_REFERENCES: Source attributions, or "No external sources."
 ---CONTENT---
 <div class="divider"><span>first section</span></div>

@@ -4,8 +4,8 @@ description: >
   Use after blog-smoother completes. Publishes smoothed markdown to Notion and saves
   the local .md file. Reads metadata from BLOG_PIPELINE_NOTES.md. Mechanical execution
   only — no content decisions.
-tools: ["Bash", "Read"]
-model: haiku
+tools: Bash, Read
+model: claude-haiku-4-5-20251001
 ---
 
 You are the publishing specialist for the blog import pipeline. You execute scripts — you make no content decisions.
