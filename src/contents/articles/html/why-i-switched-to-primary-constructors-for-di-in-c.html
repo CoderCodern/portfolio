@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why I Switched to Primary Constructors for DI in C#</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #e8e4dc;
+    --muted: #7a7570;
+    --accent: #e8a84c;       /* episode accent */
+    --accent-dim: #3d2c12;     /* tinted background for callouts */
+    --code-bg: #111;
+    --green: #4caf7d;
+    --green-dim: #122a1e;
+    --red: #ff7b72;
+    --red-dim: #2a1212;
+    --blue: #79c0ff;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scrollbar-width: none; /* Firefox */
+  }
+  html::-webkit-scrollbar { display: none; } /* Chrome, Safari, Edge */
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    font-size: 17px;
+  }
+
+  /* ── HERO ─────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 25%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 70%, rgba(232,168,76,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 800px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+
+  .series-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    padding: 6px 14px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  .series-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    max-width: 720px;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-wrap: wrap;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta span::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+  }
+  .hero-meta span:first-child::before { display: none; }
+
+  /* ── LAYOUT ───────────────────────────── */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  article { padding: 5rem 0; }
+
+  .lead {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: #c5c0b5;
+    margin-bottom: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin: 3.5rem 0 1rem;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 2.5rem 0 0.75rem;
+  }
+  p { margin-bottom: 1.4rem; }
+  strong { font-weight: 500; color: var(--text); }
+  em { font-style: italic; color: #c5c0b5; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p.aside { font-size: 14px; color: var(--muted); font-style: italic; margin: -0.5rem 0 1.4rem; }
+
+  /* ── CODE ─────────────────────────────── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 1.75rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #0e0e0e;
+  }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  pre {
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    color: #c9d1d9;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.83em;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: #88c0d0;
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  /* Reset inline-code styles inside code blocks — Shiki handles all colouring */
+  pre code { background: transparent; border: none; padding: 0; color: inherit; border-radius: 0; }
+  /* Syntax highlight helpers — use as <span class="X"> inside <pre> (Nord palette) */
+  .kw  { color: #81a1c1; }                     /* keywords — Nord blue */
+  .cm  { color: #616e88; font-style: italic; } /* comments — Nord muted */
+  .st  { color: #a3be8c; }                     /* strings — Nord green */
+  .bad { color: var(--red); }                  /* bad examples */
+  .good{ color: var(--green); }                /* good examples */
+  .num { color: #b48ead; }                     /* numbers — Nord purple */
+
+  /* ── CALLOUTS ─────────────────────────── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-dim);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 6px 6px 0;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+  }
+  .callout.green { border-left-color: var(--green); background: var(--green-dim); }
+  .callout.red   { border-left-color: var(--red);   background: var(--red-dim);   }
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red   .callout-label { color: var(--red);   }
+
+  /* ── BLOCKQUOTE ───────────────────────── */
+  blockquote {
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    margin: 2.5rem 0;
+  }
+  blockquote::before {
+    content: '"';
+    font-family: 'Lora', serif;
+    font-size: 6rem;
+    color: var(--border);
+    position: absolute;
+    top: -1rem; left: 50%;
+    transform: translateX(-50%);
+    line-height: 1;
+  }
+  blockquote p {
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #c5c0b5;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+
+  /* ── TABLES ───────────────────────────── */
+  .table-wrap { overflow-x: auto; margin: 1.75rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #0f0f0f;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid #1c1c1c; vertical-align: top; line-height: 1.6; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+
+  /* ── DIVIDER ──────────────────────────── */
+  .divider { display: flex; align-items: center; gap: 1rem; margin: 3.5rem 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── COMPARE GRID ─────────────────────── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 6px; overflow: hidden; margin: 1.75rem 0; }
+  .compare-col { background: var(--surface); padding: 1.25rem; }
+  .compare-header { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .compare-header.bad-h  { color: var(--red); }
+  .compare-header.good-h { color: var(--green); }
+  .compare-item { font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .compare-item:last-child { border-bottom: none; }
+  .compare-item.bad-t  { color: #c9a0a0; }
+  .compare-item.good-t { color: #a0c9a8; }
+
+  /* ── CHECKLIST ────────────────────────── */
+  .check-list { list-style: none; margin: 1.5rem 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .check-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before { content: '[ ]'; flex-shrink: 0; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  /* ── WEEK GRID ────────────────────────── */
+  .week-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .week-day { background: var(--surface); padding: 1.25rem; }
+  .week-day-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .week-day-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .week-day-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── NEXT POST ────────────────────────── */
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; text-decoration: none; transition: border-color 0.2s, background 0.2s; }
+  .next-post:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
+  .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
+  .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
+
+  /* ── COPY BUTTON ─────────────────────── */
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+  /* ── FOOTER ───────────────────────────── */
+  footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── RESPONSIVE ───────────────────────── */
+  @media (max-width: 640px) {
+    .hero { padding: 3rem 1.5rem; }
+    .container { padding: 0 1.5rem; }
+    h1 { font-size: 2rem; }
+    article { padding: 3rem 0; }
+    .compare { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="series-tag">Backend · Episode —</div>
+    <h1>Why I Switched to Primary Constructors for <em>DI in C#</em></h1>
+    <div class="hero-meta">
+      <span>April 2026</span>
+      <span>6 min read</span>
+      <span>C# · .NET · Backend</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ARTICLE ═══════════════ -->
+<div class="container">
+<article>
+
+  <!-- First paragraph becomes the .lead -->
+  <p class="lead">I resisted primary constructors for a while. When C# 12 extended them from <code>record</code> types to regular classes and structs, my first reaction was skepticism — an implicit mutable capture instead of explicit <code>readonly</code> fields felt like trading safety for convenience. After using them across several projects, I changed my mind. Here's what convinced me, and the one thing you actually need to watch out for.</p>
+
+  <!-- ── All content sections go here ── -->
+  <div class="divider"><span>what changed my mind</span></div>
+<h2>What Changed My Mind</h2>
+
+<p>Here's what my service classes used to look like:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">public</span><span style="color:#81A1C1"> class</span><span style="color:#8FBCBB"> OrderService</span></span>
+<span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#81A1C1">    private</span><span style="color:#81A1C1"> readonly</span><span style="color:#D8DEE9FF"> IOrderRepository _orderRepository</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">    private</span><span style="color:#81A1C1"> readonly</span><span style="color:#D8DEE9FF"> ILogger</span><span style="color:#ECEFF4">&#x3C;</span><span style="color:#D8DEE9FF">OrderService</span><span style="color:#ECEFF4">></span><span style="color:#D8DEE9FF"> _logger</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">    public</span><span style="color:#88C0D0"> OrderService</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#D8DEE9FF">        IOrderRepository orderRepository</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">        ILogger</span><span style="color:#ECEFF4">&#x3C;</span><span style="color:#D8DEE9FF">OrderService</span><span style="color:#ECEFF4">></span><span style="color:#D8DEE9FF"> logger</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">    {</span></span>
+<span class="line"><span style="color:#D8DEE9">        _orderRepository</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> orderRepository</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#D8DEE9">        _logger</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> logger</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">    public</span><span style="color:#81A1C1"> async</span><span style="color:#D8DEE9FF"> Task</span><span style="color:#ECEFF4">&#x3C;</span><span style="color:#D8DEE9FF">Order</span><span style="color:#ECEFF4">?></span><span style="color:#88C0D0"> GetOrderAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">Guid id</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">    {</span></span>
+<span class="line"><span style="color:#D8DEE9">        _logger</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">LogInformation</span><span style="color:#ECEFF4">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">Fetching order {OrderId}</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> id</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">        return</span><span style="color:#81A1C1"> await</span><span style="color:#D8DEE9"> _orderRepository</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">GetByIdAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">id</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
+</div>
+
+<p>And here's what they look like now:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">public</span><span style="color:#81A1C1"> class</span><span style="color:#8FBCBB"> OrderService</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    IOrderRepository orderRepository</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    ILogger</span><span style="color:#ECEFF4">&#x3C;</span><span style="color:#D8DEE9FF">OrderService</span><span style="color:#ECEFF4">></span><span style="color:#D8DEE9FF"> logger</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#81A1C1">    public</span><span style="color:#81A1C1"> async</span><span style="color:#D8DEE9FF"> Task</span><span style="color:#ECEFF4">&#x3C;</span><span style="color:#D8DEE9FF">Order</span><span style="color:#ECEFF4">?></span><span style="color:#88C0D0"> GetOrderAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">Guid id</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">    {</span></span>
+<span class="line"><span style="color:#D8DEE9">        logger</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">LogInformation</span><span style="color:#ECEFF4">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">Fetching order {OrderId}</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> id</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">        return</span><span style="color:#81A1C1"> await</span><span style="color:#D8DEE9"> orderRepository</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">GetByIdAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">id</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
+</div>
+
+<blockquote><p>"The field declarations, the constructor body, the assignments. All gone. The parameters are captured and available throughout the class body."</p></blockquote>
+
+<p>That's the most common use case for primary constructors: dependency injection in service classes. You declare what you need, and use it directly. No intermediate ceremony.</p>
+
+<div class="divider"><span>di service classes</span></div>
+<h2>Where I Use Them Most: DI Service Classes</h2>
+
+<p>The place where primary constructors sold me is ASP.NET Core service classes. Here's a more realistic example from a checkout flow:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">public</span><span style="color:#81A1C1"> class</span><span style="color:#8FBCBB"> CheckoutService</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    IPaymentProcessor paymentProcessor</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    IOrderRepository orderRepository</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    ILogger</span><span style="color:#ECEFF4">&#x3C;</span><span style="color:#D8DEE9FF">CheckoutService</span><span style="color:#ECEFF4">></span><span style="color:#D8DEE9FF"> logger</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    IOptions</span><span style="color:#ECEFF4">&#x3C;</span><span style="color:#D8DEE9FF">CheckoutOptions</span><span style="color:#ECEFF4">></span><span style="color:#D8DEE9FF"> options</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#81A1C1">    public</span><span style="color:#81A1C1"> async</span><span style="color:#D8DEE9FF"> Task</span><span style="color:#ECEFF4">&#x3C;</span><span style="color:#D8DEE9FF">CheckoutResult</span><span style="color:#ECEFF4">></span><span style="color:#88C0D0"> ProcessAsync</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#D8DEE9FF">        Cart cart</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">        CancellationToken ct </span><span style="color:#81A1C1">=</span><span style="color:#81A1C1"> default</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">    {</span></span>
+<span class="line"><span style="color:#81A1C1">        var</span><span style="color:#D8DEE9FF"> settings </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9"> options</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Value</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">        if</span><span style="color:#ECEFF4"> (</span><span style="color:#D8DEE9">cart</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Total</span><span style="color:#81A1C1"> &#x3C;</span><span style="color:#D8DEE9"> settings</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">MinimumOrderAmount</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">        {</span></span>
+<span class="line"><span style="color:#D8DEE9">            logger</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">LogWarning</span><span style="color:#ECEFF4">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">Order below minimum: {Total}</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> cart</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Total</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">            return</span><span style="color:#D8DEE9"> CheckoutResult</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">BelowMinimum</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">        var</span><span style="color:#D8DEE9FF"> order </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9"> Order</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Create</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">cart</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">        await</span><span style="color:#D8DEE9"> paymentProcessor</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">ChargeAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">order</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> ct</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">        await</span><span style="color:#D8DEE9"> orderRepository</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">SaveAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">order</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> ct</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D8DEE9">        logger</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">LogInformation</span><span style="color:#ECEFF4">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">Checkout complete for order {OrderId}</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> order</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Id</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">        return</span><span style="color:#D8DEE9"> CheckoutResult</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Success</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
+</div>
+
+<p>Four dependencies, zero boilerplate. The class reads top-to-bottom without any noise.</p>
+<p class="aside"><em>Took me embarrassingly long to stop complaining about implicit captures and just use this.</em></p>
+
+<p>This pattern works well because service classes typically don't need to validate or transform their dependencies. The DI container provides them, and you use them. Primary constructors are a perfect fit for this — they're designed for exactly this scenario.</p>
+
+<div class="divider"><span>entity construction</span></div>
+<h2>Entity Construction (With a Caveat)</h2>
+
+<p>Primary constructors also work for domain entities and value objects where you want to enforce required parameters at construction time:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">public</span><span style="color:#81A1C1"> class</span><span style="color:#8FBCBB"> Order</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">Guid customerId</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> Money total</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#81A1C1">    public</span><span style="color:#D8DEE9FF"> Guid Id </span><span style="color:#ECEFF4">{</span><span style="color:#81A1C1"> get;</span><span style="color:#ECEFF4"> }</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> Guid</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">NewGuid</span><span style="color:#ECEFF4">()</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">    public</span><span style="color:#D8DEE9FF"> Guid CustomerId </span><span style="color:#ECEFF4">{</span><span style="color:#81A1C1"> get;</span><span style="color:#ECEFF4"> }</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> customerId</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">    public</span><span style="color:#D8DEE9FF"> Money Total </span><span style="color:#ECEFF4">{</span><span style="color:#81A1C1"> get;</span><span style="color:#ECEFF4"> }</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> total</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">    public</span><span style="color:#D8DEE9FF"> OrderStatus Status </span><span style="color:#ECEFF4">{</span><span style="color:#81A1C1"> get;</span><span style="color:#81A1C1"> private</span><span style="color:#81A1C1"> set;</span><span style="color:#ECEFF4"> }</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> OrderStatus</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Pending</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">    public</span><span style="color:#D8DEE9FF"> DateTime CreatedAt </span><span style="color:#ECEFF4">{</span><span style="color:#81A1C1"> get;</span><span style="color:#ECEFF4"> }</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> DateTime</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">UtcNow</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">    public</span><span style="color:#81A1C1"> void</span><span style="color:#88C0D0"> Confirm</span><span style="color:#ECEFF4">()</span></span>
+<span class="line"><span style="color:#ECEFF4">    {</span></span>
+<span class="line"><span style="color:#81A1C1">        if</span><span style="color:#ECEFF4"> (</span><span style="color:#D8DEE9">Status</span><span style="color:#81A1C1"> !=</span><span style="color:#D8DEE9"> OrderStatus</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Pending</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">        {</span></span>
+<span class="line"><span style="color:#81A1C1">            throw</span><span style="color:#81A1C1"> new</span><span style="color:#D8DEE9FF"> InvalidOperationException</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#ECEFF4">                $"</span><span style="color:#A3BE8C">Cannot confirm order in </span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9">Status</span><span style="color:#ECEFF4">}</span><span style="color:#A3BE8C"> status.</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D8DEE9">        Status</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> OrderStatus</span><span style="color:#ECEFF4">.</span><span style="color:#D8DEE9">Confirmed</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
+</div>
+
+<p>There's no way to create an <code>Order</code> without a <code>customerId</code> and <code>total</code>. The primary constructor makes this constraint visible right at the type declaration.</p>
+<div class="callout"><div class="callout-label">💡 Tip</div><p>Notice the key difference from the service class pattern: in entity classes, you assign primary constructor parameters to <strong>properties with initializers</strong> (<code>= customerId</code>). This makes the parameter's role explicit and the entity's shape immediately obvious. It also leads directly to the biggest pitfall.</p></div>
+
+<div class="divider"><span>the pitfall</span></div>
+<h2>The Pitfall That Almost Stopped Me</h2>
+
+<p>Here's why I held off for so long.</p>
+
+<p><strong>Primary constructor parameters are not <code>readonly</code> fields.</strong> When you use a parameter directly in the class body (like the service class pattern), the compiler captures it as a <strong>mutable variable</strong>. No <code>readonly</code> backing field is generated behind the scenes. This means you can accidentally reassign a parameter:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">public</span><span style="color:#81A1C1"> class</span><span style="color:#8FBCBB"> OrderService</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    IOrderRepository orderRepository</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    ILogger</span><span style="color:#ECEFF4">&#x3C;</span><span style="color:#D8DEE9FF">OrderService</span><span style="color:#ECEFF4">></span><span style="color:#D8DEE9FF"> logger</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#81A1C1">    public</span><span style="color:#81A1C1"> async</span><span style="color:#D8DEE9FF"> Task</span><span style="color:#ECEFF4">&#x3C;</span><span style="color:#D8DEE9FF">Order</span><span style="color:#ECEFF4">?></span><span style="color:#88C0D0"> GetOrderAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">Guid id</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">    {</span></span>
+<span class="line"><span style="color:#D8DEE9">        logger</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">LogInformation</span><span style="color:#ECEFF4">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">Fetching order {OrderId}</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> id</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">        return</span><span style="color:#81A1C1"> await</span><span style="color:#D8DEE9"> orderRepository</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">GetByIdAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">id</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">    public</span><span style="color:#81A1C1"> void</span><span style="color:#88C0D0"> SomeOtherMethod</span><span style="color:#ECEFF4">()</span></span>
+<span class="line"><span style="color:#ECEFF4">    {</span></span>
+<span class="line"><span style="color:#616E88">        // This compiles. No warning. No error.</span></span>
+<span class="line"><span style="color:#D8DEE9">        orderRepository</span><span style="color:#81A1C1"> =</span><span style="color:#81A1C1"> null!;</span></span>
+<span class="line"><span style="color:#D8DEE9">        logger</span><span style="color:#81A1C1"> =</span><span style="color:#81A1C1"> null!;</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
+</div>
+
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>That compiles without a warning. No error. Nothing. With a traditional constructor and <code>private readonly</code> fields, the compiler stops you immediately. With primary constructors, it stays completely silent.</p></div>
+
+<p>If you need immutability guarantees, you can explicitly assign the parameter to a <code>readonly</code> field:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">public</span><span style="color:#81A1C1"> class</span><span style="color:#8FBCBB"> OrderService</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    IOrderRepository orderRepository</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">    ILogger</span><span style="color:#ECEFF4">&#x3C;</span><span style="color:#D8DEE9FF">OrderService</span><span style="color:#ECEFF4">></span><span style="color:#D8DEE9FF"> logger</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#81A1C1">    private</span><span style="color:#81A1C1"> readonly</span><span style="color:#D8DEE9FF"> IOrderRepository _orderRepository </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9"> orderRepository</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1">    private</span><span style="color:#81A1C1"> readonly</span><span style="color:#D8DEE9FF"> ILogger</span><span style="color:#ECEFF4">&#x3C;</span><span style="color:#D8DEE9FF">OrderService</span><span style="color:#ECEFF4">></span><span style="color:#D8DEE9FF"> _logger </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9"> logger</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">    public</span><span style="color:#81A1C1"> async</span><span style="color:#D8DEE9FF"> Task</span><span style="color:#ECEFF4">&#x3C;</span><span style="color:#D8DEE9FF">Order</span><span style="color:#ECEFF4">?></span><span style="color:#88C0D0"> GetOrderAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9FF">Guid id</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">    {</span></span>
+<span class="line"><span style="color:#D8DEE9">        _logger</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">LogInformation</span><span style="color:#ECEFF4">(</span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">Fetching order {OrderId}</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> id</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">        return</span><span style="color:#81A1C1"> await</span><span style="color:#D8DEE9"> _orderRepository</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">GetByIdAsync</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">id</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
+</div>
+
+<p>But now you've lost most of the benefit. You're back to field declarations and assignments, just with a different syntax.</p>
+
+<p>In practice, I've never hit this bug in a DI service class — you're unlikely to accidentally reassign <code>logger</code> in the middle of a method. But it <em>can</em> bite you in entity classes or value types where immutability actually matters. That's the one place where I stay cautious.</p>
+<p class="aside"><em>In five years of C# I have never accidentally reassigned <code>_logger</code>. The universe of bugs I'm protecting against here is very small.</em></p>
+
+<div class="divider"><span>traditional constructors</span></div>
+<h2>Where I Still Use Traditional Constructors</h2>
+
+<p>I haven't switched everything over. Here's when primary constructors aren't the right tool:</p>
+
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">🚫 Primary Constructors Struggle Here</div>
+    <div class="compare-item bad-t">Complex validation before assignment</div>
+    <div class="compare-item bad-t">Multiple constructor overloads needed</div>
+    <div class="compare-item bad-t">5+ dependencies (your class is the problem)</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">✅ Primary Constructors Win</div>
+    <div class="compare-item good-t">DI service classes — just declare and use</div>
+    <div class="compare-item good-t">Entity construction enforcing required params</div>
+    <div class="compare-item good-t">Any class where you use what you're given directly</div>
+  </div>
+</div>
+
+<p><strong>Complex validation logic.</strong> If you need to validate parameters before assigning them, you need a constructor body. Primary constructors don't give you a place to run validation before the class body starts:</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">csharp</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">public</span><span style="color:#81A1C1"> class</span><span style="color:#8FBCBB"> EmailAddress</span></span>
+<span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#81A1C1">    private</span><span style="color:#81A1C1"> readonly</span><span style="color:#81A1C1"> string</span><span style="color:#D8DEE9FF"> _value</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">    public</span><span style="color:#88C0D0"> EmailAddress</span><span style="color:#ECEFF4">(</span><span style="color:#81A1C1">string</span><span style="color:#D8DEE9FF"> value</span><span style="color:#ECEFF4">)</span></span>
+<span class="line"><span style="color:#ECEFF4">    {</span></span>
+<span class="line"><span style="color:#81A1C1">        if</span><span style="color:#ECEFF4"> (</span><span style="color:#81A1C1">string</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">IsNullOrWhiteSpace</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">value</span><span style="color:#ECEFF4">)</span><span style="color:#81A1C1"> ||</span><span style="color:#81A1C1"> !</span><span style="color:#D8DEE9">value</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">Contains</span><span style="color:#ECEFF4">(</span><span style="color:#ECEFF4">'</span><span style="color:#A3BE8C">@</span><span style="color:#ECEFF4">'</span><span style="color:#ECEFF4">))</span></span>
+<span class="line"><span style="color:#ECEFF4">        {</span></span>
+<span class="line"><span style="color:#81A1C1">            throw</span><span style="color:#81A1C1"> new</span><span style="color:#D8DEE9FF"> ArgumentException</span><span style="color:#ECEFF4">(</span></span>
+<span class="line"><span style="color:#ECEFF4">                "</span><span style="color:#A3BE8C">Invalid email address.</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#81A1C1"> nameof</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">value</span><span style="color:#ECEFF4">))</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D8DEE9">        _value</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> value</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">    }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
+</div>
+
+<p><strong>Multiple constructor overloads.</strong> Primary constructors support one signature. If you need overloads, you'll have to chain secondary constructors with <code>this(...)</code>, which gets messy fast.</p>
+
+<p><strong>Too many parameters.</strong> Once you hit 5+ dependencies, the primary constructor line becomes hard to read. At that point, your class probably has too many responsibilities — and refactoring is the right answer, not formatting tricks.</p>
+
+<div class="divider"><span>summary</span></div>
+<h2>Summary</h2>
+
+<p>Here's what I've settled on after using primary constructors across several projects:</p>
+
+<ul class="check-list">
+  <li>Use primary constructors for all DI service classes — the boilerplate savings are real</li>
+  <li>They work well for entity construction when you want required parameters at the type level</li>
+  <li>Parameters are captured as mutable variables, not readonly fields — know this</li>
+  <li>The mutable capture pitfall rarely bites in service classes; it matters more in entities</li>
+  <li>Stick with traditional constructors for validation-heavy types, multiple overloads, or bloated dependencies</li>
+</ul>
+
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>The switch was worth it. Service classes are shorter, easier to scan, and the one pitfall is manageable once you know about it.</p></div>
+
+<blockquote><p>"You can outsource the boilerplate. You can't outsource understanding what the compiler is actually doing."</p></blockquote>
+
+  <!-- ── Series navigation ── -->
+  <a class="next-post" href="/articles" target="_parent">
+    <div>
+      <div class="next-label">Next in the series</div>
+      <div class="next-title">Browse all articles</div>
+    </div>
+    <div class="next-arrow">→</div>
+  </a>
+
+</article>
+</div>
+
+<footer>
+  <div>No external sources.</div>
+  <div style="margin-top: 8px; color: #3d3a35;">claude-code-journey.md · episode —</div>
+</footer>
+
+<script>
+  document.querySelectorAll('.code-block').forEach(block => {
+    const header = block.querySelector('.code-header');
+    const pre = block.querySelector('pre');
+    if (!header || !pre) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText.trim()).then(() => {
+        btn.textContent = '✓ copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    });
+
+    header.appendChild(btn);
+  });
+</script>
+</body>
+</html>

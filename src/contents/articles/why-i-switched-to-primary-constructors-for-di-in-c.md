@@ -3,6 +3,7 @@ title: "Why I Switched to Primary Constructors for DI in C#"
 publishedDate: April 18, 2026
 category: Backend
 poster: https://www.milanjovanovic.tech/blog-covers/mnw_190.png
+htmlFile: why-i-switched-to-primary-constructors-for-di-in-c
 ---
 
 I'll be honest. I resisted primary constructors for a while.
@@ -50,7 +51,7 @@ public class OrderService
 And here's what they look like now:
 
 
-```
+```csharp
 public class OrderService(
     IOrderRepository orderRepository,
     ILogger<OrderService> logger)
@@ -80,7 +81,7 @@ The place where primary constructors sold me is ASP.NET Core service classes. Th
 Here's a more realistic example from a checkout flow:
 
 
-```
+```csharp
 public class CheckoutService(
     IPaymentProcessor paymentProcessor,
     IOrderRepository orderRepository,
@@ -124,7 +125,7 @@ This pattern works well because service classes typically don't need to validate
 I also started using primary constructors for [**domain entities**](https://www.milanjovanovic.tech/blog/refactoring-from-an-anemic-domain-model-to-a-rich-domain-model) and [**value objects**](https://www.milanjovanovic.tech/blog/value-objects-in-dotnet-ddd-fundamentals) where you want to enforce required parameters at construction time:
 
 
-```
+```csharp
 public class Order(Guid customerId, Money total)
 {
     public Guid Id { get; } = Guid.NewGuid();
@@ -168,7 +169,7 @@ When you use a primary constructor parameter directly in the class body (like we
 This means you can accidentally reassign a parameter:
 
 
-```
+```csharp
 public class OrderService(
     IOrderRepository orderRepository,
     ILogger<OrderService> logger)
@@ -199,7 +200,7 @@ With a traditional constructor and `private readonly` fields, the compiler would
 **If you need immutability guarantees**, explicitly assign the parameter to a `readonly` field:
 
 
-```
+```csharp
 public class OrderService(
     IOrderRepository orderRepository,
     ILogger<OrderService> logger)
@@ -232,7 +233,7 @@ I haven't switched everything over. Here are the cases where I stick with the tr
 **Complex validation logic.** If you need to validate parameters before assigning them, you need a constructor body:
 
 
-```
+```csharp
 public class EmailAddress
 {
     private readonly string _value;
