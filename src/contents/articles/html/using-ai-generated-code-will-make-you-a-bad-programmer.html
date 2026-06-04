@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Using AI Generated Code Will Make You a Bad Programmer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #e8e4dc;
+    --muted: #7a7570;
+    --accent: #e8a84c;       /* episode accent */
+    --accent-dim: #3d2c12;     /* tinted background for callouts */
+    --code-bg: #111;
+    --green: #4caf7d;
+    --green-dim: #122a1e;
+    --red: #ff7b72;
+    --red-dim: #2a1212;
+    --blue: #79c0ff;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scrollbar-width: none; /* Firefox */
+  }
+  html::-webkit-scrollbar { display: none; } /* Chrome, Safari, Edge */
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    font-size: 17px;
+  }
+
+  /* ── HERO ─────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 25%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 70%, rgba(232,168,76,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 800px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+
+  .series-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    padding: 6px 14px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  .series-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    max-width: 720px;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-wrap: wrap;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta span::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+  }
+  .hero-meta span:first-child::before { display: none; }
+
+  /* ── LAYOUT ───────────────────────────── */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  article { padding: 5rem 0; }
+
+  .lead {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: #c5c0b5;
+    margin-bottom: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin: 3.5rem 0 1rem;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 2.5rem 0 0.75rem;
+  }
+  p { margin-bottom: 1.4rem; }
+  strong { font-weight: 500; color: var(--text); }
+  em { font-style: italic; color: #c5c0b5; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p.aside { font-size: 14px; color: var(--muted); font-style: italic; margin: -0.5rem 0 1.4rem; }
+
+  /* ── CODE ─────────────────────────────── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 1.75rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #0e0e0e;
+  }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  pre {
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    color: #c9d1d9;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.83em;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: #88c0d0;
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  /* Reset inline-code styles inside code blocks — Shiki handles all colouring */
+  pre code { background: transparent; border: none; padding: 0; color: inherit; border-radius: 0; }
+  /* Syntax highlight helpers — use as <span class="X"> inside <pre> (Nord palette) */
+  .kw  { color: #81a1c1; }                     /* keywords — Nord blue */
+  .cm  { color: #616e88; font-style: italic; } /* comments — Nord muted */
+  .st  { color: #a3be8c; }                     /* strings — Nord green */
+  .bad { color: var(--red); }                  /* bad examples */
+  .good{ color: var(--green); }                /* good examples */
+  .num { color: #b48ead; }                     /* numbers — Nord purple */
+
+  /* ── CALLOUTS ─────────────────────────── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-dim);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 6px 6px 0;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+  }
+  .callout.green { border-left-color: var(--green); background: var(--green-dim); }
+  .callout.red   { border-left-color: var(--red);   background: var(--red-dim);   }
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red   .callout-label { color: var(--red);   }
+
+  /* ── BLOCKQUOTE ───────────────────────── */
+  blockquote {
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    margin: 2.5rem 0;
+  }
+  blockquote::before {
+    content: '"';
+    font-family: 'Lora', serif;
+    font-size: 6rem;
+    color: var(--border);
+    position: absolute;
+    top: -1rem; left: 50%;
+    transform: translateX(-50%);
+    line-height: 1;
+  }
+  blockquote p {
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #c5c0b5;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+
+  /* ── TABLES ───────────────────────────── */
+  .table-wrap { overflow-x: auto; margin: 1.75rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #0f0f0f;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid #1c1c1c; vertical-align: top; line-height: 1.6; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+
+  /* ── DIVIDER ──────────────────────────── */
+  .divider { display: flex; align-items: center; gap: 1rem; margin: 3.5rem 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── COMPARE GRID ─────────────────────── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 6px; overflow: hidden; margin: 1.75rem 0; }
+  .compare-col { background: var(--surface); padding: 1.25rem; }
+  .compare-header { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .compare-header.bad-h  { color: var(--red); }
+  .compare-header.good-h { color: var(--green); }
+  .compare-item { font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .compare-item:last-child { border-bottom: none; }
+  .compare-item.bad-t  { color: #c9a0a0; }
+  .compare-item.good-t { color: #a0c9a8; }
+
+  /* ── CHECKLIST ────────────────────────── */
+  .check-list { list-style: none; margin: 1.5rem 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .check-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before { content: '[ ]'; flex-shrink: 0; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  /* ── WEEK GRID ────────────────────────── */
+  .week-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .week-day { background: var(--surface); padding: 1.25rem; }
+  .week-day-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .week-day-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .week-day-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── NEXT POST ────────────────────────── */
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; text-decoration: none; transition: border-color 0.2s, background 0.2s; }
+  .next-post:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
+  .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
+  .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
+
+  /* ── COPY BUTTON ─────────────────────── */
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+  /* ── FOOTER ───────────────────────────── */
+  footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── RESPONSIVE ───────────────────────── */
+  @media (max-width: 640px) {
+    .hero { padding: 3rem 1.5rem; }
+    .container { padding: 0 1.5rem; }
+    h1 { font-size: 2rem; }
+    article { padding: 3rem 0; }
+    .compare { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="series-tag">Career · Episode —</div>
+    <h1>Using AI Generated Code Will Make You a <em>Bad Programmer</em></h1>
+    <div class="hero-meta">
+      <span>February 2025</span>
+      <span>7 min read</span>
+      <span>Career · AI · Opinion</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ARTICLE ═══════════════ -->
+<div class="container">
+<article>
+
+  <!-- First paragraph becomes the .lead -->
+  <p class="lead">Probably fine — unless you care about self-improvement or actually taking pride in your work. When I say "using AI generated code," I mean letting AI write code <em>for</em> you — not using it as a learning tool to understand languages and libraries better. If you've ever typed a vague method name and let AI fill in the body, or relied on it to understand your own codebase so you don't have to: this is for you.</p>
+
+  <!-- ── All content sections go here ── -->
+  <div class="divider"><span>not using ai</span></div>
+<h2>Reasons to Not Use AI Generated Code</h2>
+
+<h3>You Rob Yourself of Learning Opportunities</h3>
+<p>In the early days of the internet, "script kiddie" was coined for people who "hack" systems without understanding what they're doing — someone who downloads a tool promising to crack a password or deface a website and, assuming it works, fancies themselves a real hacker.</p>
+<p>You may think comparing AI code users to script kiddies is a stretch. I don't. Serial script kiddies want to be big-league hackers, but they'll never get there by running scripts. The actual big-league hackers are the ones <em>writing</em> those scripts — exploring, probing, truly understanding the vulnerabilities being exploited. Serial AI coders may want to be serious developers, but by letting predictive text engines write their code, they're kneecapping any real chance of that happening. At least for now, the serious developers are the ones writing code those AI engines train on.</p>
+
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">🤖 The AI Code Kiddie</div>
+    <div class="compare-item bad-t">Types a vague name and lets AI fill the body</div>
+    <div class="compare-item bad-t">Ships code they don't fully understand</div>
+    <div class="compare-item bad-t">Stagnates: becomes a reviewer, not a writer</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">👨‍💻 The Actual Developer</div>
+    <div class="compare-item good-t">Writes the implementation, owns every line</div>
+    <div class="compare-item good-t">Builds understanding that compounds over years</div>
+    <div class="compare-item good-t">Has something to be genuinely proud of</div>
+  </div>
+</div>
+
+<p>You can't improve at something without actually doing it. You won't get better at chess by not playing. You won't become a better hockey player by sitting on the bench. You can't learn piano by listening to your mom's Yanni albums — at some point you have to play yourself.</p>
+<p class="aside"><em>Yanni slaps, but no amount of listening has ever made anyone a pianist.</em></p>
+
+<h3>Skills You Already Have May Atrophy</h3>
+<p>What if you're already comfortable as a programmer? What if you just want AI to handle the boring stuff — scaffold a project, write a merge sort, generate some boilerplate?</p>
+<p>Maybe that seems fine. Senior devs have been delegating tedium to juniors long before LLMs were a twinkle in Sam Altman's eye. What's different?</p>
+<p>First, junior programmers need guidance and come to you with questions. Helping them reinforces your own skills and develops new ones — mentoring, communication, the art of staying pleasant when you're quietly losing your mind. An AI never asks follow-up questions.</p>
+<p>Second: if you stop doing something long enough, you forget how to do it. Think back to the first programming language you learned. Can you write a single syntactically valid line in it today? Try coding for a day without syntax highlighting or auto-completion and notice how helpless you feel. Those "assistants" have quietly eaten a surprising amount of raw knowledge by eliminating the need to memorize even basic things. Imagine what happens when AI removes the need to write code at all.</p>
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>If you stop writing your own code — even the boring bits — you will get rusty. You'll forget things. The interesting work gets harder because the foundation those advanced skills are built on has quietly crumbled. A robot that lifts the weights for you won't improve your bench press.</p></div>
+
+<h3>You May Become Dependent on Your Own Eventual Replacement</h3>
+<p>Many AI coding assistants offer their products free to students. You might think that's generous. It isn't.</p>
+<p>If there's any point in a developer's life when they should absolutely not be taking shortcuts, it's when they're first learning the ropes. Free-to-students is straight-up predatory behavior. Like cults indoctrinating from birth to guarantee a constant influx of new members, AI companies know that hooking developers before they've opened their first text editor locks in a lifetime of subscription revenue. They've likely written off the greybeards who write rants like this — and turned their attention to future generations instead.</p>
+<p>The development tools you already use — syntax highlighting, auto-completion, code analysis — have one goal: help you be more efficient and write better code. AI code generation has a different goal: replace you entirely. Those are not the same product.</p>
+<blockquote><p>"AI tools aren't being eagerly embraced by corporate leadership because they believe it will transform employees into senior developers. They're drooling in anticipation because they see a future where senior developers have been replaced by cheaper, AI-dependent code kiddies. Or better yet, eliminated entirely — once enough of us have paid subscription fees to train the AI past the point where we're needed at all."</p></blockquote>
+<p class="aside"><em>The robot lifting weights for you isn't trying to help your gains. It's waiting for you to leave.</em></p>
+
+<h3>Brief Aside: Do You Even Own AI Generated Code?</h3>
+<p>I'm no lawyer, but there is — to put it mildly — some legal ambiguity around ownership of AI-generated works. The conversation is mostly about art right now, but there's no obvious reason it doesn't extend to code.</p>
+<p>If you generate a function with AI that was trained on LGPL-licensed code, must that function now also fall under the LGPL? Maybe you don't care about the LGPL. But what if the training data included a private repo from an obscenely wealthy and litigious corporation with its own private army of lawyers — and they could prove you used that AI when building a competing product that got a little too successful?</p>
+<div class="callout"><div class="callout-label">💡 Tip</div><p>I genuinely don't know the answers to these questions. I also don't want to be the one footing the legal bills when courts eventually work it out. Worth thinking about before you ship AI-generated code in a commercial product.</p></div>
+
+<h3>Your Code Will Not Be Respected</h3>
+<p>AI-generated code won't necessarily be <em>bad</em>. That may be true to varying degrees with today's tools, but the tech is improving. That's not the point.</p>
+<p>The point is: if you use these tools, nobody outside of other AI code kiddies will be particularly impressed with you as a programmer. There's an art to software development — constructing a coherent, tight codebase; coming up with elegant solutions to hard problems; earning the genuine respect of your peers. These are supposed to be sources of pride.</p>
+<blockquote><p>"I don't want to commission some art and pretend to be the artist. I want to be the artist."</p></blockquote>
+<p>Maybe the laundry scheduling app you're building for the hospitality industry will never make Fabian Sanglard's short list for a deep dive into elegant code. But is that really such a bad thing to aspire to? Taking pride in your work makes it more enjoyable. How can you respect your own code — or expect anyone else to — if you didn't write it?</p>
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>The craft is the point. If you outsource that, you're not a developer anymore — you're a prompt writer with a deployment pipeline.</p></div>
+
+<div class="divider"><span>using ai</span></div>
+<h2>Reasons to Use AI Generated Code</h2>
+
+<h3>You Prefer Code Reviews to Actually Coding</h3>
+<p>I was wrong earlier. This is actually the main reason I'll personally never integrate AI code generation into my workflow. I love to write code. I very much do not love to read, review, and generate feedback on other people's code. I understand it's valuable — it can help shape less experienced colleagues into better collaborators. I still hate it.</p>
+<p>The more code you let AI generate for you, the more your job shifts from developer to code reviewer. Maybe that's your thing.</p>
+<p class="aside"><em>Some people genuinely enjoy code reviews. I don't ask questions I don't want answers to.</em></p>
+
+<h3>You Don't Actually Want to be a Programmer</h3>
+<p>If you have no real interest in learning to code and see AI more as a freelancer — telling it things like "make a kart racer game" and "that sucks, make it better" — none of this applies to you.</p>
+<p>Honestly, I think this is the future large corporations are quietly hoping for. A world where their walled-garden ecosystems control not just app distribution but the means of app production. Got an idea? Just tell the App Store's AI what you want and it excretes the app directly onto your device — letting the platform pocket 100% of subscription fees instead of the 30% they were stuck with when pesky developer middlemen kept insisting they provided some kind of value.</p>
+
+<h3>You Believe We've Entered a New Post-Work Era</h3>
+<p>In the unlikely event you're already that deep into the Kool-Aid <em>and</em> you didn't bail after the first two paragraphs — I don't have much to say to you. I'd recommend <em>Nineteen Eighty-Four</em>, <em>Fahrenheit 451</em>, or <em>Snow Crash</em>. You'll probably enjoy their visions of the future.</p>
+<p>To everyone else: thanks for reading. There's no schedule for future rants — don't hold your breath. Or get an AI to hold it for you.</p>
+<blockquote><p>"You can outsource the code. You can't outsource the craft."</p></blockquote>
+
+  <!-- ── Series navigation ── -->
+  <a class="next-post" href="/articles" target="_parent">
+    <div>
+      <div class="next-label">Next in the series</div>
+      <div class="next-title">Browse all articles</div>
+    </div>
+    <div class="next-arrow">→</div>
+  </a>
+
+</article>
+</div>
+
+<footer>
+  <div>Referenced hellofutureme's Nebula video "The AI Apocalypse" (nebula.tv). Fabian Sanglard's code deep-dive blog (fabiensanglard.net).</div>
+  <div style="margin-top: 8px; color: #3d3a35;">claude-code-journey.md · episode —</div>
+</footer>
+
+<script>
+  document.querySelectorAll('.code-block').forEach(block => {
+    const header = block.querySelector('.code-header');
+    const pre = block.querySelector('pre');
+    if (!header || !pre) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText.trim()).then(() => {
+        btn.textContent = '✓ copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    });
+
+    header.appendChild(btn);
+  });
+</script>
+</body>
+</html>

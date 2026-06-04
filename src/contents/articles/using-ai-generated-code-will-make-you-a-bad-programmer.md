@@ -4,6 +4,7 @@ description: "Using AI-generated code can hinder self-improvement and damage one
 publishedDate: February 9, 2025
 category: Career
 poster: https://images.unsplash.com/photo-1677756119517-756a188d2d94?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb
+htmlFile: using-ai-generated-code-will-make-you-a-bad-programmer
 ---
 
 ## **1. Using AI Generated Code Will Make You a Bad Programmer**
