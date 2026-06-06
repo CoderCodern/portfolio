@@ -12,6 +12,8 @@ export interface Project {
 	techstack: string[];
 	date?: string;
 	category?: string;
+	link?: string;
+	github?: string;
 }
 
 export interface Article {
