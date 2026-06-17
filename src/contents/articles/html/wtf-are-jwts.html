@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WTF Are JWTs?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #e8e4dc;
+    --muted: #7a7570;
+    --accent: #e8a84c;       /* episode accent */
+    --accent-dim: #3d2c12;     /* tinted background for callouts */
+    --code-bg: #111;
+    --green: #4caf7d;
+    --green-dim: #122a1e;
+    --red: #ff7b72;
+    --red-dim: #2a1212;
+    --blue: #79c0ff;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scrollbar-width: none; /* Firefox */
+  }
+  html::-webkit-scrollbar { display: none; } /* Chrome, Safari, Edge */
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    font-size: 17px;
+  }
+
+  /* ── HERO ─────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 25%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 70%, rgba(232,168,76,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 800px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+
+  .series-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    padding: 6px 14px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  .series-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    max-width: 720px;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-wrap: wrap;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta span::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+  }
+  .hero-meta span:first-child::before { display: none; }
+
+  /* ── LAYOUT ───────────────────────────── */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  article { padding: 5rem 0; }
+
+  .lead {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: #c5c0b5;
+    margin-bottom: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin: 3.5rem 0 1rem;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 2.5rem 0 0.75rem;
+  }
+  p { margin-bottom: 1.4rem; }
+  strong { font-weight: 500; color: var(--text); }
+  em { font-style: italic; color: #c5c0b5; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p.aside { font-size: 14px; color: var(--muted); font-style: italic; margin: -0.5rem 0 1.4rem; }
+
+  /* ── CODE ─────────────────────────────── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 1.75rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #0e0e0e;
+  }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  pre {
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    color: #c9d1d9;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.83em;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: #88c0d0;
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  /* Reset inline-code styles inside code blocks — Shiki handles all colouring */
+  pre code { background: transparent; border: none; padding: 0; color: inherit; border-radius: 0; }
+  /* Syntax highlight helpers — use as <span class="X"> inside <pre> (Nord palette) */
+  .kw  { color: #81a1c1; }                     /* keywords — Nord blue */
+  .cm  { color: #616e88; font-style: italic; } /* comments — Nord muted */
+  .st  { color: #a3be8c; }                     /* strings — Nord green */
+  .bad { color: var(--red); }                  /* bad examples */
+  .good{ color: var(--green); }                /* good examples */
+  .num { color: #b48ead; }                     /* numbers — Nord purple */
+
+  /* ── CALLOUTS ─────────────────────────── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-dim);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 6px 6px 0;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+  }
+  .callout.green { border-left-color: var(--green); background: var(--green-dim); }
+  .callout.red   { border-left-color: var(--red);   background: var(--red-dim);   }
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red   .callout-label { color: var(--red);   }
+
+  /* ── BLOCKQUOTE ───────────────────────── */
+  blockquote {
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    margin: 2.5rem 0;
+  }
+  blockquote::before {
+    content: '"';
+    font-family: 'Lora', serif;
+    font-size: 6rem;
+    color: var(--border);
+    position: absolute;
+    top: -1rem; left: 50%;
+    transform: translateX(-50%);
+    line-height: 1;
+  }
+  blockquote p {
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #c5c0b5;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+
+  /* ── TABLES ───────────────────────────── */
+  .table-wrap { overflow-x: auto; margin: 1.75rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #0f0f0f;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid #1c1c1c; vertical-align: top; line-height: 1.6; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+
+  /* ── DIVIDER ──────────────────────────── */
+  .divider { display: flex; align-items: center; gap: 1rem; margin: 3.5rem 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── COMPARE GRID ─────────────────────── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 6px; overflow: hidden; margin: 1.75rem 0; }
+  .compare-col { background: var(--surface); padding: 1.25rem; }
+  .compare-header { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .compare-header.bad-h  { color: var(--red); }
+  .compare-header.good-h { color: var(--green); }
+  .compare-item { font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .compare-item:last-child { border-bottom: none; }
+  .compare-item.bad-t  { color: #c9a0a0; }
+  .compare-item.good-t { color: #a0c9a8; }
+
+  /* ── CHECKLIST ────────────────────────── */
+  .check-list { list-style: none; margin: 1.5rem 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .check-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before { content: '[ ]'; flex-shrink: 0; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  /* ── WEEK GRID ────────────────────────── */
+  .week-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .week-day { background: var(--surface); padding: 1.25rem; }
+  .week-day-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .week-day-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .week-day-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── NEXT POST ────────────────────────── */
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; text-decoration: none; transition: border-color 0.2s, background 0.2s; }
+  .next-post:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
+  .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
+  .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
+
+  /* ── COPY BUTTON ─────────────────────── */
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+  /* ── FOOTER ───────────────────────────── */
+  footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── RESPONSIVE ───────────────────────── */
+  @media (max-width: 640px) {
+    .hero { padding: 3rem 1.5rem; }
+    .container { padding: 0 1.5rem; }
+    h1 { font-size: 2rem; }
+    article { padding: 3rem 0; }
+    .compare { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="series-tag">Backend · Episode —</div>
+    <h1>WTF Are JWTs? The <em>Self-Contained Tokens</em> Behind Modern Auth</h1>
+    <div class="hero-meta">
+      <span>February 2025</span>
+      <span>8 min read</span>
+      <span>Backend · Security · Auth</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ARTICLE ═══════════════ -->
+<div class="container">
+<article>
+
+  <!-- First paragraph becomes the .lead -->
+  <p class="lead">Every time you hit a protected API endpoint, a JWT is doing the heavy lifting — carrying your identity, roles, and session data in a single compact string that anyone can read but nobody can fake. Your auth provider generates them. Your database verifies them. Here's what's actually happening inside those three dots.</p>
+
+  <!-- ── All content sections go here ── -->
+  <div class="divider"><span>the history</span></div>
+<h2>The History of the JWT</h2>
+<p>Before JWTs, session-based authentication was the norm. The server created a session ID, stored it in a database, and sent it to the client as a cookie. Every authentication request needed a database lookup. Scaling that across multiple servers meant sharing session state — a headache that grew worse with every new service you added.</p>
+<p>The rise of mobile apps, SPAs, and distributed systems made the problem acute. Developers needed something that worked across domains and platforms without constant database hits.</p>
+<blockquote><p>"a compact, URL-safe means of representing claims to be transferred between two parties."</p></blockquote>
+<p>That's RFC 7519, published by the IETF in May 2015. The whole idea: put all the user information directly in the token, sign it cryptographically to ensure authenticity. No database hit on every request. No shared session store. All the necessary information travels with the request itself.</p>
+<ul class="check-list">
+  <li>Stateless auth — no server-side session storage needed</li>
+  <li>Cross-domain — works across different origins and services</li>
+  <li>Less DB load — verify with a public key, not a table lookup</li>
+  <li>Portable — carries any JSON-serializable data</li>
+</ul>
+<p class="aside"><em>"Stateless authentication" sounds like marketing until the fourth time you've debugged a session store sync issue at 2am.</em></p>
+
+<div class="divider"><span>the structure</span></div>
+<h2>The Structure of a JWT</h2>
+<p>A JWT is three base64url-encoded segments joined by dots: <code>header.payload.signature</code>. Paste one into jwt.io and you'll see them split apart. Here's what each segment actually contains.</p>
+<h3>The Header</h3>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">json</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">alg</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">HS256</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#616E88">    // the algorithm used for signing</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">typ</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">JWT</span><span style="color:#ECEFF4">"</span><span style="color:#616E88">       // specifies this is a JWT</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
+</div>
+<p>Two fields. <code>alg</code> says which algorithm signed the token; <code>typ</code> confirms it's a JWT. That's the entire header — metadata, not content. Don't expect more from it.</p>
+<p class="aside"><em>The entire header is two keys. JSON has seen worse.</em></p>
+<h3>The Payload</h3>
+<p>The payload carries the actual data — also called "claims." Some are standard, defined by RFC 7519 and included automatically by your auth provider:</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">json</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#616E88">  // Default claims, included automatically by the auth provider</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">azp</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">http://localhost:3000</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#616E88">   // Authorized party - client that requested the token</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">exp</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#B48EAD"> 1639398300</span><span style="color:#ECEFF4">,</span><span style="color:#616E88">             // Expiration time - timestamp the token becomes invalid</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">iat</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#B48EAD"> 1639398272</span><span style="color:#ECEFF4">,</span><span style="color:#616E88">                  // Issued at - timestamp when the token was created</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">iss</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">https://clean-mayfly-62.clerk.accounts.dev</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#616E88"> // Issuer created/signed the token</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">nbf</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#B48EAD"> 1639398220</span><span style="color:#ECEFF4">,</span><span style="color:#616E88">                  // Not before - timestamp before which token should not be accepted</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">sid</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">sess_2ehYpzsasKNOZrpqPZ9yDWhrYVe</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#616E88">  // Session ID - unique identifier for this session</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">sub</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">user_1deJLArSTiWiF1YdsEWysnhJLLY</span><span style="color:#ECEFF4">"</span><span style="color:#616E88">   // Subject - unique identifier for the user</span></span>
+<span class="line"><span style="color:#D8DEE9">...</span></span></code></pre>
+</div>
+<p>These standard claims handle token lifecycle (<code>exp</code>, <code>iat</code>, <code>nbf</code>), identity (<code>sub</code>, <code>sid</code>), and source (<code>iss</code>, <code>azp</code>). Then you layer in custom claims specific to your application:</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">json</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#D8DEE9FF">...</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#A3BE8C">user_id</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">: </span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">user_abcdef123456789</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#A3BE8C">avatar</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">: </span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">https://example.com/avatar.jpg</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#A3BE8C">full_name</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">: </span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">Doe Maria</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#A3BE8C">email</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">: </span><span style="color:#ECEFF4">"</span><span style="color:#A3BE8C">maria@example.com</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9FF">,</span></span>
+<span class="line"><span style="color:#D8DEE9FF">}</span></span></code></pre>
+</div>
+<p>Put them together and you get the full payload:</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">json</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">azp</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">http://localhost:3000</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">exp</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#B48EAD"> 1639398300</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF">             </span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">iat</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#B48EAD"> 1639398272</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF">                  </span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">iss</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">https://clean-mayfly-62.clerk.accounts.dev</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">nbf</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#B48EAD"> 1639398220</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF">                  </span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">sid</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">sess_2ehYpzsasKNOZrpqPZ9yDWhrYVe</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF">  </span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">sub</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">user_1deJLArSTiWiF1YdsEWysnhJLLY</span><span style="color:#ECEFF4">"</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#A3BE8C">user_id</span><span style="color:#ECEFF4">"</span><span style="color:#D8DEE9">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">user_abcdef123456789</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">avatar</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">https://example.com/avatar.jpg</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">full_name</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">Doe Maria</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">email</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">maria@example.com</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>
+</div>
+<div class="callout"><div class="callout-label">💡 Tip</div><p>Claims are base64-encoded, not encrypted. Anyone who intercepts the token can decode and read the payload. Only store non-sensitive identifiers here — look up sensitive data from your database using the <code>sub</code> claim.</p></div>
+<h3>The Signature</h3>
+<p>The signature is what makes JWTs trustworthy. Take the encoded header, add a dot, add the encoded payload, run it through HMAC-SHA256 (or whichever algorithm the header specifies) with a secret key:</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">javascript</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#88C0D0">HMACSHA256</span><span style="color:#D8DEE9FF">(</span></span>
+<span class="line"><span style="color:#88C0D0">  base64UrlEncode</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">header</span><span style="color:#D8DEE9FF">) </span><span style="color:#81A1C1">+</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">.</span><span style="color:#ECEFF4">"</span><span style="color:#81A1C1"> +</span><span style="color:#D8DEE9FF"> </span></span>
+<span class="line"><span style="color:#88C0D0">  base64UrlEncode</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">payload</span><span style="color:#D8DEE9FF">)</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#D8DEE9">  secret</span></span>
+<span class="line"><span style="color:#D8DEE9FF">)</span></span></code></pre>
+</div>
+<p>Here's a working Node.js implementation that builds a JWT from scratch:</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">javascript</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#81A1C1">function</span><span style="color:#88C0D0"> base64UrlEncode</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">str</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#616E88"> // Convert string to base64 and make URL safe</span></span>
+<span class="line"><span style="color:#81A1C1"> return</span><span style="color:#D8DEE9"> Buffer</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">from</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">str</span><span style="color:#D8DEE9FF">)</span></span>
+<span class="line"><span style="color:#ECEFF4">   .</span><span style="color:#88C0D0">toString</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">'</span><span style="color:#A3BE8C">base64</span><span style="color:#ECEFF4">'</span><span style="color:#D8DEE9FF">)</span></span>
+<span class="line"><span style="color:#ECEFF4">   .</span><span style="color:#88C0D0">replace</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">/</span><span style="color:#EBCB8B">\+</span><span style="color:#ECEFF4">/</span><span style="color:#81A1C1">g</span><span style="color:#ECEFF4">,</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">-</span><span style="color:#ECEFF4">'</span><span style="color:#D8DEE9FF">)</span></span>
+<span class="line"><span style="color:#ECEFF4">   .</span><span style="color:#88C0D0">replace</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">/</span><span style="color:#EBCB8B">\/</span><span style="color:#ECEFF4">/</span><span style="color:#81A1C1">g</span><span style="color:#ECEFF4">,</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">_</span><span style="color:#ECEFF4">'</span><span style="color:#D8DEE9FF">)</span></span>
+<span class="line"><span style="color:#ECEFF4">   .</span><span style="color:#88C0D0">replace</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">/</span><span style="color:#EBCB8B">=</span><span style="color:#ECEFF4">/</span><span style="color:#81A1C1">g</span><span style="color:#ECEFF4">,</span><span style="color:#ECEFF4"> ''</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">function</span><span style="color:#88C0D0"> createJWT</span><span style="color:#ECEFF4">(</span><span style="color:#D8DEE9">header</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> payload</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> secret</span><span style="color:#ECEFF4">)</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#616E88"> // Convert header and payload to strings</span></span>
+<span class="line"><span style="color:#81A1C1"> const</span><span style="color:#D8DEE9"> headerStr</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> JSON</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">stringify</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">header</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1"> const</span><span style="color:#D8DEE9"> payloadStr</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> JSON</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">stringify</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">payload</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#616E88"> // Base64Url encode header and payload</span></span>
+<span class="line"><span style="color:#81A1C1"> const</span><span style="color:#D8DEE9"> encodedHeader</span><span style="color:#81A1C1"> =</span><span style="color:#88C0D0"> base64UrlEncode</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">headerStr</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1"> const</span><span style="color:#D8DEE9"> encodedPayload</span><span style="color:#81A1C1"> =</span><span style="color:#88C0D0"> base64UrlEncode</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">payloadStr</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#616E88"> // Create signature input</span></span>
+<span class="line"><span style="color:#81A1C1"> const</span><span style="color:#D8DEE9"> signatureInput</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> encodedHeader</span><span style="color:#81A1C1"> +</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">.</span><span style="color:#ECEFF4">'</span><span style="color:#81A1C1"> +</span><span style="color:#D8DEE9"> encodedPayload</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#616E88"> // Create HMAC SHA256 signature</span></span>
+<span class="line"><span style="color:#81A1C1"> const</span><span style="color:#D8DEE9"> crypto</span><span style="color:#81A1C1"> =</span><span style="color:#88C0D0"> require</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">'</span><span style="color:#A3BE8C">crypto</span><span style="color:#ECEFF4">'</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#81A1C1"> const</span><span style="color:#D8DEE9"> signature</span><span style="color:#81A1C1"> =</span><span style="color:#D8DEE9"> crypto</span></span>
+<span class="line"><span style="color:#ECEFF4">   .</span><span style="color:#88C0D0">createHmac</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">'</span><span style="color:#A3BE8C">sha256</span><span style="color:#ECEFF4">'</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> secret</span><span style="color:#D8DEE9FF">)</span></span>
+<span class="line"><span style="color:#ECEFF4">   .</span><span style="color:#88C0D0">update</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">signatureInput</span><span style="color:#D8DEE9FF">)</span></span>
+<span class="line"><span style="color:#ECEFF4">   .</span><span style="color:#88C0D0">digest</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">'</span><span style="color:#A3BE8C">base64</span><span style="color:#ECEFF4">'</span><span style="color:#D8DEE9FF">)</span></span>
+<span class="line"><span style="color:#ECEFF4">   .</span><span style="color:#88C0D0">replace</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">/</span><span style="color:#EBCB8B">\+</span><span style="color:#ECEFF4">/</span><span style="color:#81A1C1">g</span><span style="color:#ECEFF4">,</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">-</span><span style="color:#ECEFF4">'</span><span style="color:#D8DEE9FF">)</span></span>
+<span class="line"><span style="color:#ECEFF4">   .</span><span style="color:#88C0D0">replace</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">/</span><span style="color:#EBCB8B">\/</span><span style="color:#ECEFF4">/</span><span style="color:#81A1C1">g</span><span style="color:#ECEFF4">,</span><span style="color:#ECEFF4"> '</span><span style="color:#A3BE8C">_</span><span style="color:#ECEFF4">'</span><span style="color:#D8DEE9FF">)</span></span>
+<span class="line"><span style="color:#ECEFF4">   .</span><span style="color:#88C0D0">replace</span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">/</span><span style="color:#EBCB8B">=</span><span style="color:#ECEFF4">/</span><span style="color:#81A1C1">g</span><span style="color:#ECEFF4">,</span><span style="color:#ECEFF4"> ''</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#616E88"> // Combine all parts</span></span>
+<span class="line"><span style="color:#81A1C1"> return</span><span style="color:#ECEFF4"> `</span><span style="color:#81A1C1">${</span><span style="color:#D8DEE9">encodedHeader</span><span style="color:#81A1C1">}</span><span style="color:#A3BE8C">.</span><span style="color:#81A1C1">${</span><span style="color:#D8DEE9">encodedPayload</span><span style="color:#81A1C1">}</span><span style="color:#A3BE8C">.</span><span style="color:#81A1C1">${</span><span style="color:#D8DEE9">signature</span><span style="color:#81A1C1">}</span><span style="color:#ECEFF4">`</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#616E88">// Example usage:</span></span>
+<span class="line"><span style="color:#81A1C1">const</span><span style="color:#D8DEE9"> header</span><span style="color:#81A1C1"> =</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">alg</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">HS256</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">typ</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">JWT</span><span style="color:#ECEFF4">"</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">const</span><span style="color:#D8DEE9"> payload</span><span style="color:#81A1C1"> =</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">azp</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">http://localhost:3000</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">exp</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#B48EAD"> 1639398300</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">iat</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#B48EAD"> 1639398272</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">iss</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">https://clean-mayfly-62.clerk.accounts.dev</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">nbf</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#B48EAD"> 1639398220</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">sid</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">sess_2ehYpzsasKNOZrpqPZ9yDWhrYVe</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">sub</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">user_1deJLArSTiWiF1YdsEWysnhJLLY</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">user_id</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">user_abcdef123456789</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">avatar</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">https://example.com/avatar.jpg</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">full_name</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">Doe Maria</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">email</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">maria@example.com</span><span style="color:#ECEFF4">"</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">const</span><span style="color:#D8DEE9"> secret</span><span style="color:#81A1C1"> =</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">neonauthorizeiscool</span><span style="color:#ECEFF4">"</span><span style="color:#81A1C1">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#81A1C1">const</span><span style="color:#D8DEE9"> token</span><span style="color:#81A1C1"> =</span><span style="color:#88C0D0"> createJWT</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">header</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> payload</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9"> secret</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span>
+<span class="line"><span style="color:#D8DEE9">console</span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0">log</span><span style="color:#D8DEE9FF">(</span><span style="color:#D8DEE9">token</span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></span></code></pre>
+</div>
+<p>Run it with the header and payload above and you get:</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">json</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#D8DEE9FF">eyJhbGciOiJIUzI</span><span style="color:#B48EAD">1</span><span style="color:#D8DEE9FF">NiIsInR</span><span style="color:#B48EAD">5</span><span style="color:#D8DEE9FF">cCI</span><span style="color:#B48EAD">6</span><span style="color:#D8DEE9FF">IkpXVCJ</span><span style="color:#B48EAD">9</span><span style="color:#D8DEE9FF">.eyJhenAiOiJodHRwOi</span><span style="color:#B48EAD">8</span><span style="color:#D8DEE9FF">vbG</span><span style="color:#B48EAD">9</span><span style="color:#D8DEE9FF">jYWxob</span><span style="color:#B48EAD">3</span><span style="color:#D8DEE9FF">N</span><span style="color:#B48EAD">0</span><span style="color:#D8DEE9FF">OjMwMDAiLCJleHAiOjE</span><span style="color:#B48EAD">2</span><span style="color:#D8DEE9FF">MzkzOTgzMDAsImlhdCI</span><span style="color:#B48EAD">6</span><span style="color:#D8DEE9FF">MTYzOTM</span><span style="color:#B48EAD">5</span><span style="color:#D8DEE9FF">ODI</span><span style="color:#B48EAD">3</span><span style="color:#D8DEE9FF">MiwiaXNzIjoiaHR</span><span style="color:#B48EAD">0</span><span style="color:#D8DEE9FF">cHM</span><span style="color:#B48EAD">6</span><span style="color:#D8DEE9FF">Ly</span><span style="color:#B48EAD">9</span><span style="color:#D8DEE9FF">jbGVhbi</span><span style="color:#B48EAD">1</span><span style="color:#D8DEE9FF">tYXlmbHktNjIuY</span><span style="color:#B48EAD">2</span><span style="color:#D8DEE9FF">xlcmsuYWNjb</span><span style="color:#B48EAD">3</span><span style="color:#D8DEE9FF">VudHMuZGV</span><span style="color:#B48EAD">2</span><span style="color:#D8DEE9FF">IiwibmJmIjoxNjM</span><span style="color:#B48EAD">5</span><span style="color:#D8DEE9FF">Mzk</span><span style="color:#B48EAD">4</span><span style="color:#D8DEE9FF">MjIwLCJzaWQiOiJzZXNzXzJlaFlwenNhc</span><span style="color:#B48EAD">0</span><span style="color:#D8DEE9FF">tOT</span><span style="color:#B48EAD">1</span><span style="color:#D8DEE9FF">pycHFQWjl</span><span style="color:#B48EAD">5</span><span style="color:#D8DEE9FF">RFdocllWZSIsInN</span><span style="color:#B48EAD">1</span><span style="color:#D8DEE9FF">YiI</span><span style="color:#B48EAD">6</span><span style="color:#D8DEE9FF">InVzZXJfMWRlSkxBclNUaVdpRjFZZHNFV</span><span style="color:#B48EAD">3</span><span style="color:#D8DEE9FF">lzbmhKTExZIiwidXNlcl</span><span style="color:#B48EAD">9</span><span style="color:#D8DEE9FF">pZCI</span><span style="color:#B48EAD">6</span><span style="color:#D8DEE9FF">InVzZXJfYWJjZGVmMTIzNDU</span><span style="color:#B48EAD">2</span><span style="color:#D8DEE9FF">Nzg</span><span style="color:#B48EAD">5</span><span style="color:#D8DEE9FF">IiwiYXZhdGFyIjoiaHR</span><span style="color:#B48EAD">0</span><span style="color:#D8DEE9FF">cHM</span><span style="color:#B48EAD">6</span><span style="color:#D8DEE9FF">Ly</span><span style="color:#B48EAD">9</span><span style="color:#D8DEE9FF">leGFtcGxlLmNvbS</span><span style="color:#B48EAD">9</span><span style="color:#D8DEE9FF">hdmF</span><span style="color:#B48EAD">0</span><span style="color:#D8DEE9FF">YXIuanBnIiwiZnVsbF</span><span style="color:#B48EAD">9</span><span style="color:#D8DEE9FF">uYW</span><span style="color:#B48EAD">1</span><span style="color:#D8DEE9FF">lIjoiRG</span><span style="color:#B48EAD">9</span><span style="color:#D8DEE9FF">lIE</span><span style="color:#B48EAD">1</span><span style="color:#D8DEE9FF">hcmlhIiwiZW</span><span style="color:#B48EAD">1</span><span style="color:#D8DEE9FF">haWwiOiJtYXJpYUBleGFtcGxlLmNvbSJ</span><span style="color:#B48EAD">9</span><span style="color:#D8DEE9FF">.ld</span><span style="color:#B48EAD">8</span><span style="color:#D8DEE9FF">fOURGSNnnDHUWqo_T</span><span style="color:#B48EAD">4</span><span style="color:#D8DEE9FF">WiRCQPQPpcLQh</span><span style="color:#B48EAD">7</span><span style="color:#D8DEE9FF">SyJlN</span><span style="color:#B48EAD">3</span><span style="color:#D8DEE9FF">Es</span></span></code></pre>
+</div>
+<p>Paste that into jwt.io and it decodes straight back to the header and payload. The third segment — the signature — is what ensures nobody tampered with either of the first two.</p>
+
+<div class="divider"><span>wtf are jwks</span></div>
+<h2>WTF Are JWKS</h2>
+<p>The signature depends on a secret key. In the example above that's the string <code>"neonauthorizeiscool"</code>. In production, you use asymmetric cryptography: your auth provider signs with a private key and publishes the corresponding public key so anyone can verify tokens without ever accessing the private key.</p>
+<p>Those public keys live at a JWKS endpoint — usually <code>/.well-known/jwks.json</code>:</p>
+<div class="code-block">
+  <div class="code-header">
+    <div class="code-dots"><span></span><span></span><span></span></div>
+    <span class="code-lang">json</span>
+  </div>
+  <pre class="shiki nord" style="color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#ECEFF4">          "</span><span style="color:#8FBCBB">keys</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> [</span></span>
+<span class="line"><span style="color:#ECEFF4">            {</span></span>
+<span class="line"><span style="color:#ECEFF4">              "</span><span style="color:#8FBCBB">kid</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">key-identifier-2023</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#616E88">  // Key ID - matches the kid in JWT header</span></span>
+<span class="line"><span style="color:#ECEFF4">              "</span><span style="color:#8FBCBB">kty</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">RSA</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#616E88">                  // Key type - usually RSA or EC</span></span>
+<span class="line"><span style="color:#ECEFF4">              "</span><span style="color:#8FBCBB">alg</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">RS256</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#616E88">                // Algorithm - like RS256 for RSA SHA-256</span></span>
+<span class="line"><span style="color:#ECEFF4">              "</span><span style="color:#8FBCBB">use</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">sig</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#616E88">                  // Usage - 'sig' for signing</span></span>
+<span class="line"><span style="color:#ECEFF4">              "</span><span style="color:#8FBCBB">n</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">long-base64-number...</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span><span style="color:#616E88">  // RSA public key modulus</span></span>
+<span class="line"><span style="color:#ECEFF4">              "</span><span style="color:#8FBCBB">e</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">AQAB</span><span style="color:#ECEFF4">"</span><span style="color:#616E88">                    // RSA public exponent</span></span>
+<span class="line"><span style="color:#ECEFF4">            }</span></span>
+<span class="line"><span style="color:#ECEFF4">          ]</span></span>
+<span class="line"><span style="color:#ECEFF4">        }</span></span></code></pre>
+</div>
+<p>When your app receives a JWT, the verification dance goes like this: read the <code>kid</code> (key ID) from the JWT header, fetch the JWKS from your auth provider, find the matching public key, use it to verify the signature. If it passes, the claims are trustworthy.</p>
+<ul class="check-list">
+  <li>Key rotation — providers swap keys without breaking existing tokens</li>
+  <li>Multiple environments — different keys for staging vs. production</li>
+  <li>Zero-trust — every single request is independently verified</li>
+</ul>
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>For Neon Authorize, you don't manage any of this. Point Neon at your auth provider's JWKS endpoint and verification is automatic. The database only ever sees claims that have been cryptographically verified.</p></div>
+
+<div class="divider"><span>authorization flow</span></div>
+<h2>How JWTs Work in Authorization</h2>
+<p>The flow splits into two phases. First, authentication: the user logs in through your auth provider, which verifies credentials and generates a JWT. That JWT gets stored in your app — usually in memory or a secure cookie.</p>
+<p>Second, authorization: your app sends a request to your backend or database with the JWT in the <code>Authorization</code> header. The receiving service verifies the JWT using the JWKS endpoint, then uses the claims to make authorization decisions.</p>
+<p>In a multi-tenant app, the flow looks like this:</p>
+<ul class="check-list">
+  <li>Neon extracts tenant_id from the JWT claims</li>
+  <li>The RLS policy checks if that matches the row's tenant_id</li>
+  <li>The user only sees data from their own organization</li>
+</ul>
+<div class="callout"><div class="callout-label">💡 Tip</div><p>Authorization enforced at the database level means no separate permission tables and no application-layer gate to accidentally bypass. Each request is independently verified. That's the zero-trust model JWTs make practical.</p></div>
+<p class="aside"><em>"Enforced at the database level" means an accidental data leak now has to defeat the cryptographic signature AND the RLS policy. Sleep better.</em></p>
+
+<div class="divider"><span>signing vs encrypting</span></div>
+<h2>Signing vs. Encrypting</h2>
+<p>This distinction trips up more people than it should. Signing and encryption are different operations with different guarantees — and confusing them leads to real security mistakes.</p>
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">❌ What signing does NOT give you</div>
+    <div class="compare-item bad-t">Privacy — the payload is publicly readable</div>
+    <div class="compare-item bad-t">Secret data storage — never put PII or credentials here</div>
+    <div class="compare-item bad-t">Protection if the token is intercepted</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">✅ What signing DOES give you</div>
+    <div class="compare-item good-t">Authenticity — proves the token hasn't been tampered with</div>
+    <div class="compare-item good-t">Trust — verifies which provider issued the token</div>
+    <div class="compare-item good-t">Stateless verification — no database lookup needed</div>
+  </div>
+</div>
+<p>The JWT in your Authorization header right now is base64-encoded. Decode it with any online decoder and you can read every claim. "base64" is not encryption — it's just a different way of spelling the same string.</p>
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>Never put sensitive data in a JWT payload — SSNs, payment info, plaintext credentials. Store a non-sensitive identifier (<code>user_id</code>, <code>sub</code>) and look up sensitive fields from your database when you need them. If you genuinely need encrypted JWTs, that's JWE (JSON Web Encryption) — a separate spec entirely.</p></div>
+
+<div class="divider"><span>jwt ftw</span></div>
+<h2>JWT FTW</h2>
+<p>Three base64-encoded segments solving distributed auth at scale. Your auth provider handles key generation and JWKS publishing. Your database uses the claims for row-level security. You write business logic instead of reinventing sessions for the third time.</p>
+<blockquote><p>"Think of a JWT as a signed security badge — it proves who you are and what you're allowed to do, but don't write anything private on the back."</p></blockquote>
+<ul class="check-list">
+  <li>JWTs are self-contained — all claims travel with the token, no DB lookup to verify</li>
+  <li>They're signed, not encrypted — readable by anyone, trusted because of the signature</li>
+  <li>Your auth provider handles the hard stuff — key management, rotation, JWKS publishing</li>
+  <li>Use claims for authorization decisions — never for storing sensitive data</li>
+</ul>
+
+  <!-- ── Series navigation ── -->
+  <a class="next-post" href="#" target="_parent">
+    <div>
+      <div class="next-label">Next in the series</div>
+      <div class="next-title">Explore More Articles</div>
+    </div>
+    <div class="next-arrow">→</div>
+  </a>
+
+</article>
+</div>
+
+<footer>
+  <div>RFC 7519 — JWT standard (IETF): https://datatracker.ietf.org/doc/html/rfc7519. JWT debugger: https://jwt.io.</div>
+  <div style="margin-top: 8px; color: #3d3a35;">claude-code-journey.md · episode —</div>
+</footer>
+
+<script>
+  document.querySelectorAll('.code-block').forEach(block => {
+    const header = block.querySelector('.code-header');
+    const pre = block.querySelector('pre');
+    if (!header || !pre) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText.trim()).then(() => {
+        btn.textContent = '✓ copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    });
+
+    header.appendChild(btn);
+  });
+</script>
+</body>
+</html>

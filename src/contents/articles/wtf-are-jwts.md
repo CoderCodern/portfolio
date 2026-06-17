@@ -3,6 +3,7 @@ title: "WTF Are JWTs?"
 description: "Every day, when you use the web, you use JWTs frictionlessly. "
 publishedDate: February 9, 2025
 category: Backend
+htmlFile: wtf-are-jwts
 ---
 
 ## **WTF Are JWTs?**

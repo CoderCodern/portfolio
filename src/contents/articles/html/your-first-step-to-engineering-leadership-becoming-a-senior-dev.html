@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your First Step to Engineering Leadership: Becoming a Senior Dev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #e8e4dc;
+    --muted: #7a7570;
+    --accent: #e8a84c;       /* episode accent */
+    --accent-dim: #3d2c12;     /* tinted background for callouts */
+    --code-bg: #111;
+    --green: #4caf7d;
+    --green-dim: #122a1e;
+    --red: #ff7b72;
+    --red-dim: #2a1212;
+    --blue: #79c0ff;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scrollbar-width: none; /* Firefox */
+  }
+  html::-webkit-scrollbar { display: none; } /* Chrome, Safari, Edge */
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    font-size: 17px;
+  }
+
+  /* ── HERO ─────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 25%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 70%, rgba(232,168,76,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 800px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+
+  .series-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    padding: 6px 14px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  .series-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    max-width: 720px;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-wrap: wrap;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+  .hero-meta span::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+  }
+  .hero-meta span:first-child::before { display: none; }
+
+  /* ── LAYOUT ───────────────────────────── */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+  article { padding: 5rem 0; }
+
+  .lead {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: #c5c0b5;
+    margin-bottom: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin: 3.5rem 0 1rem;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin: 2.5rem 0 0.75rem;
+  }
+  p { margin-bottom: 1.4rem; }
+  strong { font-weight: 500; color: var(--text); }
+  em { font-style: italic; color: #c5c0b5; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p.aside { font-size: 14px; color: var(--muted); font-style: italic; margin: -0.5rem 0 1.4rem; }
+
+  /* ── CODE ─────────────────────────────── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 1.75rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #0e0e0e;
+  }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  pre {
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    color: #c9d1d9;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.83em;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: #88c0d0;
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  /* Reset inline-code styles inside code blocks — Shiki handles all colouring */
+  pre code { background: transparent; border: none; padding: 0; color: inherit; border-radius: 0; }
+  /* Syntax highlight helpers — use as <span class="X"> inside <pre> (Nord palette) */
+  .kw  { color: #81a1c1; }                     /* keywords — Nord blue */
+  .cm  { color: #616e88; font-style: italic; } /* comments — Nord muted */
+  .st  { color: #a3be8c; }                     /* strings — Nord green */
+  .bad { color: var(--red); }                  /* bad examples */
+  .good{ color: var(--green); }                /* good examples */
+  .num { color: #b48ead; }                     /* numbers — Nord purple */
+
+  /* ── CALLOUTS ─────────────────────────── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-dim);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 6px 6px 0;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+  }
+  .callout.green { border-left-color: var(--green); background: var(--green-dim); }
+  .callout.red   { border-left-color: var(--red);   background: var(--red-dim);   }
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red   .callout-label { color: var(--red);   }
+
+  /* ── BLOCKQUOTE ───────────────────────── */
+  blockquote {
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    margin: 2.5rem 0;
+  }
+  blockquote::before {
+    content: '"';
+    font-family: 'Lora', serif;
+    font-size: 6rem;
+    color: var(--border);
+    position: absolute;
+    top: -1rem; left: 50%;
+    transform: translateX(-50%);
+    line-height: 1;
+  }
+  blockquote p {
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #c5c0b5;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+
+  /* ── TABLES ───────────────────────────── */
+  .table-wrap { overflow-x: auto; margin: 1.75rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #0f0f0f;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid #1c1c1c; vertical-align: top; line-height: 1.6; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+
+  /* ── DIVIDER ──────────────────────────── */
+  .divider { display: flex; align-items: center; gap: 1rem; margin: 3.5rem 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── COMPARE GRID ─────────────────────── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 6px; overflow: hidden; margin: 1.75rem 0; }
+  .compare-col { background: var(--surface); padding: 1.25rem; }
+  .compare-header { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .compare-header.bad-h  { color: var(--red); }
+  .compare-header.good-h { color: var(--green); }
+  .compare-item { font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .compare-item:last-child { border-bottom: none; }
+  .compare-item.bad-t  { color: #c9a0a0; }
+  .compare-item.good-t { color: #a0c9a8; }
+
+  /* ── CHECKLIST ────────────────────────── */
+  .check-list { list-style: none; margin: 1.5rem 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .check-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before { content: '[ ]'; flex-shrink: 0; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  /* ── WEEK GRID ────────────────────────── */
+  .week-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin: 2rem 0; }
+  .week-day { background: var(--surface); padding: 1.25rem; }
+  .week-day-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .week-day-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .week-day-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── NEXT POST ────────────────────────── */
+  .next-post { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin: 4rem 0 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; text-decoration: none; transition: border-color 0.2s, background 0.2s; }
+  .next-post:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
+  .next-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .next-title { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--text); }
+  .next-arrow { font-size: 1.5rem; color: var(--accent); flex-shrink: 0; }
+
+  /* ── COPY BUTTON ─────────────────────── */
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+  /* ── FOOTER ───────────────────────────── */
+  footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── RESPONSIVE ───────────────────────── */
+  @media (max-width: 640px) {
+    .hero { padding: 3rem 1.5rem; }
+    .container { padding: 0 1.5rem; }
+    h1 { font-size: 2rem; }
+    article { padding: 3rem 0; }
+    .compare { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="series-tag">Career · Episode —</div>
+    <h1>Your Path to Engineering Leadership: <em>Senior Dev Comes First</em></h1>
+    <div class="hero-meta">
+      <span>April 2025</span>
+      <span>6 min read</span>
+      <span>Career · Leadership · Engineering</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ARTICLE ═══════════════ -->
+<div class="container">
+<article>
+
+  <!-- First paragraph becomes the .lead -->
+  <p class="lead">A guest post from Adler Hsieh — author of <a href="https://adlerhsieh.com/">Tokyo Tech Lead</a>, a newsletter on engineering leadership and the transition from software engineer to engineering leader. His central point: the path to leading engineers doesn't start with wanting a management title. It starts with becoming senior.</p>
+
+  <!-- ── All content sections go here ── -->
+  <p>Adler first wanted to be a manager after joining a large corporation. He watched managers speak with confidence, maintain control over their teams, and thought — "I want that." He had almost no idea what it actually entailed.</p>
+<p>Two years later, he found the key insight that reframed everything: the journey to engineering leadership doesn't begin with a leap into management. It begins with mastering the technical and soft skills that make you worth following. Before you can lead engineers, you need to <em>be</em> a senior engineer.</p>
+<p class="aside"><em>"I want to become an Engineering Manager!" is a perfectly valid ambition. "I understand what that means" — that part takes longer.</em></p>
+
+<div class="divider"><span>the two paths</span></div>
+<h2>Types of Engineering Leaders</h2>
+<p>Engineering leadership splits into two main paths: the Individual Contributor (IC) path and the management path. Both require leadership. Neither is the easy option.</p>
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">👥 Management path — people focus</div>
+    <div class="compare-item bad-t">Engineering Manager, Director, VP of Engineering</div>
+    <div class="compare-item bad-t">Responsible for team performance and career growth</div>
+    <div class="compare-item bad-t">Primary output: a team that delivers well</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">🔧 IC path — technical focus</div>
+    <div class="compare-item good-t">Staff Engineer, Principal Engineer, Distinguished Engineer</div>
+    <div class="compare-item good-t">Responsible for technical strategy and cross-team direction</div>
+    <div class="compare-item good-t">Primary output: systems and decisions that scale</div>
+  </div>
+</div>
+<h3>The IC Path: Staff Engineers</h3>
+<p>Staff Engineers are senior developers with broader reach. They may own a single team's technical direction or span multiple teams, depending on the organization. Their daily work covers technical strategy, cross-team problem-solving, and technical innovation. The key distinction: Staff Engineers don't manage people. Their influence comes entirely through technical credibility and judgment.</p>
+<p>From Staff Engineer, the ladder continues up to Principal, Distinguished, and Fellow levels — each with wider scope and higher stakes.</p>
+<h3>The Management Path: Engineering Managers</h3>
+<p>Engineering Managers (EMs), Directors, and VPs of Engineering own team and people management. Role definitions vary — some EMs do project management directly, others work alongside PMs. But people management is always the core. EMs are accountable for the team's progress, health, and growth — not just the code that ships.</p>
+<p class="aside"><em>Both paths eventually manage something. Staff Engineers manage complexity. Engineering Managers manage humans. Pick the one that sounds less exhausting to you.</em></p>
+
+<div class="divider"><span>why senior first</span></div>
+<h2>Why Becoming a Senior Developer is the First Step</h2>
+<p>The answer lives in the engineering ladder — the framework most companies use to define engineer levels. The primary measure at each level is <strong>impact</strong>:</p>
+<ul class="check-list">
+  <li>Level 1 — impact through completing assigned tasks</li>
+  <li>Level 2 — impact through leading projects</li>
+  <li>Level 3 — impact through leading a single team</li>
+  <li>Level 4 — impact through leading multiple teams</li>
+  <li>Level 5 — impact through leading an entire division</li>
+</ul>
+<p>Leadership roles — on both the IC and management path — start at Level 3. That means your baseline expectation is leading an entire team. That's what senior developers do. You can't skip that level and walk into a leadership role cold. The ladder doesn't bend.</p>
+<blockquote><p>"The journey to engineering leadership doesn't begin with a leap into management. It starts with the skills and track record that make you worth following."</p></blockquote>
+<p>So "I want to be an engineering leader" is a goal. "I need to become a senior dev first" is the plan. Those are different things, and conflating them is the most common mistake Adler saw at large organizations.</p>
+
+<div class="divider"><span>the mindset</span></div>
+<h2>Embracing the Senior Developer Mindset</h2>
+<p>A senior developer functions as a team leader — someone who moves the whole team forward, not just their own tickets. Here's a quick self-check: can you make most technical decisions for your team without escalating to someone else? If yes, you're probably already there. If not, that gap is your roadmap.</p>
+<p>Three traits consistently define senior developers:</p>
+<h3>Team Ownership</h3>
+<p>Senior devs prioritize the team over their own output. When teammates hit blockers, they stay aware and proactive — not to solve every problem personally, but to know the state of the road: the roadmap, the outstanding issues, the technical debt that actually matters. They lead by providing guidance rather than waiting for it.</p>
+<h3>Vision and Strategy</h3>
+<p>Senior devs think in 2-3 year arcs, not sprint cycles. They envision what the system should look like and build toward it deliberately — modularizing code, ensuring test coverage, writing documentation that the next team can actually use. It might take 18 months of incremental planning sessions. They plan for it anyway.</p>
+<h3>Going Beyond Engineering</h3>
+<p>Senior devs engage with non-engineering stakeholders: product managers, designers, QA. A wider view of product delivery makes them better at catching where things go wrong early — and at asking the right questions before the wrong thing gets built. When a business requirement looks strange, they ask why instead of just implementing it.</p>
+<div class="compare">
+  <div class="compare-col">
+    <div class="compare-header bad-h">🔵 Mid-level habits</div>
+    <div class="compare-item bad-t">Completes assigned work well</div>
+    <div class="compare-item bad-t">Asks for technical direction when stuck</div>
+    <div class="compare-item bad-t">Focused on own output and PR queue</div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header good-h">🟡 Senior habits</div>
+    <div class="compare-item good-t">Owns the team's technical direction</div>
+    <div class="compare-item good-t">Provides guidance without waiting to be asked</div>
+    <div class="compare-item good-t">Monitors overall team progress, blockers, and health</div>
+  </div>
+</div>
+<div class="callout"><div class="callout-label">💡 Tip</div><p>Three resources Adler recommends for the full senior engineer picture: <a href="https://www.engguidebook.com/">The Software Engineer's Guidebook</a> by Gergely Orosz, <a href="https://roadmap.sh/">roadmap.sh</a> for skill maps, and <a href="https://www.engineeringladders.com/">Engineering Ladders</a> for level frameworks.</p></div>
+<div class="callout green"><div class="callout-label">✓ Verdict</div><p>Team Ownership, Vision and Strategy, and cross-functional engagement — these three traits separate senior developers from mid-level developers. All of them are learnable. None of them require a title first.</p></div>
+
+<div class="divider"><span>timeline</span></div>
+<h2>Timeline</h2>
+<p>In the current job market, senior developers typically have 6-8+ years of experience. That's a median. Don't mistake it for a rule.</p>
+<div class="callout red"><div class="callout-label">⚠️ Warning</div><p>Adler has seen engineers reach senior in 1-2 years. He's also seen 15-year veterans still operating at mid-level. Years of experience measures time, not growth. The timeline is a side effect of mindset and deliberate skill-building — not the other way around.</p></div>
+<p>There's no shame in wherever you are right now. Senior isn't a deadline — it's a capability threshold. Keep building the skills that compound, stay curious about the work beyond your own tasks, and the level follows naturally.</p>
+<blockquote><p>"As long as you maintain the right mindset and consistently develop your skills, the timeline becomes irrelevant. Keep progressing, keep learning, and you'll get there."</p></blockquote>
+
+  <!-- ── Series navigation ── -->
+  <a class="next-post" href="#" target="_parent">
+    <div>
+      <div class="next-label">Next in the series</div>
+      <div class="next-title">Explore More Articles</div>
+    </div>
+    <div class="next-arrow">→</div>
+  </a>
+
+</article>
+</div>
+
+<footer>
+  <div>Guest post by Adler Hsieh — Tokyo Tech Lead newsletter: https://adlerhsieh.com/. Engineering Ladders framework: https://www.engineeringladders.com/. Software Engineer's Guidebook: https://www.engguidebook.com/.</div>
+  <div style="margin-top: 8px; color: #3d3a35;">claude-code-journey.md · episode —</div>
+</footer>
+
+<script>
+  document.querySelectorAll('.code-block').forEach(block => {
+    const header = block.querySelector('.code-header');
+    const pre = block.querySelector('pre');
+    if (!header || !pre) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText.trim()).then(() => {
+        btn.textContent = '✓ copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>copy';
+          btn.classList.remove('copied');
+        }, 1800);
+      });
+    });
+
+    header.appendChild(btn);
+  });
+</script>
+</body>
+</html>

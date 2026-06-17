@@ -4,6 +4,7 @@ description: "Why Becoming Senior Dev is the First Step to Leadership"
 publishedDate: April 7, 2025
 category: Career
 poster: https://images.unsplash.com/photo-1541844053589-346841d0b34c?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb
+htmlFile: your-first-step-to-engineering-leadership-becoming-a-senior-dev
 ---
 > 
 >
